@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TaskFlow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="tasks.css" />
 </head>
@@ -15,16 +18,15 @@
           <p class="eyebrow">Stay organized</p>
           <h1 class="logo-text">TaskFlow</h1>
         </div>
-
         <div class="top-bar-right">
           <div class="date-box" id="todayDate"></div>
           <button id="settingsBtn" class="settings-btn" type="button">⚙️ Settings</button>
         </div>
       </div>
-
+ 
       <div id="settingsPanel" class="settings-panel hidden">
         <h3>Settings</h3>
-
+ 
         <div class="setting-item">
           <span>Dark mode</span>
           <label class="theme-switch">
@@ -34,7 +36,7 @@
             </span>
           </label>
         </div>
-
+ 
         <label class="setting-item">
           <span>Theme color</span>
           <select id="themeSelect">
@@ -45,25 +47,23 @@
             <option value="fritolay">Frito-Lay Corporate</option>
           </select>
         </label>
-
+ 
         <button id="editModeToggle" class="setting-action-btn" type="button">
           Edit Mode: OFF
         </button>
       </div>
-
+ 
       <div class="stats-card">
         <div class="stats-row">
           <div class="stat">
             <span class="stat-label">Tasks Left</span>
             <span class="stat-number" id="tasksLeft">0</span>
           </div>
-
           <div class="stat">
             <span class="stat-label">Completed</span>
             <span class="stat-number" id="tasksCompleted">0</span>
           </div>
         </div>
-
         <div class="progress-section">
           <div class="progress-text">
             <span>Progress</span>
@@ -74,33 +74,33 @@
           </div>
         </div>
       </div>
-
+ 
       <div class="task-input">
-        <input type="text" id="taskInput" placeholder="Add a new task..." />
-        <input type="date" id="dueDateInput" min="2026-01-01" max="2030-12-31" />
+        <input type="text" id="taskInput" placeholder="Add a new task…" />
+        <input type="date" id="dueDateInput" />
         <select id="priorityInput">
-          <option value="medium">Medium Priority</option>
+          <option value="medium" selected>Medium Priority</option>
           <option value="high">High Priority</option>
           <option value="low">Low Priority</option>
         </select>
         <button id="addTaskBtn" type="button">Add Task</button>
         <button id="resetBtn" type="button">Reset</button>
       </div>
-
+ 
       <div class="view-bar">
         <button class="view-btn active" type="button" data-view="all">All</button>
         <button class="view-btn" type="button" data-view="today">Today</button>
         <button class="view-btn" type="button" data-view="week">Week</button>
         <button class="view-btn" type="button" data-view="month">Month</button>
       </div>
-
+ 
       <div class="section">
         <div class="section-header">
           <h2 id="todoHeading">To Do</h2>
         </div>
         <ul id="todoList" class="task-list"></ul>
       </div>
-
+ 
       <div class="section">
         <div class="section-header">
           <h2 id="completedHeading">Completed</h2>
@@ -109,13 +109,36 @@
       </div>
     </div>
   </div>
-
-<script src="tasks.js"></script>
-<script src="script.js"></script>
-<script src="settings.js"></script>
-data-view="all"
-data-view="today"
-data-view="week"
-data-view="month"
+ 
+  <!-- Inline edit modal -->
+  <div id="editModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Edit task">
+    <div class="modal-card">
+      <h3 class="modal-title">Edit Task</h3>
+      <div class="modal-field">
+        <label for="editTextInput">Task</label>
+        <input type="text" id="editTextInput" placeholder="Task description" />
+      </div>
+      <div class="modal-field">
+        <label for="editDateInput">Due Date</label>
+        <input type="date" id="editDateInput" />
+      </div>
+      <div class="modal-field">
+        <label for="editPriorityInput">Priority</label>
+        <select id="editPriorityInput">
+          <option value="high">High Priority</option>
+          <option value="medium" selected>Medium Priority</option>
+          <option value="low">Low Priority</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button id="editCancelBtn" class="modal-btn modal-btn-cancel" type="button">Cancel</button>
+        <button id="editSaveBtn" class="modal-btn modal-btn-save" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+ 
+  <script src="tasks.js"></script>
+  <script src="script.js"></script>
+  <script src="settings.js"></script>
 </body>
 </html>

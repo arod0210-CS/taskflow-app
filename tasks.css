@@ -3,27 +3,24 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  background: #ffffff;
+  background: var(--card-solid);          /* ← was hardcoded #ffffff */
   border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 14px 16px;
   margin-bottom: 12px;
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.2s ease;
 }
-
+ 
 .task-card:hover {
   transform: translateY(-1px);
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
 }
-
-.task-card.overdue {
-  border: 2px solid #ef4444;
-}
-
-.task-card.due-today {
-  border: 2px solid #f59e0b;
-}
-
+ 
+.task-card.overdue  { border: 2px solid #ef4444; }
+.task-card.due-today { border: 2px solid #f59e0b; }
+ 
+/* ── Main row ─────────────────────────────────────────────────────────────── */
+ 
 .task-main {
   display: flex;
   align-items: flex-start;
@@ -31,7 +28,9 @@
   flex: 1;
   min-width: 0;
 }
-
+ 
+/* ── Toggle button ────────────────────────────────────────────────────────── */
+ 
 .toggle-btn {
   width: 22px;
   height: 22px;
@@ -41,17 +40,22 @@
   cursor: pointer;
   flex-shrink: 0;
   margin-top: 2px;
-  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.15s ease, background 0.2s ease;
 }
-
-.toggle-btn:hover {
-  transform: scale(1.06);
-}
-
+ 
+.toggle-btn:hover { transform: scale(1.1); }
+ 
 .toggle-btn.completed {
   background: var(--accent-color);
+  /* Checkmark via SVG background */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6l3 3 5-5' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-size: 60%;
+  background-repeat: no-repeat;
+  background-position: center;
 }
-
+ 
+/* ── Task content ─────────────────────────────────────────────────────────── */
+ 
 .task-content {
   display: flex;
   flex-direction: column;
@@ -59,125 +63,90 @@
   min-width: 0;
   flex: 1;
 }
-
+ 
 .task-text {
   font-size: 15px;
   font-weight: 600;
   word-break: break-word;
   line-height: 1.35;
+  transition: opacity 0.2s ease;
 }
-
+ 
 .task-text.completed {
   text-decoration: line-through;
-  opacity: 0.65;
+  opacity: 0.5;
 }
-
+ 
+/* ── Meta row ─────────────────────────────────────────────────────────────── */
+ 
 .task-meta {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
   align-items: center;
 }
-
+ 
 .due-date {
   font-size: 13px;
   color: var(--text-soft);
 }
-
+ 
+/* ── Priority badge ───────────────────────────────────────────────────────── */
+ 
 .priority-badge {
   font-size: 12px;
-  font-weight: 800;
-  padding: 4px 10px;
+  font-weight: 700;
+  padding: 3px 10px;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   letter-spacing: 0.01em;
 }
-
-.priority-high {
-  background: #ef4444;
-  color: white;
-}
-
-.priority-medium {
-  background: #f59e0b;
-  color: white;
-}
-
-.priority-low {
-  background: #22c55e;
-  color: white;
-}
-
+ 
+.priority-high   { background: #ef4444; color: white; }
+.priority-medium { background: #f59e0b; color: white; }
+.priority-low    { background: #22c55e; color: white; }
+ 
+/* ── Action buttons ───────────────────────────────────────────────────────── */
+ 
 .task-actions {
   display: flex;
   gap: 8px;
   flex-shrink: 0;
 }
-
+ 
 .task-action-btn {
   border: none;
   border-radius: 10px;
-  padding: 10px 12px;
+  padding: 9px 12px;
   cursor: pointer;
   font-weight: 700;
+  font-size: 13px;
   transition: transform 0.15s ease, opacity 0.15s ease;
 }
-
-.task-action-btn:hover {
-  transform: translateY(-1px);
-  opacity: 0.95;
-}
-
-.edit-btn {
-  background: #e0e7ff;
-  color: #3730a3;
-}
-
-.delete-btn {
-  background: #fee2e2;
-  color: #b91c1c;
-}
-
-body.dark-mode .task-card {
-  background: #111827;
-  border-color: #374151;
-}
-
-body.dark-mode .task-card.overdue {
-  border-color: #f87171;
-}
-
-body.dark-mode .task-card.due-today {
-  border-color: #fbbf24;
-}
-
-body.dark-mode .edit-btn {
-  background: #312e81;
-  color: #e0e7ff;
-}
-
-body.dark-mode .delete-btn {
-  background: #7f1d1d;
-  color: #fee2e2;
-}
-
-body.dark-mode .due-date {
-  color: #9ca3af;
-}
-
+ 
+.task-action-btn:hover { transform: translateY(-1px); opacity: 0.9; }
+ 
+.edit-btn   { background: #e0e7ff; color: #3730a3; }
+.delete-btn { background: #fee2e2; color: #b91c1c; }
+ 
+/* ── Dark mode overrides ──────────────────────────────────────────────────── */
+ 
+body.dark-mode .task-card.overdue   { border-color: #f87171; }
+body.dark-mode .task-card.due-today { border-color: #fbbf24; }
+body.dark-mode .edit-btn            { background: #312e81; color: #e0e7ff; }
+body.dark-mode .delete-btn          { background: #7f1d1d; color: #fee2e2; }
+ 
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+ 
 @media (max-width: 640px) {
   .task-card {
     flex-direction: column;
     align-items: stretch;
   }
-
-  .task-actions {
-    width: 100%;
-  }
-
-  .task-action-btn {
-    flex: 1;
-  }
+ 
+  .task-actions { width: 100%; }
+  .task-action-btn { flex: 1; }
 }
+ 
