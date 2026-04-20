@@ -15,7 +15,34 @@
           <p class="eyebrow">Stay organized</p>
           <h1>TaskFlow</h1>
         </div>
-        <div class="date-box" id="todayDate"></div>
+
+        <div class="top-bar-right">
+          <div class="date-box" id="todayDate"></div>
+          <button id="settingsBtn" class="settings-btn" type="button">⚙️ Settings</button>
+        </div>
+      </div>
+
+      <div id="settingsPanel" class="settings-panel hidden">
+        <h3>Settings</h3>
+
+        <label class="setting-item">
+          <span>Dark mode</span>
+          <input type="checkbox" id="darkModeToggle" />
+        </label>
+
+        <label class="setting-item">
+          <span>Theme color</span>
+          <select id="themeSelect">
+            <option value="default">Default</option>
+            <option value="blue">Blue</option>
+            <option value="green">Green</option>
+            <option value="purple">Purple</option>
+          </select>
+        </label>
+
+        <button id="editModeToggle" class="setting-action-btn" type="button">
+          Edit Mode: OFF
+        </button>
       </div>
 
       <div class="stats-card">
@@ -64,7 +91,8 @@
     </div>
   </div>
 
-  <script src="tasks.js"></script>
   <script src="script.js"></script>
+  <script src="tasks.js"></script>
+  <script src="settings.js"></script>
 </body>
 </html>
