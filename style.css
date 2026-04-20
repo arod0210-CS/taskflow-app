@@ -421,3 +421,39 @@ body.theme-fritolay.dark-mode #resetBtn {
     grid-template-columns: 1fr;
   }
 }
+/* =========================
+   CHEETOS-STYLE LOGO
+   (Frito-Lay theme only)
+========================= */
+body.theme-fritolay .logo-text {
+  font-family: "Cooper Black", "Luckiest Guy", cursive;
+  font-size: 44px;
+  font-weight: 900;
+
+  /* Orange cheesy gradient */
+  background: linear-gradient(135deg, #ff7a00, #ffcc00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  /* Thick cartoon shadow */
+  text-shadow:
+    2px 2px 0 #d35400,
+    4px 4px 0 #a84300,
+    6px 6px 10px rgba(0,0,0,0.2);
+
+  letter-spacing: 1px;
+
+  /* Slight tilt like branding */
+  transform: rotate(-2deg);
+
+  transition: all 0.3s ease;
+}
+body.theme-fritolay .logo-text:hover {
+  transform: rotate(-2deg) scale(1.05);
+  text-shadow:
+    2px 2px 0 #d35400,
+    6px 6px 0 #a84300,
+    10px 10px 20px rgba(0,0,0,0.3);
+
+  cursor: pointer;
+}
