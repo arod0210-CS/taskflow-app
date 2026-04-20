@@ -10,11 +10,24 @@ function createTaskElement(task, handlers) {
   toggleBtn.type = "button";
   toggleBtn.addEventListener("click", () => handlers.onToggle(task.id));
 
+  const content = document.createElement("div");
+  content.style.display = "flex";
+  content.style.flexDirection = "column";
+  content.style.gap = "4px";
+
   const taskText = document.createElement("span");
   taskText.className = task.completed ? "task-text completed" : "task-text";
   taskText.textContent = task.text;
-
   taskText.addEventListener("dblclick", () => handlers.onEdit(task.id));
+
+  content.appendChild(taskText);
+
+  if (task.dueDate) {
+    const due = document.createElement("small");
+    due.textContent = "Due: " + new Date(task.dueDate).toLocaleDateString();
+    due.style.opacity = "0.75";
+    content.appendChild(due);
+  }
 
   const actions = document.createElement("div");
   actions.className = "task-actions";
@@ -32,7 +45,7 @@ function createTaskElement(task, handlers) {
   deleteBtn.addEventListener("click", () => handlers.onDelete(task.id));
 
   main.appendChild(toggleBtn);
-  main.appendChild(taskText);
+  main.appendChild(content);
 
   actions.appendChild(editBtn);
   actions.appendChild(deleteBtn);

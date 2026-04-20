@@ -1,4 +1,5 @@
 const taskInput = document.getElementById("taskInput");
+const dueDateInput = document.getElementById("dueDateInput");
 const addTaskBtn = document.getElementById("addTaskBtn");
 const resetBtn = document.getElementById("resetBtn");
 const todoList = document.getElementById("todoList");
@@ -26,25 +27,29 @@ function formatTodayDate() {
   });
 }
 
-function createTask(text) {
+function createTask(text, dueDate) {
   return {
     id: Date.now(),
     text: text.trim(),
-    completed: false
+    completed: false,
+    dueDate: dueDate || null
   };
 }
 
 function addTask() {
   const text = taskInput.value.trim();
+  const dueDate = dueDateInput.value;
 
   if (text === "") {
     return;
   }
 
-  tasks.unshift(createTask(text));
+  tasks.unshift(createTask(text, dueDate));
   saveTasks();
   renderTasks();
+
   taskInput.value = "";
+  dueDateInput.value = "";
   taskInput.focus();
 }
 
@@ -114,19 +119,23 @@ function renderTasks() {
   const doneTasks = tasks.filter((task) => task.completed);
 
   todoTasks.forEach((task) => {
-    todoList.appendChild(window.createTaskElement(task, {
-      onToggle: toggleTask,
-      onDelete: deleteTask,
-      onEdit: editTask
-    }));
+    todoList.appendChild(
+      window.createTaskElement(task, {
+        onToggle: toggleTask,
+        onDelete: deleteTask,
+        onEdit: editTask
+      })
+    );
   });
 
   doneTasks.forEach((task) => {
-    completedList.appendChild(window.createTaskElement(task, {
-      onToggle: toggleTask,
-      onDelete: deleteTask,
-      onEdit: editTask
-    }));
+    completedList.appendChild(
+      window.createTaskElement(task, {
+        onToggle: toggleTask,
+        onDelete: deleteTask,
+        onEdit: editTask
+      })
+    );
   });
 
   updateStats();

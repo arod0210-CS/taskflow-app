@@ -13,7 +13,7 @@
       <div class="top-bar">
         <div>
           <p class="eyebrow">Stay organized</p>
-          <h1>TaskFlow</h1>
+          <h1 class="logo-text">TaskFlow</h1>
         </div>
 
         <div class="top-bar-right">
@@ -25,25 +25,31 @@
       <div id="settingsPanel" class="settings-panel hidden">
         <h3>Settings</h3>
 
+        <div class="setting-item">
+          <span>Dark mode</span>
+
+          <label class="theme-switch">
+            <input type="checkbox" id="darkModeToggle" />
+            <span class="slider">
+              <span class="slider-icon">🌙</span>
+            </span>
+          </label>
+        </div>
+
         <label class="setting-item">
-  <span>Dark mode</span>
-  <input type="checkbox" id="darkModeToggle" />
-</label>
+          <span>Theme color</span>
+          <select id="themeSelect">
+            <option value="default">Default</option>
+            <option value="blue">Blue</option>
+            <option value="green">Green</option>
+            <option value="purple">Purple</option>
+            <option value="fritolay">Frito-Lay Corporate</option>
+          </select>
+        </label>
 
-<label class="setting-item">
-  <span>Theme color</span>
-  <select id="themeSelect">
-    <option value="default">Default</option>
-    <option value="blue">Blue</option>
-    <option value="green">Green</option>
-    <option value="purple">Purple</option>
-    <option value="fritolay">Frito-Lay Corporate</option>
-  </select>
-</label>
-
-<button id="editModeToggle" class="setting-action-btn" type="button">
-  Edit Mode: OFF
-</button>
+        <button id="editModeToggle" class="setting-action-btn" type="button">
+          Edit Mode: OFF
+        </button>
       </div>
 
       <div class="stats-card">
