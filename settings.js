@@ -31,7 +31,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function applyTheme(theme) {
-    document.body.classList.remove("theme-blue", "theme-green", "theme-purple");
+    document.body.classList.remove(
+      "theme-blue",
+      "theme-green",
+      "theme-purple",
+      "theme-fritolay"
+    );
 
     if (theme !== "default") {
       document.body.classList.add(`theme-${theme}`);
