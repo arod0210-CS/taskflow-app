@@ -4,7 +4,7 @@
   justify-content: space-between;
   gap: 12px;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 14px 16px;
   margin-bottom: 12px;
@@ -22,7 +22,7 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 2px solid #6366f1;
+  border: 2px solid var(--accent-color);
   background: transparent;
   cursor: pointer;
   flex-shrink: 0;
@@ -30,7 +30,7 @@
 }
 
 .toggle-btn.completed {
-  background: #6366f1;
+  background: var(--accent-color);
 }
 
 .task-content {
@@ -60,7 +60,7 @@
 
 .due-date {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--text-soft);
 }
 
 .priority-badge {
@@ -107,6 +107,21 @@
 .delete-btn {
   background: #fee2e2;
   color: #b91c1c;
+}
+
+body.dark-mode .task-card {
+  background: #111827;
+  border-color: #374151;
+}
+
+body.dark-mode .edit-btn {
+  background: #312e81;
+  color: #e0e7ff;
+}
+
+body.dark-mode .delete-btn {
+  background: #7f1d1d;
+  color: #fee2e2;
 }
 
 @media (max-width: 640px) {
