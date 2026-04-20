@@ -5,55 +5,80 @@ document.addEventListener("DOMContentLoaded", () => {
   const themeSelect = document.getElementById("themeSelect");
   const editModeToggle = document.getElementById("editModeToggle");
 
+  const THEME_CLASSES = [
+    "theme-blue",
+    "theme-green",
+    "theme-purple",
+    "theme-fritolay"
+  ];
+
+  // Open / close settings panel
   settingsBtn.addEventListener("click", () => {
     settingsPanel.classList.toggle("hidden");
   });
 
+  // ---------- DARK MODE ----------
   const savedDarkMode = JSON.parse(localStorage.getItem("darkMode")) || false;
-  if (savedDarkMode) {
-    document.body.classList.add("dark-mode");
-    darkModeToggle.checked = true;
+
+  if (darkModeToggle) {
+    darkModeToggle.checked = savedDarkMode;
   }
 
-  darkModeToggle.addEventListener("change", () => {
-    document.body.classList.toggle("dark-mode", darkModeToggle.checked);
-    localStorage.setItem("darkMode", JSON.stringify(darkModeToggle.checked));
-  });
+  document.body.classList.toggle("dark-mode", savedDarkMode);
 
+  if (darkModeToggle) {
+    darkModeToggle.addEventListener("change", () => {
+      const isDark = darkModeToggle.checked;
+      document.body.classList.toggle("dark-mode", isDark);
+      localStorage.setItem("darkMode", JSON.stringify(isDark));
+    });
+  }
+
+  // ---------- THEME ----------
   const savedTheme = localStorage.getItem("theme") || "default";
-  themeSelect.value = savedTheme;
+
+  if (themeSelect) {
+    themeSelect.value = savedTheme;
+  }
+
   applyTheme(savedTheme);
 
-  themeSelect.addEventListener("change", () => {
-    const selectedTheme = themeSelect.value;
-    applyTheme(selectedTheme);
-    localStorage.setItem("theme", selectedTheme);
-  });
+  if (themeSelect) {
+    themeSelect.addEventListener("change", () => {
+      const selectedTheme = themeSelect.value;
+      applyTheme(selectedTheme);
+      localStorage.setItem("theme", selectedTheme);
+    });
+  }
 
   function applyTheme(theme) {
-    document.body.classList.remove(
-      "theme-blue",
-      "theme-green",
-      "theme-purple",
-      "theme-fritolay"
-    );
+    document.body.classList.remove(...THEME_CLASSES);
 
     if (theme !== "default") {
       document.body.classList.add(`theme-${theme}`);
     }
   }
 
+  // ---------- EDIT MODE ----------
   let editMode = JSON.parse(localStorage.getItem("editMode")) || false;
 
   function updateEditModeButton() {
-    editModeToggle.textContent = editMode ? "Edit Mode: ON" : "Edit Mode: OFF";
+    if (editModeToggle) {
+      editModeToggle.textContent = editMode ? "Edit Mode: ON" : "Edit Mode: OFF";
+    }
   }
 
-  editModeToggle.addEventListener("click", () => {
-    editMode = !editMode;
-    localStorage.setItem("editMode", JSON.stringify(editMode));
-    updateEditModeButton();
-  });
+  if (editModeToggle) {
+    editModeToggle.addEventListener("click", () => {
+  editMode = !editMode;
+  localStorage.setItem("editMode", JSON.stringify(editMode));
+  updateEditModeButton();
+
+  if (typeof renderTasks === "function") {
+    renderTasks();
+  }
+});
+  }
 
   updateEditModeButton();
 });
