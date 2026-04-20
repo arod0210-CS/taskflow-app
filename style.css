@@ -9,6 +9,7 @@
   --border-color: #d1d5db;
   --input-bg: #f9fafb;
   --shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+  --app-font: Arial, sans-serif;
 }
 
 * {
@@ -17,10 +18,10 @@
 
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: var(--app-font);
   background: var(--page-bg);
   color: var(--text-main);
-  transition: background 0.25s ease, color 0.25s ease;
+  transition: background 0.25s ease, color 0.25s ease, font-family 0.25s ease;
 }
 
 .app-shell {
@@ -306,6 +307,96 @@ body.theme-green {
 body.theme-purple {
   --accent-color: #a855f7;
   --accent-hover: #9333ea;
+}
+
+/* FRITO-LAY CORPORATE THEME */
+body.theme-fritolay {
+  --accent-color: #005cb9;
+  --accent-hover: #00479a;
+  --page-bg: linear-gradient(135deg, #f7f9fc, #eef4fb);
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --card-solid: #ffffff;
+  --text-main: #12304f;
+  --text-soft: #5b728b;
+  --border-color: #d7e3f1;
+  --input-bg: #f7fbff;
+  --shadow: 0 16px 40px rgba(0, 63, 136, 0.10);
+  --app-font: "Other Hand Font", "Cooper Black", "Trebuchet MS", Arial, sans-serif;
+}
+
+body.theme-fritolay .container {
+  border: 1px solid #d4e0ee;
+}
+
+body.theme-fritolay .eyebrow {
+  color: #005cb9;
+}
+
+body.theme-fritolay h1 {
+  color: #005cb9;
+  letter-spacing: 0.2px;
+}
+
+body.theme-fritolay .date-box {
+  background: #005cb9;
+  color: #ffffff;
+}
+
+body.theme-fritolay .stats-card {
+  background: linear-gradient(180deg, #ffffff, #f7fbff);
+}
+
+body.theme-fritolay .stat {
+  background: rgba(0, 92, 185, 0.08);
+}
+
+body.theme-fritolay .progress-bar {
+  background: #dce9f7;
+}
+
+body.theme-fritolay .progress-fill,
+body.theme-fritolay #addTaskBtn,
+body.theme-fritolay .settings-btn,
+body.theme-fritolay .setting-action-btn {
+  background: linear-gradient(135deg, #005cb9, #0076d6);
+  color: #ffffff;
+}
+
+body.theme-fritolay #resetBtn {
+  background: #f4c542;
+  color: #12304f;
+  font-weight: 800;
+}
+
+body.theme-fritolay .settings-panel {
+  background: linear-gradient(180deg, #ffffff, #f9fcff);
+  border-color: #d7e3f1;
+}
+
+body.theme-fritolay .task-input input {
+  border-color: #cddced;
+  background: #fbfdff;
+}
+
+body.theme-fritolay.dark-mode {
+  --page-bg: linear-gradient(135deg, #0f1f33, #102844);
+  --card-bg: rgba(19, 38, 63, 0.94);
+  --card-solid: #173252;
+  --text-main: #eef6ff;
+  --text-soft: #b4c7db;
+  --border-color: #28476b;
+  --input-bg: #0f2945;
+  --shadow: 0 16px 40px rgba(0, 0, 0, 0.32);
+}
+
+body.theme-fritolay.dark-mode .date-box {
+  background: #f4c542;
+  color: #12304f;
+}
+
+body.theme-fritolay.dark-mode #resetBtn {
+  background: #f4c542;
+  color: #12304f;
 }
 
 @media (max-width: 640px) {
