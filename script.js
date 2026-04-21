@@ -42,68 +42,62 @@ document.addEventListener("DOMContentLoaded", () => {
     },
     updateEditModeUI() {
       const btn = document.getElementById("editModeToggle");
-      if (btn) {
-        btn.textContent = this.editMode ? "Edit Mode: ON" : "Edit Mode: OFF";
-        btn.classList.toggle("edit-mode-active", this.editMode);
-      }
+      btn.textContent = this.editMode ? "Edit Mode: ON" : "Edit Mode: OFF";
+      btn.classList.toggle("edit-mode-active", this.editMode);
     }
   };
 
-  // --- 2. THEME & UI LOGIC ---
+  // Helper for tasks.js component logic
+  window.getEditMode = () => State.editMode;
+
+  // --- 2. THEME & UI POLISH LOGIC ---
+  
+  // A. Date Initialization
+  const dateOptions = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+  document.getElementById("todayDate").textContent = new Date().toLocaleDateString('en-US', dateOptions);
+
+  // B. Settings Panel Toggle
+  const settingsBtn = document.getElementById("settingsBtn");
+  const settingsPanel = document.getElementById("settingsPanel");
+  settingsBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    settingsPanel.classList.toggle("hidden");
+  });
+  document.addEventListener("click", (e) => {
+    if (!settingsPanel.classList.contains("hidden") && !settingsPanel.contains(e.target) && !settingsBtn.contains(e.target)) {
+      settingsPanel.classList.add("hidden");
+    }
+  });
+
+  // C. Enhanced Theme Switcher
   const darkModeToggle = document.getElementById("darkModeToggle");
   const themeSelect = document.getElementById("themeSelect");
+  const THEME_CLASSES = ["theme-blue", "theme-green", "theme-purple", "theme-fritolay"];
 
   function applyTheme(theme) {
-    // 1. Remove any existing class starting with "theme-" to avoid clashing
-    document.body.className = Array.from(document.body.classList)
-      .filter(c => !c.startsWith("theme-"))
-      .join(" ");
-
-    // 2. Add the selected theme class
+    document.body.classList.remove(...THEME_CLASSES);
     if (theme !== "default") {
       document.body.classList.add(`theme-${theme}`);
     }
-
-    // 3. Apply Dark Mode override if active
     const isDark = JSON.parse(localStorage.getItem("darkMode")) || false;
     document.body.classList.toggle("dark-mode", isDark);
-    if (darkModeToggle) darkModeToggle.checked = isDark;
+    darkModeToggle.checked = isDark;
   }
 
-  // Event Listeners for UI
-  if (themeSelect) {
-    themeSelect.addEventListener("change", () => {
-      applyTheme(themeSelect.value);
-      localStorage.setItem("theme", themeSelect.value);
-    });
-  }
+  themeSelect.addEventListener("change", () => {
+    applyTheme(themeSelect.value);
+    localStorage.setItem("theme", themeSelect.value);
+  });
 
-  if (darkModeToggle) {
-    darkModeToggle.addEventListener("change", () => {
-      localStorage.setItem("darkMode", JSON.stringify(darkModeToggle.checked));
-      applyTheme(themeSelect ? themeSelect.value : "default");
-    });
-  }
+  darkModeToggle.addEventListener("change", () => {
+    localStorage.setItem("darkMode", JSON.stringify(darkModeToggle.checked));
+    applyTheme(themeSelect.value);
+  });
 
-  // Date Display
-  const dateOptions = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
-  const dateBox = document.getElementById("todayDate");
-  if (dateBox) dateBox.textContent = new Date().toLocaleDateString('en-US', dateOptions);
-
-  // Settings Panel Toggle
-  const settingsBtn = document.getElementById("settingsBtn");
-  const settingsPanel = document.getElementById("settingsPanel");
-  if (settingsBtn && settingsPanel) {
-    settingsBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      settingsPanel.classList.toggle("hidden");
-    });
-    document.addEventListener("click", (e) => {
-      if (!settingsPanel.classList.contains("hidden") && !settingsPanel.contains(e.target) && !settingsBtn.contains(e.target)) {
-        settingsPanel.classList.add("hidden");
-      }
-    });
-  }
+  // Initial Theme Load
+  themeSelect.value = localStorage.getItem("theme") || "default";
+  applyTheme(themeSelect.value);
+  State.updateEditModeUI();
 
   // --- 3. TASK COMPONENT BUILDER ---
   function createTaskElement(task) {
@@ -173,13 +167,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const completedList = document.getElementById("completedList");
 
   function render(state) {
-    if (!todoList || !completedList) return;
     todoList.innerHTML = "";
     completedList.innerHTML = "";
 
     let filteredTasks = state.tasks.filter(task => {
       if (state.searchQuery && !task.text.toLowerCase().includes(state.searchQuery)) return false;
       if (state.view === "today" && task.dueDate !== new Date().toISOString().split("T")[0]) return false;
+      // Add Week/Month logic here if desired
       return true; 
     });
 
@@ -196,31 +190,21 @@ document.addEventListener("DOMContentLoaded", () => {
     completedList.appendChild(doneFragment);
 
     // Update Stats & Progress
-    const leftEl = document.getElementById("tasksLeft");
-    const compEl = document.getElementById("tasksCompleted");
-    const percEl = document.getElementById("progressPercent");
-    const fillEl = document.getElementById("progressFill");
-
-    if (leftEl) leftEl.textContent = todoTasks.length;
-    if (compEl) compEl.textContent = doneTasks.length;
-    
+    document.getElementById("tasksLeft").textContent = todoTasks.length;
+    document.getElementById("tasksCompleted").textContent = doneTasks.length;
     const total = todoTasks.length + doneTasks.length;
     const percent = total === 0 ? 0 : Math.round((doneTasks.length / total) * 100);
-    
-    if (percEl) percEl.textContent = `${percent}%`;
-    if (fillEl) fillEl.style.width = `${percent}%`;
+    document.getElementById("progressPercent").textContent = `${percent}%`;
+    document.getElementById("progressFill").style.width = `${percent}%`;
   }
   State.subscribe(render);
 
   // --- 5. SEARCH & FILTERS ---
-  const searchInput = document.getElementById("searchInput");
-  if (searchInput) {
-    let searchTimeout;
-    searchInput.addEventListener("input", (e) => {
-      clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(() => State.setSearch(e.target.value), 300);
-    });
-  }
+  let searchTimeout;
+  document.getElementById("searchInput").addEventListener("input", (e) => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => State.setSearch(e.target.value), 300);
+  });
 
   document.querySelectorAll(".view-btn").forEach(btn => {
     btn.addEventListener("click", (e) => {
@@ -233,13 +217,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- 6. DRAG AND DROP ---
   let draggedElementId = null;
   document.addEventListener("dragstart", (e) => {
-    if (e.target.classList && e.target.classList.contains("task-card")) {
+    if (e.target.classList.contains("task-card")) {
       draggedElementId = e.target.dataset.id;
       e.target.classList.add("dragging");
     }
   });
   document.addEventListener("dragend", (e) => {
-    if (e.target.classList && e.target.classList.contains("task-card")) {
+    if (e.target.classList.contains("task-card")) {
       e.target.classList.remove("dragging");
       document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
     }
@@ -260,66 +244,51 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // --- 7. DATA OPERATIONS ---
-  const addTaskBtn = document.getElementById("addTaskBtn");
-  if (addTaskBtn) {
-    addTaskBtn.addEventListener("click", () => {
-      const textInput = document.getElementById("taskInput");
-      const dateInput = document.getElementById("dueDateInput");
-      const priorityInput = document.getElementById("priorityInput");
-      
-      if (textInput && textInput.value.trim()) {
-        State.addTask({
-          id: Date.now().toString(),
-          text: textInput.value.trim(),
-          completed: false,
-          dueDate: dateInput ? dateInput.value : null,
-          priority: priorityInput ? priorityInput.value : "medium"
-        });
-        textInput.value = '';
-        if (dateInput) dateInput.value = '';
-      }
-    });
-  }
+  // --- 7. DATA OPERATIONS (ADD, RESET, IMPORT/EXPORT) ---
+  document.getElementById("addTaskBtn").addEventListener("click", () => {
+    const textInput = document.getElementById("taskInput");
+    const dateInput = document.getElementById("dueDateInput");
+    const priorityInput = document.getElementById("priorityInput");
+    
+    if (textInput.value.trim()) {
+      State.addTask({
+        id: Date.now().toString(),
+        text: textInput.value.trim(),
+        completed: false,
+        dueDate: dateInput.value || null,
+        priority: priorityInput.value || "medium"
+      });
+      textInput.value = '';
+      dateInput.value = '';
+    }
+  });
 
-  const resetBtn = document.getElementById("resetBtn");
-  if (resetBtn) {
-    resetBtn.addEventListener("click", () => {
-      if(confirm("Clear all tasks?")) State.setTasks([]);
-    });
-  }
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    if(confirm("Clear all tasks?")) State.setTasks([]);
+  });
 
-  const exportBtn = document.getElementById("exportBtn");
-  if (exportBtn) {
-    exportBtn.addEventListener("click", () => {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(State.tasks));
-      const dlAnchor = document.createElement('a');
-      dlAnchor.setAttribute("href", dataStr);
-      dlAnchor.setAttribute("download", "taskflow_data.json");
-      dlAnchor.click();
-    });
-  }
+  document.getElementById("exportBtn").addEventListener("click", () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(State.tasks));
+    const dlAnchor = document.createElement('a');
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", "taskflow_data.json");
+    dlAnchor.click();
+  });
 
-  const importFile = document.getElementById("importFile");
-  if (importFile) {
-    importFile.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          const imported = JSON.parse(event.target.result);
-          if (Array.isArray(imported)) { State.setTasks(imported); alert("Import successful!"); }
-        } catch (err) { alert("Invalid file."); }
-      };
-      reader.readAsText(file);
-    });
-  }
+  document.getElementById("importFile").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const imported = JSON.parse(event.target.result);
+        if (Array.isArray(imported)) { State.setTasks(imported); alert("Import successful!"); }
+      } catch (err) { alert("Invalid file."); }
+    };
+    reader.readAsText(file);
+  });
 
-  const editModeToggle = document.getElementById("editModeToggle");
-  if (editModeToggle) {
-    editModeToggle.addEventListener("click", () => State.toggleEditMode());
-  }
+  document.getElementById("editModeToggle").addEventListener("click", () => State.toggleEditMode());
 
   // --- 8. MOTIVATIONAL QUOTES ---
   const quotes = [
@@ -336,7 +305,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const quoteAuthor = document.getElementById("quoteAuthor");
 
   function updateQuote() {
-    if (!quoteContent || !quoteText || !quoteAuthor) return;
     quoteContent.classList.add("quote-fade-out");
     setTimeout(() => {
       const q = quotes[Math.floor(Math.random() * quotes.length)];
@@ -349,10 +317,6 @@ document.addEventListener("DOMContentLoaded", () => {
   updateQuote();
   setInterval(updateQuote, 15000);
 
-  // --- INITIAL LOAD ---
-  const savedTheme = localStorage.getItem("theme") || "default";
-  if (themeSelect) themeSelect.value = savedTheme;
-  applyTheme(savedTheme);
-  State.updateEditModeUI();
+  // --- INITIAL NOTIFY ---
   State.notify();
 });
