@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   
-  // --- 1. STATE MANAGEMENT (Pub/Sub) ---
+  // --- 1. STATE MANAGEMENT (Pub/Sub Pattern) ---
   const State = {
     tasks: JSON.parse(localStorage.getItem("taskflow-tasks-v3")) || [],
     view: "all",
@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
       this.listeners.forEach(listener => listener(this));
     },
     
+    // Core Actions
     addTask(task) { this.tasks.unshift(task); this.notify(); },
     deleteTask(id) { this.tasks = this.tasks.filter(t => t.id !== id); this.notify(); },
     toggleTask(id) { 
@@ -36,13 +37,75 @@ document.addEventListener("DOMContentLoaded", () => {
     toggleEditMode() { 
       this.editMode = !this.editMode; 
       localStorage.setItem("editMode", JSON.stringify(this.editMode));
-      document.getElementById("editModeToggle").textContent = this.editMode ? "Edit Mode: ON" : "Edit Mode: OFF";
-      document.getElementById("editModeToggle").classList.toggle("edit-mode-active", this.editMode);
+      this.updateEditModeUI();
       this.notify(); 
+    },
+    updateEditModeUI() {
+      const btn = document.getElementById("editModeToggle");
+      if (btn) {
+        btn.textContent = this.editMode ? "Edit Mode: ON" : "Edit Mode: OFF";
+        btn.classList.toggle("edit-mode-active", this.editMode);
+      }
     }
   };
 
-  // --- 2. COMPONENT BUILDER ---
+  // --- 2. THEME & UI LOGIC ---
+  const darkModeToggle = document.getElementById("darkModeToggle");
+  const themeSelect = document.getElementById("themeSelect");
+
+  function applyTheme(theme) {
+    // 1. Remove any existing class starting with "theme-" to avoid clashing
+    document.body.className = Array.from(document.body.classList)
+      .filter(c => !c.startsWith("theme-"))
+      .join(" ");
+
+    // 2. Add the selected theme class
+    if (theme !== "default") {
+      document.body.classList.add(`theme-${theme}`);
+    }
+
+    // 3. Apply Dark Mode override if active
+    const isDark = JSON.parse(localStorage.getItem("darkMode")) || false;
+    document.body.classList.toggle("dark-mode", isDark);
+    if (darkModeToggle) darkModeToggle.checked = isDark;
+  }
+
+  // Event Listeners for UI
+  if (themeSelect) {
+    themeSelect.addEventListener("change", () => {
+      applyTheme(themeSelect.value);
+      localStorage.setItem("theme", themeSelect.value);
+    });
+  }
+
+  if (darkModeToggle) {
+    darkModeToggle.addEventListener("change", () => {
+      localStorage.setItem("darkMode", JSON.stringify(darkModeToggle.checked));
+      applyTheme(themeSelect ? themeSelect.value : "default");
+    });
+  }
+
+  // Date Display
+  const dateOptions = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+  const dateBox = document.getElementById("todayDate");
+  if (dateBox) dateBox.textContent = new Date().toLocaleDateString('en-US', dateOptions);
+
+  // Settings Panel Toggle
+  const settingsBtn = document.getElementById("settingsBtn");
+  const settingsPanel = document.getElementById("settingsPanel");
+  if (settingsBtn && settingsPanel) {
+    settingsBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      settingsPanel.classList.toggle("hidden");
+    });
+    document.addEventListener("click", (e) => {
+      if (!settingsPanel.classList.contains("hidden") && !settingsPanel.contains(e.target) && !settingsBtn.contains(e.target)) {
+        settingsPanel.classList.add("hidden");
+      }
+    });
+  }
+
+  // --- 3. TASK COMPONENT BUILDER ---
   function createTaskElement(task) {
     const li = document.createElement("li");
     li.className = "task-card";
@@ -105,56 +168,12 @@ document.addEventListener("DOMContentLoaded", () => {
     return li;
   }
 
-  // --- 3. SETTINGS & UI LOGIC ---
-  const dateOptions = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
-  document.getElementById("todayDate").textContent = new Date().toLocaleDateString('en-US', dateOptions);
-
-  const settingsBtn = document.getElementById("settingsBtn");
-  const settingsPanel = document.getElementById("settingsPanel");
-  settingsBtn.addEventListener("click", (e) => { e.stopPropagation(); settingsPanel.classList.toggle("hidden"); });
-  document.addEventListener("click", (e) => { if (!settingsPanel.classList.contains("hidden") && !settingsPanel.contains(e.target) && !settingsBtn.contains(e.target)) { settingsPanel.classList.add("hidden"); } });
-
-  const darkModeToggle = document.getElementById("darkModeToggle");
-  darkModeToggle.checked = JSON.parse(localStorage.getItem("darkMode")) || false;
-  document.body.classList.toggle("dark-mode", darkModeToggle.checked);
-  darkModeToggle.addEventListener("change", () => {
-    document.body.classList.toggle("dark-mode", darkModeToggle.checked);
-    localStorage.setItem("darkMode", JSON.stringify(darkModeToggle.checked));
-  });
-
-  const themeSelect = document.getElementById("themeSelect");
-  themeSelect.value = localStorage.getItem("theme") || "default";
-  document.body.classList.add(themeSelect.value !== "default" ? `theme-${themeSelect.value}` : "default");
-  themeSelect.addEventListener("change", () => {
-    document.body.className = document.body.className.replace(/theme-\w+/g, "");
-    if(themeSelect.value !== "default") document.body.classList.add(`theme-${themeSelect.value}`);
-    if(darkModeToggle.checked) document.body.classList.add("dark-mode");
-    localStorage.setItem("theme", themeSelect.value);
-  });
-
-  document.getElementById("editModeToggle").textContent = State.editMode ? "Edit Mode: ON" : "Edit Mode: OFF";
-  document.getElementById("editModeToggle").classList.toggle("edit-mode-active", State.editMode);
-  document.getElementById("editModeToggle").addEventListener("click", () => State.toggleEditMode());
-
-  // --- 4. VIEW & RENDER PIPELINE ---
-  document.querySelectorAll(".view-btn").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      document.querySelectorAll(".view-btn").forEach(b => b.classList.remove("active"));
-      e.target.classList.add("active");
-      State.setView(e.target.dataset.view);
-    });
-  });
-
-  let timeout;
-  document.getElementById("searchInput").addEventListener("input", (e) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => State.setSearch(e.target.value), 300);
-  });
-
+  // --- 4. RENDER PIPELINE ---
   const todoList = document.getElementById("todoList");
   const completedList = document.getElementById("completedList");
 
   function render(state) {
+    if (!todoList || !completedList) return;
     todoList.innerHTML = "";
     completedList.innerHTML = "";
 
@@ -176,74 +195,140 @@ document.addEventListener("DOMContentLoaded", () => {
     todoList.appendChild(todoFragment);
     completedList.appendChild(doneFragment);
 
-    document.getElementById("tasksLeft").textContent = todoTasks.length;
-    document.getElementById("tasksCompleted").textContent = doneTasks.length;
+    // Update Stats & Progress
+    const leftEl = document.getElementById("tasksLeft");
+    const compEl = document.getElementById("tasksCompleted");
+    const percEl = document.getElementById("progressPercent");
+    const fillEl = document.getElementById("progressFill");
+
+    if (leftEl) leftEl.textContent = todoTasks.length;
+    if (compEl) compEl.textContent = doneTasks.length;
+    
     const total = todoTasks.length + doneTasks.length;
     const percent = total === 0 ? 0 : Math.round((doneTasks.length / total) * 100);
-    document.getElementById("progressPercent").textContent = `${percent}%`;
-    document.getElementById("progressFill").style.width = `${percent}%`;
+    
+    if (percEl) percEl.textContent = `${percent}%`;
+    if (fillEl) fillEl.style.width = `${percent}%`;
   }
   State.subscribe(render);
 
-  // --- 5. DRAG AND DROP LOGIC ---
+  // --- 5. SEARCH & FILTERS ---
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput) {
+    let searchTimeout;
+    searchInput.addEventListener("input", (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => State.setSearch(e.target.value), 300);
+    });
+  }
+
+  document.querySelectorAll(".view-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      document.querySelectorAll(".view-btn").forEach(b => b.classList.remove("active"));
+      e.target.classList.add("active");
+      State.setView(e.target.dataset.view);
+    });
+  });
+
+  // --- 6. DRAG AND DROP ---
   let draggedElementId = null;
-  document.addEventListener("dragstart", (e) => { if (e.target.classList.contains("task-card")) { draggedElementId = e.target.dataset.id; e.target.classList.add("dragging"); }});
-  document.addEventListener("dragend", (e) => { if (e.target.classList.contains("task-card")) { e.target.classList.remove("dragging"); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); }});
-  document.addEventListener("dragover", (e) => { e.preventDefault(); const targetCard = e.target.closest(".task-card"); if (targetCard && targetCard.dataset.id !== draggedElementId) { document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); targetCard.classList.add("drag-over"); }});
-  document.addEventListener("drop", (e) => { e.preventDefault(); const targetCard = e.target.closest(".task-card"); if (targetCard && draggedElementId) { State.reorderTasks(draggedElementId, targetCard.dataset.id); }});
-
-  // --- 6. IMPORT / EXPORT DATA ---
-  document.getElementById("exportBtn").addEventListener("click", () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(State.tasks));
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "taskflow_backup.json");
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
+  document.addEventListener("dragstart", (e) => {
+    if (e.target.classList && e.target.classList.contains("task-card")) {
+      draggedElementId = e.target.dataset.id;
+      e.target.classList.add("dragging");
+    }
   });
-
-  document.getElementById("importFile").addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const importedTasks = JSON.parse(event.target.result);
-        if (Array.isArray(importedTasks)) {
-          State.setTasks(importedTasks);
-          alert("Data imported successfully!");
-        }
-      } catch (err) {
-        alert("Invalid JSON file.");
-      }
-    };
-    reader.readAsText(file);
+  document.addEventListener("dragend", (e) => {
+    if (e.target.classList && e.target.classList.contains("task-card")) {
+      e.target.classList.remove("dragging");
+      document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    }
   });
-
-  // --- 7. ADD TASK ---
-  document.getElementById("addTaskBtn").addEventListener("click", () => {
-    const text = document.getElementById("taskInput").value.trim();
-    if (text) {
-      State.addTask({ id: Date.now().toString(), text, completed: false, dueDate: document.getElementById("dueDateInput").value || null, priority: document.getElementById("priorityInput").value || "medium" });
-      document.getElementById("taskInput").value = '';
-      document.getElementById("dueDateInput").value = '';
+  document.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    const targetCard = e.target.closest(".task-card");
+    if (targetCard && targetCard.dataset.id !== draggedElementId) {
+      document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+      targetCard.classList.add("drag-over");
+    }
+  });
+  document.addEventListener("drop", (e) => {
+    e.preventDefault();
+    const targetCard = e.target.closest(".task-card");
+    if (targetCard && draggedElementId) {
+      State.reorderTasks(draggedElementId, targetCard.dataset.id);
     }
   });
 
-  document.getElementById("resetBtn").addEventListener("click", () => { if(confirm("Clear all tasks?")) State.setTasks([]); });
+  // --- 7. DATA OPERATIONS ---
+  const addTaskBtn = document.getElementById("addTaskBtn");
+  if (addTaskBtn) {
+    addTaskBtn.addEventListener("click", () => {
+      const textInput = document.getElementById("taskInput");
+      const dateInput = document.getElementById("dueDateInput");
+      const priorityInput = document.getElementById("priorityInput");
+      
+      if (textInput && textInput.value.trim()) {
+        State.addTask({
+          id: Date.now().toString(),
+          text: textInput.value.trim(),
+          completed: false,
+          dueDate: dateInput ? dateInput.value : null,
+          priority: priorityInput ? priorityInput.value : "medium"
+        });
+        textInput.value = '';
+        if (dateInput) dateInput.value = '';
+      }
+    });
+  }
 
-  // --- 8. DAILY MOTIVATIONAL QUOTES ---
+  const resetBtn = document.getElementById("resetBtn");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      if(confirm("Clear all tasks?")) State.setTasks([]);
+    });
+  }
+
+  const exportBtn = document.getElementById("exportBtn");
+  if (exportBtn) {
+    exportBtn.addEventListener("click", () => {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(State.tasks));
+      const dlAnchor = document.createElement('a');
+      dlAnchor.setAttribute("href", dataStr);
+      dlAnchor.setAttribute("download", "taskflow_data.json");
+      dlAnchor.click();
+    });
+  }
+
+  const importFile = document.getElementById("importFile");
+  if (importFile) {
+    importFile.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const imported = JSON.parse(event.target.result);
+          if (Array.isArray(imported)) { State.setTasks(imported); alert("Import successful!"); }
+        } catch (err) { alert("Invalid file."); }
+      };
+      reader.readAsText(file);
+    });
+  }
+
+  const editModeToggle = document.getElementById("editModeToggle");
+  if (editModeToggle) {
+    editModeToggle.addEventListener("click", () => State.toggleEditMode());
+  }
+
+  // --- 8. MOTIVATIONAL QUOTES ---
   const quotes = [
     { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
     { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
-    { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
     { text: "Quality is not an act, it is a habit.", author: "Aristotle" },
-    { text: "You don't have to be great to start, but you have to start to be great.", author: "Zig Ziglar" },
-    { text: "The way to get started is to quit talking and begin doing.", author: "Walt Disney" },
     { text: "Focus on being productive instead of busy.", author: "Tim Ferriss" },
     { text: "Action is the foundational key to all success.", author: "Pablo Picasso" },
-    { text: "Small daily improvements are key to staggering long-term results.", author: "Unknown" }
+    { text: "Small daily improvements are the key to long-term results.", author: "Unknown" }
   ];
 
   const quoteContent = document.querySelector(".quote-content");
@@ -251,11 +336,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const quoteAuthor = document.getElementById("quoteAuthor");
 
   function updateQuote() {
+    if (!quoteContent || !quoteText || !quoteAuthor) return;
     quoteContent.classList.add("quote-fade-out");
     setTimeout(() => {
-      const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-      quoteText.textContent = `"${randomQuote.text}"`;
-      quoteAuthor.textContent = `- ${randomQuote.author}`;
+      const q = quotes[Math.floor(Math.random() * quotes.length)];
+      quoteText.textContent = `"${q.text}"`;
+      quoteAuthor.textContent = `- ${q.author}`;
       quoteContent.classList.remove("quote-fade-out");
     }, 500); 
   }
@@ -263,6 +349,10 @@ document.addEventListener("DOMContentLoaded", () => {
   updateQuote();
   setInterval(updateQuote, 15000);
 
-  // Initial Render
+  // --- INITIAL LOAD ---
+  const savedTheme = localStorage.getItem("theme") || "default";
+  if (themeSelect) themeSelect.value = savedTheme;
+  applyTheme(savedTheme);
+  State.updateEditModeUI();
   State.notify();
 });
