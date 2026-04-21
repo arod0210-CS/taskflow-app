@@ -1,333 +1,209 @@
-const taskInput       = document.getElementById("taskInput");
-const dueDateInput    = document.getElementById("dueDateInput");
-const priorityInput   = document.getElementById("priorityInput");
-const addTaskBtn      = document.getElementById("addTaskBtn");
-const resetBtn        = document.getElementById("resetBtn");
-const todoList        = document.getElementById("todoList");
-const completedList   = document.getElementById("completedList");
-const tasksLeft       = document.getElementById("tasksLeft");
-const tasksCompleted  = document.getElementById("tasksCompleted");
-const progressPercent = document.getElementById("progressPercent");
-const progressFill    = document.getElementById("progressFill");
-const todayDate       = document.getElementById("todayDate");
-const todoHeading     = document.getElementById("todoHeading");
-const completedHeading = document.getElementById("completedHeading");
-const viewButtons     = document.querySelectorAll(".view-btn");
- 
-// Modal elements
-const editModal        = document.getElementById("editModal");
-const editTextInput    = document.getElementById("editTextInput");
-const editDateInput    = document.getElementById("editDateInput");
-const editPriorityInput = document.getElementById("editPriorityInput");
-const editSaveBtn      = document.getElementById("editSaveBtn");
-const editCancelBtn    = document.getElementById("editCancelBtn");
- 
-const STORAGE_KEY = "taskflow-tasks-v3";
-let currentView = "all";
-let tasks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-let editingTaskId = null;
- 
-// ── Date helpers ──────────────────────────────────────────────────────────────
- 
-function getTodayString() {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
- 
-function setDateInputMin() {
-  const today = getTodayString();
-  dueDateInput.min = today;
-  if (editDateInput) editDateInput.min = today;
-}
- 
-function formatTodayDate() {
-  todayDate.textContent = new Date().toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric"
-  });
-}
- 
-function parseDateOnly(dateString) {
-  return new Date(`${dateString}T00:00:00`);
-}
- 
-function startOfToday() {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-}
- 
-function sameDay(a, b) {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
-}
- 
-// ── Storage ───────────────────────────────────────────────────────────────────
- 
-function saveTasks() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-}
- 
-// ── Task factory ──────────────────────────────────────────────────────────────
- 
-function createTask(text, dueDate, priority) {
-  return {
-    id: Date.now(),
-    text: text.trim(),
-    completed: false,
-    dueDate: dueDate || null,
-    priority: priority || "medium",
-    createdAt: new Date().toISOString()
+document.addEventListener("DOMContentLoaded", () => {
+  
+  // --- 1. STATE MANAGEMENT (Pub/Sub) ---
+  const State = {
+    tasks: JSON.parse(localStorage.getItem("taskflow-tasks-v3")) || [],
+    view: "all",
+    searchQuery: "",
+    editMode: JSON.parse(localStorage.getItem("editMode")) || false,
+    
+    listeners: [],
+    subscribe(listener) { this.listeners.push(listener); },
+    notify() {
+      localStorage.setItem("taskflow-tasks-v3", JSON.stringify(this.tasks));
+      this.listeners.forEach(listener => listener(this));
+    },
+    
+    addTask(task) { this.tasks.unshift(task); this.notify(); },
+    deleteTask(id) { this.tasks = this.tasks.filter(t => t.id !== id); this.notify(); },
+    toggleTask(id) { 
+      const task = this.tasks.find(t => t.id === id);
+      if (task) task.completed = !task.completed;
+      this.notify();
+    },
+    reorderTasks(draggedId, targetId) {
+      const draggedIndex = this.tasks.findIndex(t => t.id === draggedId);
+      const targetIndex = this.tasks.findIndex(t => t.id === targetId);
+      if (draggedIndex > -1 && targetIndex > -1) {
+        const [draggedItem] = this.tasks.splice(draggedIndex, 1);
+        this.tasks.splice(targetIndex, 0, draggedItem);
+        this.notify();
+      }
+    },
+    setTasks(newTasks) { this.tasks = newTasks; this.notify(); },
+    setView(view) { this.view = view; this.notify(); },
+    setSearch(query) { this.searchQuery = query.toLowerCase(); this.notify(); },
+    toggleEditMode() { 
+      this.editMode = !this.editMode; 
+      localStorage.setItem("editMode", JSON.stringify(this.editMode));
+      document.getElementById("editModeToggle").textContent = this.editMode ? "Edit Mode: ON" : "Edit Mode: OFF";
+      document.getElementById("editModeToggle").classList.toggle("edit-mode-active", this.editMode);
+      this.notify(); 
+    }
   };
-}
- 
-// ── View filtering ────────────────────────────────────────────────────────────
- 
-function taskMatchesView(task) {
-  if (currentView === "all") return true;
-  if (!task.dueDate) return false;
- 
-  const due   = parseDateOnly(task.dueDate);
-  const today = startOfToday();
- 
-  if (currentView === "today") return sameDay(due, today);
- 
-  if (currentView === "week") {
-    const weekEnd = new Date(today);
-    weekEnd.setDate(weekEnd.getDate() + 6);
-    return due >= today && due <= weekEnd;
-  }
- 
-  if (currentView === "month") {
-    return (
-      due.getFullYear() === today.getFullYear() &&
-      due.getMonth() === today.getMonth()
-    );
-  }
- 
-  return true;
-}
- 
-// ── Sorting ───────────────────────────────────────────────────────────────────
- 
-function priorityRank(priority) {
-  if (priority === "high")   return 0;
-  if (priority === "medium") return 1;
-  return 2;
-}
- 
-function sortTasks(taskList) {
-  return [...taskList].sort((a, b) => {
-    if (a.dueDate && b.dueDate) {
-      const diff = parseDateOnly(a.dueDate).getTime() - parseDateOnly(b.dueDate).getTime();
-      if (diff !== 0) return diff;
-    } else if (a.dueDate)  return -1;
-    else if (b.dueDate)    return  1;
- 
-    const pc = priorityRank(a.priority) - priorityRank(b.priority);
-    if (pc !== 0) return pc;
- 
-    return b.id - a.id;
-  });
-}
- 
-// ── Add / delete / toggle ─────────────────────────────────────────────────────
- 
-function addTask() {
-  const text     = taskInput.value.trim();
-  const dueDate  = dueDateInput.value;
-  const priority = priorityInput.value;
- 
-  if (text === "") {
-    taskInput.classList.add("input-error");
-    taskInput.focus();
-    taskInput.addEventListener("input", () => taskInput.classList.remove("input-error"), { once: true });
-    return;
-  }
- 
-  tasks.unshift(createTask(text, dueDate, priority));
-  saveTasks();
-  renderTasks();
- 
-  taskInput.value      = "";
-  dueDateInput.value   = "";
-  priorityInput.value  = "medium";
-  taskInput.focus();
-}
- 
-function deleteTask(id) {
-  tasks = tasks.filter((t) => t.id !== id);
-  saveTasks();
-  renderTasks();
-}
- 
-function toggleTask(id) {
-  tasks = tasks.map((t) => t.id === id ? { ...t, completed: !t.completed } : t);
-  saveTasks();
-  renderTasks();
-}
- 
-// ── Inline edit modal ─────────────────────────────────────────────────────────
- 
-function openEditModal(id) {
-  const task = tasks.find((t) => t.id === id);
-  if (!task) return;
- 
-  editingTaskId            = id;
-  editTextInput.value      = task.text;
-  editDateInput.value      = task.dueDate || "";
-  editPriorityInput.value  = task.priority || "medium";
- 
-  editModal.classList.remove("hidden");
-  editTextInput.focus();
-}
- 
-function closeEditModal() {
-  editModal.classList.add("hidden");
-  editingTaskId = null;
-}
- 
-function saveEdit() {
-  if (editingTaskId === null) return;
- 
-  const newText = editTextInput.value.trim();
-  if (newText === "") {
-    editTextInput.classList.add("input-error");
-    editTextInput.focus();
-    editTextInput.addEventListener("input", () => editTextInput.classList.remove("input-error"), { once: true });
-    return;
-  }
- 
-  tasks = tasks.map((t) => {
-    if (t.id !== editingTaskId) return t;
-    return {
-      ...t,
-      text:     newText,
-      dueDate:  editDateInput.value || null,
-      priority: editPriorityInput.value
-    };
-  });
- 
-  saveTasks();
-  renderTasks();
-  closeEditModal();
-}
- 
-editSaveBtn.addEventListener("click", saveEdit);
-editCancelBtn.addEventListener("click", closeEditModal);
- 
-// Close modal on backdrop click
-editModal.addEventListener("click", (e) => {
-  if (e.target === editModal) closeEditModal();
-});
- 
-// Close modal on Escape
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && !editModal.classList.contains("hidden")) {
-    closeEditModal();
-  }
-});
- 
-// ── Stats & headings ──────────────────────────────────────────────────────────
- 
-function updateStats() {
-  const total     = tasks.length;
-  const completed = tasks.filter((t) => t.completed).length;
-  const left      = total - completed;
-  const percent   = total === 0 ? 0 : Math.round((completed / total) * 100);
- 
-  tasksLeft.textContent        = left;
-  tasksCompleted.textContent   = completed;
-  progressPercent.textContent  = `${percent}%`;
-  progressFill.style.width     = `${percent}%`;
-}
- 
-function updateHeadings(todoCount, doneCount) {
-  const labels = { all: "All Tasks", today: "Today", week: "This Week", month: "This Month" };
-  const label  = labels[currentView] || "Tasks";
-  todoHeading.textContent      = `${label} To Do (${todoCount})`;
-  completedHeading.textContent = `${label} Completed (${doneCount})`;
-}
- 
-// ── View switching ────────────────────────────────────────────────────────────
- 
-function setActiveView(view) {
-  currentView = view;
-  viewButtons.forEach((btn) => btn.classList.toggle("active", btn.dataset.view === view));
-  renderTasks();
-}
- 
-// ── Render ────────────────────────────────────────────────────────────────────
- 
-function renderTasks() {
-  todoList.innerHTML      = "";
-  completedList.innerHTML = "";
- 
-  const filtered   = tasks.filter(taskMatchesView);
-  const todoTasks  = sortTasks(filtered.filter((t) => !t.completed));
-  const doneTasks  = sortTasks(filtered.filter((t) =>  t.completed));
- 
-  todoTasks.forEach((task) => {
-    todoList.appendChild(
-      window.createTaskElement(task, { onToggle: toggleTask, onDelete: deleteTask, onEdit: openEditModal })
-    );
-  });
- 
-  doneTasks.forEach((task) => {
-    completedList.appendChild(
-      window.createTaskElement(task, { onToggle: toggleTask, onDelete: deleteTask, onEdit: openEditModal })
-    );
-  });
- 
-  function emptyState(msg) {
+
+  // --- 2. COMPONENT BUILDER ---
+  function createTaskElement(task) {
     const li = document.createElement("li");
-    li.className   = "empty-state";
-    li.textContent = msg;
+    li.className = "task-card";
+    li.draggable = true; 
+    li.dataset.id = task.id; 
+
+    if (task.dueDate && !task.completed) {
+      const today = new Date().toISOString().split("T")[0];
+      if (task.dueDate < today) li.classList.add("overdue");
+      if (task.dueDate === today) li.classList.add("due-today");
+    }
+
+    const mainWrapper = document.createElement("div");
+    mainWrapper.className = "task-main";
+
+    const toggleBtn = document.createElement("button");
+    toggleBtn.className = "toggle-btn";
+    if (task.completed) toggleBtn.classList.add("completed");
+    toggleBtn.addEventListener("click", () => State.toggleTask(task.id));
+
+    const content = document.createElement("div");
+    content.className = "task-content";
+
+    const textSpan = document.createElement("span");
+    textSpan.className = "task-text";
+    if (task.completed) textSpan.classList.add("completed");
+    textSpan.textContent = task.text;
+
+    const meta = document.createElement("div");
+    meta.className = "task-meta";
+
+    if (task.dueDate) {
+      const dateSpan = document.createElement("span");
+      dateSpan.className = "due-date";
+      dateSpan.textContent = `Due: ${task.dueDate}`;
+      meta.appendChild(dateSpan);
+    }
+
+    const prioritySpan = document.createElement("span");
+    prioritySpan.className = `priority-badge priority-${task.priority}`;
+    prioritySpan.textContent = task.priority.charAt(0).toUpperCase() + task.priority.slice(1);
+    meta.appendChild(prioritySpan);
+
+    content.appendChild(textSpan);
+    content.appendChild(meta);
+    mainWrapper.appendChild(toggleBtn);
+    mainWrapper.appendChild(content);
+    li.appendChild(mainWrapper);
+
+    if (State.editMode) {
+      const actions = document.createElement("div");
+      actions.className = "task-actions";
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "task-action-btn delete-btn";
+      deleteBtn.textContent = "Delete";
+      deleteBtn.addEventListener("click", () => State.deleteTask(task.id));
+      actions.appendChild(deleteBtn);
+      li.appendChild(actions);
+    }
     return li;
   }
- 
-  if (todoTasks.length === 0) todoList.appendChild(emptyState("No tasks in this view."));
-  if (doneTasks.length === 0) completedList.appendChild(emptyState("No completed tasks in this view."));
- 
-  updateHeadings(todoTasks.length, doneTasks.length);
-  updateStats();
-}
- 
-// ── Reset ─────────────────────────────────────────────────────────────────────
- 
-function resetAllTasks() {
-  if (!confirm("Are you sure you want to remove all tasks?")) return;
-  tasks = [];
-  saveTasks();
-  renderTasks();
-}
- 
-// ── Keyboard shortcuts ────────────────────────────────────────────────────────
- 
-function handleEnterToAdd(e) {
-  if (e.key === "Enter") addTask();
-}
- 
-// ── Wire up ───────────────────────────────────────────────────────────────────
- 
-addTaskBtn.addEventListener("click", addTask);
-resetBtn.addEventListener("click", resetAllTasks);
-taskInput.addEventListener("keydown", handleEnterToAdd);
-dueDateInput.addEventListener("keydown", handleEnterToAdd);
- 
-viewButtons.forEach((btn) => btn.addEventListener("click", () => setActiveView(btn.dataset.view)));
- 
-// ── Init ──────────────────────────────────────────────────────────────────────
- 
-setDateInputMin();
-formatTodayDate();
-renderTasks();
- 
-// Expose renderTasks for settings.js
-window.renderTasks = renderTasks;
+
+  // --- 3. SETTINGS & UI LOGIC ---
+  const dateOptions = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+  document.getElementById("todayDate").textContent = new Date().toLocaleDateString('en-US', dateOptions);
+
+  const settingsBtn = document.getElementById("settingsBtn");
+  const settingsPanel = document.getElementById("settingsPanel");
+  settingsBtn.addEventListener("click", (e) => { e.stopPropagation(); settingsPanel.classList.toggle("hidden"); });
+  document.addEventListener("click", (e) => { if (!settingsPanel.classList.contains("hidden") && !settingsPanel.contains(e.target) && !settingsBtn.contains(e.target)) { settingsPanel.classList.add("hidden"); } });
+
+  const darkModeToggle = document.getElementById("darkModeToggle");
+  darkModeToggle.checked = JSON.parse(localStorage.getItem("darkMode")) || false;
+  document.body.classList.toggle("dark-mode", darkModeToggle.checked);
+  darkModeToggle.addEventListener("change", () => {
+    document.body.classList.toggle("dark-mode", darkModeToggle.checked);
+    localStorage.setItem("darkMode", JSON.stringify(darkModeToggle.checked));
+  });
+
+  const themeSelect = document.getElementById("themeSelect");
+  themeSelect.value = localStorage.getItem("theme") || "default";
+  document.body.classList.add(themeSelect.value !== "default" ? `theme-${themeSelect.value}` : "default");
+  themeSelect.addEventListener("change", () => {
+    document.body.className = document.body.className.replace(/theme-\w+/g, "");
+    if(themeSelect.value !== "default") document.body.classList.add(`theme-${themeSelect.value}`);
+    if(darkModeToggle.checked) document.body.classList.add("dark-mode");
+    localStorage.setItem("theme", themeSelect.value);
+  });
+
+  document.getElementById("editModeToggle").textContent = State.editMode ? "Edit Mode: ON" : "Edit Mode: OFF";
+  document.getElementById("editModeToggle").classList.toggle("edit-mode-active", State.editMode);
+  document.getElementById("editModeToggle").addEventListener("click", () => State.toggleEditMode());
+
+  // --- 4. VIEW & RENDER PIPELINE ---
+  document.querySelectorAll(".view-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      document.querySelectorAll(".view-btn").forEach(b => b.classList.remove("active"));
+      e.target.classList.add("active");
+      State.setView(e.target.dataset.view);
+    });
+  });
+
+  let timeout;
+  document.getElementById("searchInput").addEventListener("input", (e) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => State.setSearch(e.target.value), 300);
+  });
+
+  const todoList = document.getElementById("todoList");
+  const completedList = document.getElementById("completedList");
+
+  function render(state) {
+    todoList.innerHTML = "";
+    completedList.innerHTML = "";
+
+    let filteredTasks = state.tasks.filter(task => {
+      if (state.searchQuery && !task.text.toLowerCase().includes(state.searchQuery)) return false;
+      if (state.view === "today" && task.dueDate !== new Date().toISOString().split("T")[0]) return false;
+      return true; 
+    });
+
+    const todoTasks = filteredTasks.filter(t => !t.completed);
+    const doneTasks = filteredTasks.filter(t => t.completed);
+
+    const todoFragment = document.createDocumentFragment();
+    const doneFragment = document.createDocumentFragment();
+
+    todoTasks.forEach(task => todoFragment.appendChild(createTaskElement(task)));
+    doneTasks.forEach(task => doneFragment.appendChild(createTaskElement(task)));
+
+    todoList.appendChild(todoFragment);
+    completedList.appendChild(doneFragment);
+
+    document.getElementById("tasksLeft").textContent = todoTasks.length;
+    document.getElementById("tasksCompleted").textContent = doneTasks.length;
+    const total = todoTasks.length + doneTasks.length;
+    const percent = total === 0 ? 0 : Math.round((doneTasks.length / total) * 100);
+    document.getElementById("progressPercent").textContent = `${percent}%`;
+    document.getElementById("progressFill").style.width = `${percent}%`;
+  }
+  State.subscribe(render);
+
+  // --- 5. DRAG AND DROP LOGIC ---
+  let draggedElementId = null;
+  document.addEventListener("dragstart", (e) => { if (e.target.classList.contains("task-card")) { draggedElementId = e.target.dataset.id; e.target.classList.add("dragging"); }});
+  document.addEventListener("dragend", (e) => { if (e.target.classList.contains("task-card")) { e.target.classList.remove("dragging"); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); }});
+  document.addEventListener("dragover", (e) => { e.preventDefault(); const targetCard = e.target.closest(".task-card"); if (targetCard && targetCard.dataset.id !== draggedElementId) { document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); targetCard.classList.add("drag-over"); }});
+  document.addEventListener("drop", (e) => { e.preventDefault(); const targetCard = e.target.closest(".task-card"); if (targetCard && draggedElementId) { State.reorderTasks(draggedElementId, targetCard.dataset.id); }});
+
+  // --- 6. ADD TASK ---
+  document.getElementById("addTaskBtn").addEventListener("click", () => {
+    const text = document.getElementById("taskInput").value.trim();
+    if (text) {
+      State.addTask({ id: Date.now().toString(), text, completed: false, dueDate: document.getElementById("dueDateInput").value || null, priority: document.getElementById("priorityInput").value || "medium" });
+      document.getElementById("taskInput").value = '';
+      document.getElementById("dueDateInput").value = '';
+    }
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", () => { if(confirm("Clear all tasks?")) State.setTasks([]); });
+
+  // Initial Render
+  State.notify();
+});

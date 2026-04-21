@@ -6,9 +6,8 @@
   <title>TaskFlow</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="tasks.css" />
 </head>
 <body>
   <div class="app-shell">
@@ -32,16 +31,13 @@
           </button>
 
           <div id="settingsPanel" class="hamburger-menu hidden">
-            
             <div class="menu-section">
               <h3>Settings</h3>
               <div class="setting-item">
                 <span>Dark mode</span>
                 <label class="theme-switch">
                   <input type="checkbox" id="darkModeToggle" />
-                  <span class="slider">
-                    <span class="slider-icon">🌙</span>
-                  </span>
+                  <span class="slider"><span class="slider-icon">🌙</span></span>
                 </label>
               </div>
             </div>
@@ -61,11 +57,17 @@
             </div>
 
             <div class="menu-section">
-              <button id="editModeToggle" class="setting-action-btn" type="button">
-                Edit Mode: OFF
-              </button>
+              <h3>Data Management</h3>
+              <button id="exportBtn" class="setting-action-btn" type="button" style="margin-bottom: 8px;">Export Data (.json)</button>
+              <label class="setting-action-btn" style="display: block; text-align: center; background: var(--btn-neutral-bg); color: var(--btn-neutral-fg); cursor: pointer;">
+                Import Data
+                <input type="file" id="importFile" accept=".json" style="display: none;" />
+              </label>
             </div>
 
+            <div class="menu-section">
+              <button id="editModeToggle" class="setting-action-btn" type="button">Edit Mode: OFF</button>
+            </div>
           </div>
         </div>
       </div>
@@ -76,13 +78,11 @@
             <span class="stat-label">Tasks Left</span>
             <span class="stat-number" id="tasksLeft">0</span>
           </div>
-
           <div class="stat">
             <span class="stat-label">Completed</span>
             <span class="stat-number" id="tasksCompleted">0</span>
           </div>
         </div>
-
         <div class="progress-section">
           <div class="progress-text">
             <span>Progress</span>
@@ -106,11 +106,14 @@
         <button id="resetBtn" type="button">Reset</button>
       </div>
 
-      <div class="view-bar">
-        <button class="view-btn active" type="button" data-view="all">All</button>
-        <button class="view-btn" type="button" data-view="today">Today</button>
-        <button class="view-btn" type="button" data-view="week">Week</button>
-        <button class="view-btn" type="button" data-view="month">Month</button>
+      <div class="view-bar" style="justify-content: space-between;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button class="view-btn active" type="button" data-view="all">All</button>
+          <button class="view-btn" type="button" data-view="today">Today</button>
+          <button class="view-btn" type="button" data-view="week">Week</button>
+          <button class="view-btn" type="button" data-view="month">Month</button>
+        </div>
+        <input type="text" id="searchInput" placeholder="Search tasks..." style="padding: 8px 16px; border-radius: 999px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-family: inherit;" />
       </div>
 
       <div class="section">
@@ -129,38 +132,6 @@
     </div>
   </div>
 
-  <div id="editModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Edit task">
-    <div class="modal-card">
-      <h3 class="modal-title">Edit Task</h3>
-
-      <div class="modal-field">
-        <label for="editTextInput">Task</label>
-        <input type="text" id="editTextInput" placeholder="Task description" />
-      </div>
-
-      <div class="modal-field">
-        <label for="editDateInput">Due Date</label>
-        <input type="date" id="editDateInput" />
-      </div>
-
-      <div class="modal-field">
-        <label for="editPriorityInput">Priority</label>
-        <select id="editPriorityInput">
-          <option value="high">High Priority</option>
-          <option value="medium" selected>Medium Priority</option>
-          <option value="low">Low Priority</option>
-        </select>
-      </div>
-
-      <div class="modal-actions">
-        <button id="editCancelBtn" class="modal-btn modal-btn-cancel" type="button">Cancel</button>
-        <button id="editSaveBtn" class="modal-btn modal-btn-save" type="button">Save</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="tasks.js"></script>
   <script src="script.js"></script>
-  <script src="settings.js"></script>
 </body>
 </html>
