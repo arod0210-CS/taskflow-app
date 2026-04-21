@@ -12,16 +12,16 @@
 <body>
   <div class="app-shell">
     <div class="container">
-      
+
       <div class="top-bar">
         <div>
           <p class="eyebrow">Stay organized</p>
           <h1 class="logo-text">TaskFlow</h1>
         </div>
 
-        <div class="top-bar-right" style="position: relative;">
+        <div class="top-bar-right">
           <div class="date-box" id="todayDate"></div>
-          
+
           <button id="settingsBtn" class="hamburger-btn" type="button" aria-label="Menu">
             <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -44,7 +44,7 @@
 
             <div class="menu-section">
               <h3>Themes</h3>
-              <label class="setting-item">
+              <label class="setting-item setting-select-row">
                 <span>Theme color</span>
                 <select id="themeSelect">
                   <option value="default">Default</option>
@@ -58,10 +58,10 @@
 
             <div class="menu-section">
               <h3>Data Management</h3>
-              <button id="exportBtn" class="setting-action-btn" type="button" style="margin-bottom: 8px;">Export Data (.json)</button>
-              <label class="setting-action-btn" style="display: block; text-align: center; background: var(--btn-neutral-bg); color: var(--btn-neutral-fg); cursor: pointer;">
+              <button id="exportBtn" class="setting-action-btn" type="button">Export Data (.json)</button>
+              <label class="setting-action-btn neutral-action upload-label">
                 Import Data
-                <input type="file" id="importFile" accept=".json" style="display: none;" />
+                <input type="file" id="importFile" accept=".json" hidden />
               </label>
             </div>
 
@@ -73,7 +73,6 @@
       </div>
 
       <div class="dashboard-grid">
-        
         <div class="stats-card">
           <div class="stats-row">
             <div class="stat">
@@ -85,6 +84,7 @@
               <span class="stat-number" id="tasksCompleted">0</span>
             </div>
           </div>
+
           <div class="progress-section">
             <div class="progress-text">
               <span>Progress</span>
@@ -97,7 +97,7 @@
         </div>
 
         <div class="quote-card">
-          <svg class="quote-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="quote-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"></path>
             <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"></path>
           </svg>
@@ -106,7 +106,6 @@
             <span id="quoteAuthor" class="quote-author"></span>
           </div>
         </div>
-
       </div>
 
       <div class="task-input">
@@ -121,14 +120,15 @@
         <button id="resetBtn" type="button">Reset</button>
       </div>
 
-      <div class="view-bar" style="justify-content: space-between;">
-        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <div class="view-bar">
+        <div class="view-group">
           <button class="view-btn active" type="button" data-view="all">All</button>
           <button class="view-btn" type="button" data-view="today">Today</button>
           <button class="view-btn" type="button" data-view="week">Week</button>
           <button class="view-btn" type="button" data-view="month">Month</button>
         </div>
-        <input type="text" id="searchInput" placeholder="Search tasks..." style="padding: 8px 16px; border-radius: 999px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-family: inherit;" />
+
+        <input type="text" id="searchInput" placeholder="Search tasks..." />
       </div>
 
       <div class="section">
@@ -150,14 +150,17 @@
   <div id="editModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Edit task">
     <div class="modal-card">
       <h3 class="modal-title">Edit Task</h3>
+
       <div class="modal-field">
         <label for="editTextInput">Task</label>
         <input type="text" id="editTextInput" placeholder="Task description" />
       </div>
+
       <div class="modal-field">
         <label for="editDateInput">Due Date</label>
         <input type="date" id="editDateInput" />
       </div>
+
       <div class="modal-field">
         <label for="editPriorityInput">Priority</label>
         <select id="editPriorityInput">
@@ -166,6 +169,7 @@
           <option value="low">Low Priority</option>
         </select>
       </div>
+
       <div class="modal-actions">
         <button id="editCancelBtn" class="modal-btn modal-btn-cancel" type="button">Cancel</button>
         <button id="editSaveBtn" class="modal-btn modal-btn-save" type="button">Save</button>
