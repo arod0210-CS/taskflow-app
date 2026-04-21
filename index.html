@@ -72,26 +72,41 @@
         </div>
       </div>
 
-      <div class="stats-card">
-        <div class="stats-row">
-          <div class="stat">
-            <span class="stat-label">Tasks Left</span>
-            <span class="stat-number" id="tasksLeft">0</span>
+      <div class="dashboard-grid">
+        
+        <div class="stats-card">
+          <div class="stats-row">
+            <div class="stat">
+              <span class="stat-label">Tasks Left</span>
+              <span class="stat-number" id="tasksLeft">0</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Completed</span>
+              <span class="stat-number" id="tasksCompleted">0</span>
+            </div>
           </div>
-          <div class="stat">
-            <span class="stat-label">Completed</span>
-            <span class="stat-number" id="tasksCompleted">0</span>
+          <div class="progress-section">
+            <div class="progress-text">
+              <span>Progress</span>
+              <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
           </div>
         </div>
-        <div class="progress-section">
-          <div class="progress-text">
-            <span>Progress</span>
-            <span id="progressPercent">0%</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" id="progressFill"></div>
+
+        <div class="quote-card">
+          <svg class="quote-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"></path>
+            <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"></path>
+          </svg>
+          <div class="quote-content">
+            <p id="quoteText" class="quote-text">"Loading inspiration..."</p>
+            <span id="quoteAuthor" class="quote-author"></span>
           </div>
         </div>
+
       </div>
 
       <div class="task-input">
@@ -128,6 +143,32 @@
           <h2 id="completedHeading">Completed</h2>
         </div>
         <ul id="completedList" class="task-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="editModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Edit task">
+    <div class="modal-card">
+      <h3 class="modal-title">Edit Task</h3>
+      <div class="modal-field">
+        <label for="editTextInput">Task</label>
+        <input type="text" id="editTextInput" placeholder="Task description" />
+      </div>
+      <div class="modal-field">
+        <label for="editDateInput">Due Date</label>
+        <input type="date" id="editDateInput" />
+      </div>
+      <div class="modal-field">
+        <label for="editPriorityInput">Priority</label>
+        <select id="editPriorityInput">
+          <option value="high">High Priority</option>
+          <option value="medium" selected>Medium Priority</option>
+          <option value="low">Low Priority</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button id="editCancelBtn" class="modal-btn modal-btn-cancel" type="button">Cancel</button>
+        <button id="editSaveBtn" class="modal-btn modal-btn-save" type="button">Save</button>
       </div>
     </div>
   </div>
