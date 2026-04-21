@@ -192,7 +192,36 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("dragover", (e) => { e.preventDefault(); const targetCard = e.target.closest(".task-card"); if (targetCard && targetCard.dataset.id !== draggedElementId) { document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); targetCard.classList.add("drag-over"); }});
   document.addEventListener("drop", (e) => { e.preventDefault(); const targetCard = e.target.closest(".task-card"); if (targetCard && draggedElementId) { State.reorderTasks(draggedElementId, targetCard.dataset.id); }});
 
-  // --- 6. ADD TASK ---
+  // --- 6. IMPORT / EXPORT DATA ---
+  document.getElementById("exportBtn").addEventListener("click", () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(State.tasks));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "taskflow_backup.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  });
+
+  document.getElementById("importFile").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const importedTasks = JSON.parse(event.target.result);
+        if (Array.isArray(importedTasks)) {
+          State.setTasks(importedTasks);
+          alert("Data imported successfully!");
+        }
+      } catch (err) {
+        alert("Invalid JSON file.");
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  // --- 7. ADD TASK ---
   document.getElementById("addTaskBtn").addEventListener("click", () => {
     const text = document.getElementById("taskInput").value.trim();
     if (text) {
@@ -203,6 +232,36 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("resetBtn").addEventListener("click", () => { if(confirm("Clear all tasks?")) State.setTasks([]); });
+
+  // --- 8. DAILY MOTIVATIONAL QUOTES ---
+  const quotes = [
+    { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+    { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
+    { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
+    { text: "Quality is not an act, it is a habit.", author: "Aristotle" },
+    { text: "You don't have to be great to start, but you have to start to be great.", author: "Zig Ziglar" },
+    { text: "The way to get started is to quit talking and begin doing.", author: "Walt Disney" },
+    { text: "Focus on being productive instead of busy.", author: "Tim Ferriss" },
+    { text: "Action is the foundational key to all success.", author: "Pablo Picasso" },
+    { text: "Small daily improvements are key to staggering long-term results.", author: "Unknown" }
+  ];
+
+  const quoteContent = document.querySelector(".quote-content");
+  const quoteText = document.getElementById("quoteText");
+  const quoteAuthor = document.getElementById("quoteAuthor");
+
+  function updateQuote() {
+    quoteContent.classList.add("quote-fade-out");
+    setTimeout(() => {
+      const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+      quoteText.textContent = `"${randomQuote.text}"`;
+      quoteAuthor.textContent = `- ${randomQuote.author}`;
+      quoteContent.classList.remove("quote-fade-out");
+    }, 500); 
+  }
+
+  updateQuote();
+  setInterval(updateQuote, 15000);
 
   // Initial Render
   State.notify();
