@@ -13,45 +13,61 @@
 <body>
   <div class="app-shell">
     <div class="container">
+      
       <div class="top-bar">
         <div>
           <p class="eyebrow">Stay organized</p>
           <h1 class="logo-text">TaskFlow</h1>
         </div>
 
-        <div class="top-bar-right">
+        <div class="top-bar-right" style="position: relative;">
           <div class="date-box" id="todayDate"></div>
-          <button id="settingsBtn" class="settings-btn" type="button">⚙️ Settings</button>
+          
+          <button id="settingsBtn" class="hamburger-btn" type="button" aria-label="Menu">
+            <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+
+          <div id="settingsPanel" class="hamburger-menu hidden">
+            
+            <div class="menu-section">
+              <h3>Settings</h3>
+              <div class="setting-item">
+                <span>Dark mode</span>
+                <label class="theme-switch">
+                  <input type="checkbox" id="darkModeToggle" />
+                  <span class="slider">
+                    <span class="slider-icon">🌙</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div class="menu-section">
+              <h3>Themes</h3>
+              <label class="setting-item">
+                <span>Theme color</span>
+                <select id="themeSelect">
+                  <option value="default">Default</option>
+                  <option value="blue">Blue</option>
+                  <option value="green">Green</option>
+                  <option value="purple">Purple</option>
+                  <option value="fritolay">Frito-Lay Corporate</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="menu-section">
+              <button id="editModeToggle" class="setting-action-btn" type="button">
+                Edit Mode: OFF
+              </button>
+            </div>
+
+          </div>
         </div>
-      </div>
-
-      <div id="settingsPanel" class="settings-panel hidden">
-        <h3>Settings</h3>
-
-        <div class="setting-item">
-          <span>Dark mode</span>
-          <label class="theme-switch">
-            <input type="checkbox" id="darkModeToggle" />
-            <span class="slider">
-              <span class="slider-icon">🌙</span>
-            </span>
-          </label>
-        </div>
-
-        <label class="setting-item">
-          <span>Theme color</span>
-          <select id="themeSelect">
-            <option value="default">Default</option>
-            <option value="blue">Blue</option>
-            <option value="green">Green</option>
-            <option value="purple">Purple</option>
-            <option value="fritolay">Frito-Lay Corporate</option>
-          </select>
-        </label>
-
-        <button id="editModeToggle" class="setting-action-btn" type="button">
-          Edit Mode: OFF
-        </button>
       </div>
 
       <div class="stats-card">
