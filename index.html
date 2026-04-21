@@ -87,7 +87,7 @@
 
           <div class="progress-section">
             <div class="progress-text">
-              <span>Progress</span>
+              <span>Task Progress</span>
               <span id="progressPercent">0%</span>
             </div>
             <div class="progress-bar">
@@ -105,6 +105,75 @@
             <p id="quoteText" class="quote-text">"Loading inspiration..."</p>
             <span id="quoteAuthor" class="quote-author"></span>
           </div>
+        </div>
+      </div>
+
+      <div class="gamify-grid">
+        <div class="level-card">
+          <div class="level-top">
+            <div>
+              <p class="mini-label">Player Rank</p>
+              <h3 id="rankTitle" class="level-rank">Starter</h3>
+            </div>
+            <div class="level-badge">
+              <span class="mini-label">Level</span>
+              <span id="playerLevel" class="level-number">1</span>
+            </div>
+          </div>
+
+          <div class="xp-section">
+            <div class="progress-text">
+              <span>XP Progress</span>
+              <span id="xpProgressText">0 / 100 XP</span>
+            </div>
+            <div class="progress-bar xp-bar">
+              <div class="progress-fill xp-fill" id="xpFill"></div>
+            </div>
+          </div>
+
+          <div class="player-stats-row">
+            <div class="player-stat-pill">
+              <span class="player-stat-emoji">🪙</span>
+              <div>
+                <span class="player-stat-label">Coins</span>
+                <strong id="playerCoins">0</strong>
+              </div>
+            </div>
+
+            <div class="player-stat-pill">
+              <span class="player-stat-emoji">🔥</span>
+              <div>
+                <span class="player-stat-label">Streak</span>
+                <strong id="playerStreak">0 days</strong>
+              </div>
+            </div>
+
+            <div class="player-stat-pill">
+              <span class="player-stat-emoji">✅</span>
+              <div>
+                <span class="player-stat-label">Done Today</span>
+                <strong id="doneToday">0</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="reward-rules">
+            <span>Low: +10 XP / +2 coins</span>
+            <span>Medium: +20 XP / +4 coins</span>
+            <span>High: +35 XP / +7 coins</span>
+          </div>
+        </div>
+
+        <div class="challenge-card">
+          <div class="challenge-header">
+            <div>
+              <p class="mini-label">Daily Challenges</p>
+              <h3>Today’s Missions</h3>
+            </div>
+            <div id="challengeCount" class="challenge-count">0/3</div>
+          </div>
+
+          <div id="challengeList" class="challenge-list"></div>
         </div>
       </div>
 
