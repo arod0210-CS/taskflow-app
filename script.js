@@ -35,10 +35,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const editSaveBtn = document.getElementById("editSaveBtn");
   const editCancelBtn = document.getElementById("editCancelBtn");
 
+  const levelCard = document.getElementById("levelCard");
+  const levelToggle = document.getElementById("levelToggle");
+  const challengeCard = document.getElementById("challengeCard");
+  const challengeToggle = document.getElementById("challengeToggle");
+
   const playerLevel = document.getElementById("playerLevel");
+  const miniPlayerLevel = document.getElementById("miniPlayerLevel");
   const rankTitle = document.getElementById("rankTitle");
   const xpProgressText = document.getElementById("xpProgressText");
+  const miniXpProgressText = document.getElementById("miniXpProgressText");
   const xpFill = document.getElementById("xpFill");
+  const collapsedXpFill = document.getElementById("collapsedXpFill");
   const playerCoins = document.getElementById("playerCoins");
   const playerStreak = document.getElementById("playerStreak");
   const doneToday = document.getElementById("doneToday");
@@ -66,6 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
     completedWeek: 0,
     totalCompleted: 0,
     challengeRewarded: [],
+    challengeRewardedDate: null,
     badges: []
   });
 
@@ -156,8 +165,6 @@ document.addEventListener("DOMContentLoaded", () => {
       this.notify();
     }
   };
-
-  window.getEditMode = () => State.editMode;
 
   function normalizePriority(priority) {
     return ["high", "medium", "low"].includes(priority) ? priority : "medium";
@@ -301,8 +308,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getDailyChallenges() {
+    const today = getTodayString();
+
     const completedToday = State.tasks.filter(
-      (task) => task.completed && task.completedAt && task.completedAt.startsWith(getTodayString())
+      (task) => task.completed && task.completedAt && task.completedAt.startsWith(today)
     ).length;
 
     const highToday = State.tasks.filter(
@@ -310,7 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
         task.completed &&
         task.priority === "high" &&
         task.completedAt &&
-        task.completedAt.startsWith(getTodayString())
+        task.completedAt.startsWith(today)
     ).length;
 
     const mediumToday = State.tasks.filter(
@@ -318,7 +327,7 @@ document.addEventListener("DOMContentLoaded", () => {
         task.completed &&
         task.priority === "medium" &&
         task.completedAt &&
-        task.completedAt.startsWith(getTodayString())
+        task.completedAt.startsWith(today)
     ).length;
 
     return [
@@ -350,6 +359,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function checkChallengeRewards() {
+    const today = getTodayString();
+    const rewardDate = State.player.challengeRewardedDate || null;
+
+    if (rewardDate !== today) {
+      State.player.challengeRewarded = [];
+      State.player.challengeRewardedDate = today;
+    }
+
     const challenges = getDailyChallenges();
 
     challenges.forEach((challenge) => {
@@ -361,13 +378,6 @@ document.addEventListener("DOMContentLoaded", () => {
         State.player.challengeRewarded.push(challenge.id);
       }
     });
-
-    const today = getTodayString();
-    const rewardDate = State.player.challengeRewardedDate || null;
-    if (rewardDate !== today) {
-      State.player.challengeRewarded = [];
-      State.player.challengeRewardedDate = today;
-    }
   }
 
   function rewardForCompletion(task) {
@@ -420,15 +430,23 @@ document.addEventListener("DOMContentLoaded", () => {
     normalizeDailyPlayerStats();
     checkChallengeRewards();
 
-    playerLevel.textContent = State.player.level;
-    rankTitle.textContent = getRankTitle(State.player.level);
+    const currentLevel = State.player.level;
+    const currentRank = getRankTitle(currentLevel);
+    const needed = xpNeededForLevel(currentLevel);
+    const xpLabel = `${State.player.xp} / ${needed} XP`;
+    const xpPercent = Math.min((State.player.xp / needed) * 100, 100);
+
+    playerLevel.textContent = currentLevel;
+    miniPlayerLevel.textContent = `Lv ${currentLevel}`;
+    rankTitle.textContent = currentRank;
     playerCoins.textContent = State.player.coins;
     playerStreak.textContent = `${State.player.streak} day${State.player.streak === 1 ? "" : "s"}`;
     doneToday.textContent = State.player.completedToday;
 
-    const needed = xpNeededForLevel(State.player.level);
-    xpProgressText.textContent = `${State.player.xp} / ${needed} XP`;
-    xpFill.style.width = `${Math.min((State.player.xp / needed) * 100, 100)}%`;
+    xpProgressText.textContent = xpLabel;
+    miniXpProgressText.textContent = xpLabel;
+    xpFill.style.width = `${xpPercent}%`;
+    collapsedXpFill.style.width = `${xpPercent}%`;
 
     const challenges = getDailyChallenges();
     const completedChallengeCount = challenges.filter((challenge) => challenge.progress >= challenge.goal).length;
@@ -699,7 +717,23 @@ document.addEventListener("DOMContentLoaded", () => {
     applyTheme(themeSelect.value);
   });
 
-  addTaskBtn.addEventListener("click", () => {
+  if (levelToggle && levelCard) {
+    levelToggle.addEventListener("click", () => {
+      levelCard.classList.toggle("collapsed");
+      const isExpanded = !levelCard.classList.contains("collapsed");
+      levelToggle.setAttribute("aria-expanded", String(isExpanded));
+    });
+  }
+
+  if (challengeToggle && challengeCard) {
+    challengeToggle.addEventListener("click", () => {
+      challengeCard.classList.toggle("collapsed");
+      const isExpanded = !challengeCard.classList.contains("collapsed");
+      challengeToggle.setAttribute("aria-expanded", String(isExpanded));
+    });
+  }
+
+  function tryAddTask() {
     const text = taskInput.value.trim();
     if (!text) {
       taskInput.classList.add("input-error");
@@ -722,18 +756,17 @@ document.addEventListener("DOMContentLoaded", () => {
     dueDateInput.value = "";
     priorityInput.value = "medium";
     taskInput.focus();
-  });
+  }
 
-  taskInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      addTaskBtn.click();
-    }
-  });
+  addTaskBtn.addEventListener("click", tryAddTask);
 
-  dueDateInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      addTaskBtn.click();
-    }
+  [taskInput, dueDateInput, priorityInput].forEach((element) => {
+    element.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        tryAddTask();
+      }
+    });
   });
 
   resetBtn.addEventListener("click", () => {

@@ -106,7 +106,7 @@ select {
   grid-template-columns: 7fr 3fr;
   gap: 16px;
   margin-bottom: 18px;
-  align-items: stretch;
+  align-items: start;
 }
 
 .stats-card,
@@ -224,6 +224,115 @@ select {
   opacity: 0;
 }
 
+/* COMPACT CARDS */
+.level-card,
+.challenge-card {
+  padding: 14px 18px;
+  transition: all 0.28s ease;
+}
+
+.level-toggle,
+.challenge-toggle {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  color: inherit;
+  text-align: left;
+}
+
+.level-toggle-left,
+.challenge-toggle-left {
+  min-width: 0;
+}
+
+.level-rank {
+  margin: 4px 0 0;
+  font-size: 22px;
+  line-height: 1.1;
+}
+
+.challenge-toggle-left h3 {
+  margin: 4px 0 0;
+  font-size: 16px;
+}
+
+.level-toggle-right,
+.challenge-toggle-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.mini-info-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent-color) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-color) 15%, transparent);
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.level-toggle-arrow {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  transition: transform 0.28s ease;
+}
+
+.collapsed-xp-preview {
+  margin-top: 12px;
+  transition: opacity 0.28s ease, max-height 0.28s ease, margin-top 0.28s ease;
+  max-height: 40px;
+  opacity: 1;
+}
+
+.level-body,
+.challenge-body {
+  overflow: hidden;
+  max-height: 600px;
+  opacity: 1;
+  margin-top: 16px;
+  transition: max-height 0.28s ease, opacity 0.24s ease, margin-top 0.28s ease;
+}
+
+.level-card.collapsed,
+.challenge-card.collapsed {
+  min-height: 106px;
+}
+
+.level-card.collapsed .level-body,
+.challenge-card.collapsed .challenge-body {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  pointer-events: none;
+}
+
+.level-card:not(.collapsed) .collapsed-xp-preview {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  pointer-events: none;
+}
+
+.level-card.collapsed .level-toggle-arrow,
+.challenge-card.collapsed .level-toggle-arrow {
+  transform: rotate(-90deg);
+}
+
 .level-top {
   display: flex;
   justify-content: space-between;
@@ -232,10 +341,8 @@ select {
   margin-bottom: 14px;
 }
 
-.level-rank {
-  margin: 4px 0 0;
-  font-size: 22px;
-  line-height: 1.1;
+.level-summary-text .level-rank {
+  font-size: 18px;
 }
 
 .level-badge {
@@ -301,19 +408,6 @@ select {
   border-radius: 999px;
   background: color-mix(in srgb, var(--accent-color) 8%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent-color) 16%, transparent);
-}
-
-.challenge-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.challenge-header h3 {
-  margin: 4px 0 0;
-  font-size: 16px;
 }
 
 .challenge-count {
@@ -935,6 +1029,18 @@ body.dark-mode .delete-btn {
   .player-stats-row {
     grid-template-columns: 1fr;
   }
+
+  .level-toggle,
+  .challenge-toggle {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .level-toggle-right,
+  .challenge-toggle-right {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
 
 @media (max-width: 640px) {
@@ -978,6 +1084,11 @@ body.dark-mode .delete-btn {
 
   .stats-row {
     grid-template-columns: 1fr;
+  }
+
+  .level-top {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
