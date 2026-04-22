@@ -15,7 +15,7 @@
 
       <div class="top-bar">
         <div>
-          <p class="eyebrow">Stay organized</p>
+          <p class="eyebrow" id="eyebrowText">Stay organized</p>
           <h1 class="logo-text">TaskFlow</h1>
         </div>
 
@@ -32,20 +32,29 @@
 
           <div id="settingsPanel" class="hamburger-menu hidden">
             <div class="menu-section">
-              <h3>Settings</h3>
+              <h3 id="settingsHeaderText">Settings</h3>
+
               <div class="setting-item">
-                <span>Dark mode</span>
+                <span id="darkModeLabel">Dark mode</span>
                 <label class="theme-switch">
                   <input type="checkbox" id="darkModeToggle" />
                   <span class="slider"><span class="slider-icon">🌙</span></span>
                 </label>
               </div>
+
+              <label class="setting-item setting-select-row">
+                <span id="languageLabel">Language</span>
+                <select id="languageSelect">
+                  <option value="en">English</option>
+                  <option value="es">Español</option>
+                </select>
+              </label>
             </div>
 
             <div class="menu-section">
-              <h3>Themes</h3>
+              <h3 id="themesHeaderText">Themes</h3>
               <label class="setting-item setting-select-row">
-                <span>Theme color</span>
+                <span id="themeColorLabel">Theme color</span>
                 <select id="themeSelect">
                   <option value="default">Default</option>
                   <option value="blue">Blue</option>
@@ -57,10 +66,10 @@
             </div>
 
             <div class="menu-section">
-              <h3>Data Management</h3>
+              <h3 id="dataHeaderText">Data Management</h3>
               <button id="exportBtn" class="setting-action-btn" type="button">Export Data (.json)</button>
               <label class="setting-action-btn neutral-action upload-label">
-                Import Data
+                <span id="importBtnText">Import Data</span>
                 <input type="file" id="importFile" accept=".json" hidden />
               </label>
             </div>
@@ -76,18 +85,18 @@
         <div class="stats-card">
           <div class="stats-row">
             <div class="stat">
-              <span class="stat-label">Tasks Left</span>
+              <span class="stat-label" id="tasksLeftLabel">Tasks Left</span>
               <span class="stat-number" id="tasksLeft">0</span>
             </div>
             <div class="stat">
-              <span class="stat-label">Completed</span>
+              <span class="stat-label" id="tasksCompletedLabel">Completed</span>
               <span class="stat-number" id="tasksCompleted">0</span>
             </div>
           </div>
 
           <div class="progress-section">
             <div class="progress-text">
-              <span>Task Progress</span>
+              <span id="taskProgressLabel">Task Progress</span>
               <span id="progressPercent">0%</span>
             </div>
             <div class="progress-bar">
@@ -112,7 +121,7 @@
         <div class="level-card collapsed" id="levelCard">
           <button class="level-toggle" id="levelToggle" type="button" aria-expanded="false" aria-controls="levelBody">
             <div class="level-toggle-left">
-              <p class="mini-label">Player Rank</p>
+              <p class="mini-label" id="playerRankMiniLabel">Player Rank</p>
               <h3 id="rankTitle" class="level-rank">Starter</h3>
             </div>
 
@@ -132,19 +141,19 @@
           <div class="level-body" id="levelBody">
             <div class="level-top">
               <div class="level-summary-text">
-                <p class="mini-label">Player Rank</p>
-                <h3 class="level-rank">Progress Summary</h3>
+                <p class="mini-label" id="playerRankExpandedLabel">Player Rank</p>
+                <h3 class="level-rank" id="progressSummaryLabel">Progress Summary</h3>
               </div>
 
               <div class="level-badge">
-                <span class="mini-label">Level</span>
+                <span class="mini-label" id="levelLabel">Level</span>
                 <span id="playerLevel" class="level-number">1</span>
               </div>
             </div>
 
             <div class="xp-section">
               <div class="progress-text">
-                <span>XP Progress</span>
+                <span id="xpProgressLabel">XP Progress</span>
                 <span id="xpProgressText">0 / 100 XP</span>
               </div>
               <div class="progress-bar xp-bar">
@@ -156,7 +165,7 @@
               <div class="player-stat-pill">
                 <span class="player-stat-emoji">🪙</span>
                 <div>
-                  <span class="player-stat-label">Coins</span>
+                  <span class="player-stat-label" id="coinsLabel">Coins</span>
                   <strong id="playerCoins">0</strong>
                 </div>
               </div>
@@ -164,7 +173,7 @@
               <div class="player-stat-pill">
                 <span class="player-stat-emoji">🔥</span>
                 <div>
-                  <span class="player-stat-label">Streak</span>
+                  <span class="player-stat-label" id="streakLabel">Streak</span>
                   <strong id="playerStreak">0 days</strong>
                 </div>
               </div>
@@ -172,16 +181,16 @@
               <div class="player-stat-pill">
                 <span class="player-stat-emoji">✅</span>
                 <div>
-                  <span class="player-stat-label">Done Today</span>
+                  <span class="player-stat-label" id="doneTodayLabel">Done Today</span>
                   <strong id="doneToday">0</strong>
                 </div>
               </div>
             </div>
 
             <div class="reward-rules">
-              <span>Low: +10 XP / +2 coins</span>
-              <span>Medium: +20 XP / +4 coins</span>
-              <span>High: +35 XP / +7 coins</span>
+              <span id="rewardLow">Low: +10 XP / +2 coins</span>
+              <span id="rewardMedium">Medium: +20 XP / +4 coins</span>
+              <span id="rewardHigh">High: +35 XP / +7 coins</span>
             </div>
           </div>
         </div>
@@ -189,8 +198,8 @@
         <div class="challenge-card collapsed" id="challengeCard">
           <button class="challenge-toggle" id="challengeToggle" type="button" aria-expanded="false" aria-controls="challengeBody">
             <div class="challenge-toggle-left">
-              <p class="mini-label">Daily Challenges</p>
-              <h3>Today’s Missions</h3>
+              <p class="mini-label" id="dailyChallengesLabel">Daily Challenges</p>
+              <h3 id="todayMissionsLabel">Today’s Missions</h3>
             </div>
             <div class="challenge-toggle-right">
               <div id="challengeCount" class="challenge-count">0/3</div>
@@ -218,10 +227,10 @@
 
       <div class="view-bar">
         <div class="view-group">
-          <button class="view-btn active" type="button" data-view="all">All</button>
-          <button class="view-btn" type="button" data-view="today">Today</button>
-          <button class="view-btn" type="button" data-view="week">Week</button>
-          <button class="view-btn" type="button" data-view="month">Month</button>
+          <button class="view-btn active" type="button" data-view="all" id="viewAllBtn">All</button>
+          <button class="view-btn" type="button" data-view="today" id="viewTodayBtn">Today</button>
+          <button class="view-btn" type="button" data-view="week" id="viewWeekBtn">Week</button>
+          <button class="view-btn" type="button" data-view="month" id="viewMonthBtn">Month</button>
         </div>
 
         <input type="text" id="searchInput" placeholder="Search tasks..." />
@@ -245,20 +254,20 @@
 
   <div id="editModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Edit task">
     <div class="modal-card">
-      <h3 class="modal-title">Edit Task</h3>
+      <h3 class="modal-title" id="editTaskTitle">Edit Task</h3>
 
       <div class="modal-field">
-        <label for="editTextInput">Task</label>
+        <label for="editTextInput" id="editTaskLabel">Task</label>
         <input type="text" id="editTextInput" placeholder="Task description" />
       </div>
 
       <div class="modal-field">
-        <label for="editDateInput">Due Date</label>
+        <label for="editDateInput" id="editDueDateLabel">Due Date</label>
         <input type="date" id="editDateInput" />
       </div>
 
       <div class="modal-field">
-        <label for="editPriorityInput">Priority</label>
+        <label for="editPriorityInput" id="editPriorityLabel">Priority</label>
         <select id="editPriorityInput">
           <option value="high">High Priority</option>
           <option value="medium" selected>Medium Priority</option>

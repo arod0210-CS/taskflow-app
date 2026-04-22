@@ -1,7 +1,177 @@
 document.addEventListener("DOMContentLoaded", () => {
   const STORAGE_KEY = "taskflow-tasks-v3";
   const PLAYER_KEY = "taskflow-player-v1";
+  const LANG_KEY = "taskflow-language-v1";
   const THEME_CLASSES = ["theme-blue", "theme-green", "theme-purple", "theme-fritolay"];
+
+  const translations = {
+    en: {
+      appLanguage: "en",
+      eyebrow: "Stay organized",
+      settings: "Settings",
+      darkMode: "Dark mode",
+      language: "Language",
+      themes: "Themes",
+      themeColor: "Theme color",
+      dataManagement: "Data Management",
+      exportData: "Export Data (.json)",
+      importData: "Import Data",
+      editModeOn: "Edit Mode: ON",
+      editModeOff: "Edit Mode: OFF",
+      tasksLeft: "Tasks Left",
+      completed: "Completed",
+      taskProgress: "Task Progress",
+      playerRank: "Player Rank",
+      progressSummary: "Progress Summary",
+      level: "Level",
+      xpProgress: "XP Progress",
+      coins: "Coins",
+      streak: "Streak",
+      doneToday: "Done Today",
+      rewardLow: "Low: +10 XP / +2 coins",
+      rewardMedium: "Medium: +20 XP / +4 coins",
+      rewardHigh: "High: +35 XP / +7 coins",
+      dailyChallenges: "Daily Challenges",
+      todayMissions: "Today’s Missions",
+      addTaskPlaceholder: "Add a new task...",
+      addTask: "Add Task",
+      reset: "Reset",
+      searchPlaceholder: "Search tasks...",
+      all: "All",
+      today: "Today",
+      week: "Week",
+      month: "Month",
+      todo: "To Do",
+      completedHeading: "Completed",
+      editTask: "Edit Task",
+      task: "Task",
+      taskDescriptionPlaceholder: "Task description",
+      dueDate: "Due Date",
+      priority: "Priority",
+      cancel: "Cancel",
+      save: "Save",
+      highPriority: "High Priority",
+      mediumPriority: "Medium Priority",
+      lowPriority: "Low Priority",
+      highBadge: "🔥 High",
+      mediumBadge: "👷 Medium",
+      lowBadge: "🌱 Low",
+      duePrefix: "Due",
+      emptyView: "No tasks in this view.",
+      clearConfirm: "Clear all tasks and reset game progress?",
+      importSuccess: "Import successful!",
+      invalidFile: "Invalid file.",
+      complete3Tasks: "Complete 3 tasks today",
+      complete1High: "Complete 1 high-priority task",
+      complete2Medium: "Complete 2 medium tasks",
+      rewardPrefix: "Reward",
+      day: "day",
+      days: "days",
+      levelShort: "Lv",
+      allLabel: "All",
+      todayLabel: "Today",
+      weekLabel: "This Week",
+      monthLabel: "This Month",
+      starter: "Starter",
+      taskRookie: "Task Rookie",
+      consistentWorker: "Consistent Worker",
+      productivityPro: "Productivity Pro",
+      taskMaster: "Task Master",
+      elitePlanner: "Elite Planner",
+      taskLegend: "Task Legend",
+      quotes: [
+        { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+        { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
+        { text: "Quality is not an act, it is a habit.", author: "Aristotle" },
+        { text: "Focus on being productive instead of busy.", author: "Tim Ferriss" },
+        { text: "Action is the foundational key to all success.", author: "Pablo Picasso" },
+        { text: "Small daily improvements are the key to long-term results.", author: "Unknown" }
+      ]
+    },
+    es: {
+      appLanguage: "es",
+      eyebrow: "Mantente organizado",
+      settings: "Configuración",
+      darkMode: "Modo oscuro",
+      language: "Idioma",
+      themes: "Temas",
+      themeColor: "Color del tema",
+      dataManagement: "Gestión de datos",
+      exportData: "Exportar datos (.json)",
+      importData: "Importar datos",
+      editModeOn: "Modo edición: ACTIVADO",
+      editModeOff: "Modo edición: DESACTIVADO",
+      tasksLeft: "Tareas pendientes",
+      completed: "Completadas",
+      taskProgress: "Progreso de tareas",
+      playerRank: "Rango del jugador",
+      progressSummary: "Resumen de progreso",
+      level: "Nivel",
+      xpProgress: "Progreso XP",
+      coins: "Monedas",
+      streak: "Racha",
+      doneToday: "Hechas hoy",
+      rewardLow: "Baja: +10 XP / +2 monedas",
+      rewardMedium: "Media: +20 XP / +4 monedas",
+      rewardHigh: "Alta: +35 XP / +7 monedas",
+      dailyChallenges: "Retos diarios",
+      todayMissions: "Misiones de hoy",
+      addTaskPlaceholder: "Agregar una nueva tarea...",
+      addTask: "Agregar tarea",
+      reset: "Reiniciar",
+      searchPlaceholder: "Buscar tareas...",
+      all: "Todas",
+      today: "Hoy",
+      week: "Semana",
+      month: "Mes",
+      todo: "Por hacer",
+      completedHeading: "Completadas",
+      editTask: "Editar tarea",
+      task: "Tarea",
+      taskDescriptionPlaceholder: "Descripción de la tarea",
+      dueDate: "Fecha límite",
+      priority: "Prioridad",
+      cancel: "Cancelar",
+      save: "Guardar",
+      highPriority: "Prioridad alta",
+      mediumPriority: "Prioridad media",
+      lowPriority: "Prioridad baja",
+      highBadge: "🔥 Alta",
+      mediumBadge: "👷 Media",
+      lowBadge: "🌱 Baja",
+      duePrefix: "Vence",
+      emptyView: "No hay tareas en esta vista.",
+      clearConfirm: "¿Borrar todas las tareas y reiniciar el progreso del juego?",
+      importSuccess: "¡Importación exitosa!",
+      invalidFile: "Archivo inválido.",
+      complete3Tasks: "Completa 3 tareas hoy",
+      complete1High: "Completa 1 tarea de prioridad alta",
+      complete2Medium: "Completa 2 tareas medias",
+      rewardPrefix: "Recompensa",
+      day: "día",
+      days: "días",
+      levelShort: "Nv",
+      allLabel: "Todas",
+      todayLabel: "Hoy",
+      weekLabel: "Esta semana",
+      monthLabel: "Este mes",
+      starter: "Inicial",
+      taskRookie: "Novato de tareas",
+      consistentWorker: "Trabajador constante",
+      productivityPro: "Pro de productividad",
+      taskMaster: "Maestro de tareas",
+      elitePlanner: "Planificador élite",
+      taskLegend: "Leyenda de tareas",
+      quotes: [
+        { text: "El secreto para avanzar es empezar.", author: "Mark Twain" },
+        { text: "Siempre parece imposible hasta que se hace.", author: "Nelson Mandela" },
+        { text: "La calidad no es un acto, es un hábito.", author: "Aristóteles" },
+        { text: "Enfócate en ser productivo en vez de estar ocupado.", author: "Tim Ferriss" },
+        { text: "La acción es la base fundamental de todo éxito.", author: "Pablo Picasso" },
+        { text: "Las pequeñas mejoras diarias son la clave para los grandes resultados.", author: "Desconocido" }
+      ]
+    }
+  };
 
   const taskInput = document.getElementById("taskInput");
   const dueDateInput = document.getElementById("dueDateInput");
@@ -24,6 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const settingsPanel = document.getElementById("settingsPanel");
   const darkModeToggle = document.getElementById("darkModeToggle");
   const themeSelect = document.getElementById("themeSelect");
+  const languageSelect = document.getElementById("languageSelect");
   const exportBtn = document.getElementById("exportBtn");
   const importFile = document.getElementById("importFile");
   const editModeToggle = document.getElementById("editModeToggle");
@@ -58,26 +229,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const quoteText = document.getElementById("quoteText");
   const quoteAuthor = document.getElementById("quoteAuthor");
 
-  const priorityMeta = {
-    high: { label: "🔥 High", css: "high", xp: 35, coins: 7 },
-    medium: { label: "👷 Medium", css: "medium", xp: 20, coins: 4 },
-    low: { label: "🌱 Low", css: "low", xp: 10, coins: 2 }
-  };
-
-  const defaultPlayer = () => ({
-    xp: 0,
-    level: 1,
-    coins: 0,
-    streak: 0,
-    lastCompletedDate: null,
-    completedToday: 0,
-    completedWeek: 0,
-    totalCompleted: 0,
-    challengeRewarded: [],
-    challengeRewardedDate: null,
-    badges: []
-  });
-
   const State = {
     tasks: sanitizeTasks(JSON.parse(localStorage.getItem(STORAGE_KEY)) || []),
     player: sanitizePlayer(JSON.parse(localStorage.getItem(PLAYER_KEY)) || defaultPlayer()),
@@ -85,6 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
     searchQuery: "",
     editMode: JSON.parse(localStorage.getItem("editMode")) || false,
     editingTaskId: null,
+    language: localStorage.getItem(LANG_KEY) || "en",
     listeners: [],
     subscribe(listener) {
       this.listeners.push(listener);
@@ -92,6 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
     notify() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.tasks));
       localStorage.setItem(PLAYER_KEY, JSON.stringify(this.player));
+      localStorage.setItem(LANG_KEY, this.language);
       this.listeners.forEach((listener) => listener(this));
     },
     addTask(task) {
@@ -141,10 +294,6 @@ document.addEventListener("DOMContentLoaded", () => {
       this.tasks.splice(targetIndex, 0, draggedItem);
       this.notify();
     },
-    setTasks(newTasks) {
-      this.tasks = sanitizeTasks(newTasks);
-      this.notify();
-    },
     setView(view) {
       this.view = view;
       this.notify();
@@ -156,7 +305,10 @@ document.addEventListener("DOMContentLoaded", () => {
     toggleEditMode() {
       this.editMode = !this.editMode;
       localStorage.setItem("editMode", JSON.stringify(this.editMode));
-      updateEditModeUI();
+      this.notify();
+    },
+    setLanguage(language) {
+      this.language = language;
       this.notify();
     },
     resetAllData() {
@@ -165,6 +317,32 @@ document.addEventListener("DOMContentLoaded", () => {
       this.notify();
     }
   };
+
+  const priorityMeta = {
+    high: { css: "high", xp: 35, coins: 7 },
+    medium: { css: "medium", xp: 20, coins: 4 },
+    low: { css: "low", xp: 10, coins: 2 }
+  };
+
+  function t(key) {
+    return translations[State.language][key];
+  }
+
+  function defaultPlayer() {
+    return {
+      xp: 0,
+      level: 1,
+      coins: 0,
+      streak: 0,
+      lastCompletedDate: null,
+      completedToday: 0,
+      completedWeek: 0,
+      totalCompleted: 0,
+      challengeRewarded: [],
+      challengeRewardedDate: null,
+      badges: []
+    };
+  }
 
   function normalizePriority(priority) {
     return ["high", "medium", "low"].includes(priority) ? priority : "medium";
@@ -230,12 +408,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function formatHeaderDate() {
+    const locale = State.language === "es" ? "es-ES" : "en-US";
     const dateOptions = { weekday: "short", month: "short", day: "numeric", year: "numeric" };
-    todayDate.textContent = new Date().toLocaleDateString("en-US", dateOptions);
+    todayDate.textContent = new Date().toLocaleDateString(locale, dateOptions);
   }
 
   function updateEditModeUI() {
-    editModeToggle.textContent = State.editMode ? "Edit Mode: ON" : "Edit Mode: OFF";
+    editModeToggle.textContent = State.editMode ? t("editModeOn") : t("editModeOff");
     editModeToggle.classList.toggle("edit-mode-active", State.editMode);
   }
 
@@ -250,6 +429,68 @@ document.addEventListener("DOMContentLoaded", () => {
     darkModeToggle.checked = isDark;
   }
 
+  function updateStaticTranslations() {
+    document.documentElement.lang = t("appLanguage");
+    document.getElementById("eyebrowText").textContent = t("eyebrow");
+    document.getElementById("settingsHeaderText").textContent = t("settings");
+    document.getElementById("darkModeLabel").textContent = t("darkMode");
+    document.getElementById("languageLabel").textContent = t("language");
+    document.getElementById("themesHeaderText").textContent = t("themes");
+    document.getElementById("themeColorLabel").textContent = t("themeColor");
+    document.getElementById("dataHeaderText").textContent = t("dataManagement");
+    exportBtn.textContent = t("exportData");
+    document.getElementById("importBtnText").textContent = t("importData");
+
+    document.getElementById("tasksLeftLabel").textContent = t("tasksLeft");
+    document.getElementById("tasksCompletedLabel").textContent = t("completed");
+    document.getElementById("taskProgressLabel").textContent = t("taskProgress");
+
+    document.getElementById("playerRankMiniLabel").textContent = t("playerRank");
+    document.getElementById("playerRankExpandedLabel").textContent = t("playerRank");
+    document.getElementById("progressSummaryLabel").textContent = t("progressSummary");
+    document.getElementById("levelLabel").textContent = t("level");
+    document.getElementById("xpProgressLabel").textContent = t("xpProgress");
+    document.getElementById("coinsLabel").textContent = t("coins");
+    document.getElementById("streakLabel").textContent = t("streak");
+    document.getElementById("doneTodayLabel").textContent = t("doneToday");
+    document.getElementById("rewardLow").textContent = t("rewardLow");
+    document.getElementById("rewardMedium").textContent = t("rewardMedium");
+    document.getElementById("rewardHigh").textContent = t("rewardHigh");
+
+    document.getElementById("dailyChallengesLabel").textContent = t("dailyChallenges");
+    document.getElementById("todayMissionsLabel").textContent = t("todayMissions");
+
+    taskInput.placeholder = t("addTaskPlaceholder");
+    searchInput.placeholder = t("searchPlaceholder");
+    editTextInput.placeholder = t("taskDescriptionPlaceholder");
+
+    addTaskBtn.textContent = t("addTask");
+    resetBtn.textContent = t("reset");
+
+    document.getElementById("viewAllBtn").textContent = t("all");
+    document.getElementById("viewTodayBtn").textContent = t("today");
+    document.getElementById("viewWeekBtn").textContent = t("week");
+    document.getElementById("viewMonthBtn").textContent = t("month");
+
+    document.getElementById("editTaskTitle").textContent = t("editTask");
+    document.getElementById("editTaskLabel").textContent = t("task");
+    document.getElementById("editDueDateLabel").textContent = t("dueDate");
+    document.getElementById("editPriorityLabel").textContent = t("priority");
+    editCancelBtn.textContent = t("cancel");
+    editSaveBtn.textContent = t("save");
+
+    priorityInput.options[0].text = t("highPriority");
+    priorityInput.options[1].text = t("mediumPriority");
+    priorityInput.options[2].text = t("lowPriority");
+
+    editPriorityInput.options[0].text = t("highPriority");
+    editPriorityInput.options[1].text = t("mediumPriority");
+    editPriorityInput.options[2].text = t("lowPriority");
+
+    updateEditModeUI();
+    formatHeaderDate();
+  }
+
   function createEmptyState(message) {
     const li = document.createElement("li");
     li.className = "empty-state";
@@ -258,13 +499,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getRankTitle(level) {
-    if (level >= 10) return "Task Legend";
-    if (level >= 8) return "Elite Planner";
-    if (level >= 6) return "Task Master";
-    if (level >= 4) return "Productivity Pro";
-    if (level >= 3) return "Consistent Worker";
-    if (level >= 2) return "Task Rookie";
-    return "Starter";
+    if (level >= 10) return t("taskLegend");
+    if (level >= 8) return t("elitePlanner");
+    if (level >= 6) return t("taskMaster");
+    if (level >= 4) return t("productivityPro");
+    if (level >= 3) return t("consistentWorker");
+    if (level >= 2) return t("taskRookie");
+    return t("starter");
   }
 
   function xpNeededForLevel(level) {
@@ -310,38 +551,30 @@ document.addEventListener("DOMContentLoaded", () => {
   function getDailyChallenges() {
     const today = getTodayString();
 
-    const completedToday = State.tasks.filter(
+    const completedTodayCount = State.tasks.filter(
       (task) => task.completed && task.completedAt && task.completedAt.startsWith(today)
     ).length;
 
     const highToday = State.tasks.filter(
-      (task) =>
-        task.completed &&
-        task.priority === "high" &&
-        task.completedAt &&
-        task.completedAt.startsWith(today)
+      (task) => task.completed && task.priority === "high" && task.completedAt && task.completedAt.startsWith(today)
     ).length;
 
     const mediumToday = State.tasks.filter(
-      (task) =>
-        task.completed &&
-        task.priority === "medium" &&
-        task.completedAt &&
-        task.completedAt.startsWith(today)
+      (task) => task.completed && task.priority === "medium" && task.completedAt && task.completedAt.startsWith(today)
     ).length;
 
     return [
       {
         id: "daily-3",
-        title: "Complete 3 tasks today",
-        progress: completedToday,
+        title: t("complete3Tasks"),
+        progress: completedTodayCount,
         goal: 3,
         rewardXp: 40,
         rewardCoins: 20
       },
       {
         id: "daily-high",
-        title: "Complete 1 high-priority task",
+        title: t("complete1High"),
         progress: highToday,
         goal: 1,
         rewardXp: 30,
@@ -349,7 +582,7 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       {
         id: "daily-medium-2",
-        title: "Complete 2 medium tasks",
+        title: t("complete2Medium"),
         progress: mediumToday,
         goal: 2,
         rewardXp: 25,
@@ -413,11 +646,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function normalizeDailyPlayerStats() {
     const today = getTodayString();
-    const completedToday = State.tasks.filter(
+    const completedTodayCount = State.tasks.filter(
       (task) => task.completed && task.completedAt && task.completedAt.startsWith(today)
     ).length;
 
-    State.player.completedToday = completedToday;
+    State.player.completedToday = completedTodayCount;
 
     const rewardDate = State.player.challengeRewardedDate || null;
     if (rewardDate !== today) {
@@ -437,10 +670,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const xpPercent = Math.min((State.player.xp / needed) * 100, 100);
 
     playerLevel.textContent = currentLevel;
-    miniPlayerLevel.textContent = `Lv ${currentLevel}`;
+    miniPlayerLevel.textContent = `${t("levelShort")} ${currentLevel}`;
     rankTitle.textContent = currentRank;
     playerCoins.textContent = State.player.coins;
-    playerStreak.textContent = `${State.player.streak} day${State.player.streak === 1 ? "" : "s"}`;
+
+    const dayWord = State.player.streak === 1 ? t("day") : t("days");
+    playerStreak.textContent = `${State.player.streak} ${dayWord}`;
     doneToday.textContent = State.player.completedToday;
 
     xpProgressText.textContent = xpLabel;
@@ -474,7 +709,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const meta = document.createElement("div");
       meta.className = "challenge-meta";
-      meta.textContent = `Reward: +${challenge.rewardXp} XP • +${challenge.rewardCoins} coins`;
+      meta.textContent = `${t("rewardPrefix")}: +${challenge.rewardXp} XP • +${challenge.rewardCoins} ${t("coins").toLowerCase()}`;
 
       const bar = document.createElement("div");
       bar.className = "challenge-progress-bar";
@@ -533,6 +768,12 @@ document.addEventListener("DOMContentLoaded", () => {
     closeEditModal();
   }
 
+  function getPriorityLabel(priority) {
+    if (priority === "high") return t("highBadge");
+    if (priority === "low") return t("lowBadge");
+    return t("mediumBadge");
+  }
+
   function buildTaskElement(task) {
     const li = document.createElement("li");
     li.className = "task-card";
@@ -569,14 +810,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (task.dueDate) {
       const dateSpan = document.createElement("span");
       dateSpan.className = "due-date";
-      dateSpan.textContent = `Due: ${task.dueDate}`;
+      dateSpan.textContent = `${t("duePrefix")}: ${task.dueDate}`;
       meta.appendChild(dateSpan);
     }
 
-    const priorityInfo = priorityMeta[normalizePriority(task.priority)];
     const prioritySpan = document.createElement("span");
-    prioritySpan.className = `priority-badge priority-${priorityInfo.css}`;
-    prioritySpan.textContent = priorityInfo.label;
+    prioritySpan.className = `priority-badge priority-${normalizePriority(task.priority)}`;
+    prioritySpan.textContent = getPriorityLabel(normalizePriority(task.priority));
     meta.appendChild(prioritySpan);
 
     content.appendChild(textSpan);
@@ -593,13 +833,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const editBtn = document.createElement("button");
       editBtn.className = "task-action-btn edit-btn";
       editBtn.type = "button";
-      editBtn.textContent = "Edit";
+      editBtn.textContent = t("editTask");
       editBtn.addEventListener("click", () => openEditModal(task.id));
 
       const deleteBtn = document.createElement("button");
       deleteBtn.className = "task-action-btn delete-btn";
       deleteBtn.type = "button";
-      deleteBtn.textContent = "Delete";
+      deleteBtn.textContent = State.language === "es" ? "Eliminar" : "Delete";
       deleteBtn.addEventListener("click", () => State.deleteTask(task.id));
 
       actions.appendChild(editBtn);
@@ -652,6 +892,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function render(state) {
+    updateStaticTranslations();
+
     todoList.innerHTML = "";
     completedList.innerHTML = "";
 
@@ -663,18 +905,23 @@ document.addEventListener("DOMContentLoaded", () => {
     doneTasks.forEach((task) => completedList.appendChild(buildTaskElement(task)));
 
     if (todoTasks.length === 0) {
-      todoList.appendChild(createEmptyState("No tasks in this view."));
+      todoList.appendChild(createEmptyState(t("emptyView")));
     }
 
     if (doneTasks.length === 0) {
-      completedList.appendChild(createEmptyState("No completed tasks in this view."));
+      completedList.appendChild(createEmptyState(t("emptyView")));
     }
 
-    const labels = { all: "All", today: "Today", week: "This Week", month: "This Month" };
-    const label = labels[state.view] || "All";
+    const labels = {
+      all: t("allLabel"),
+      today: t("todayLabel"),
+      week: t("weekLabel"),
+      month: t("monthLabel")
+    };
+    const label = labels[state.view] || t("allLabel");
 
-    todoHeading.textContent = `${label} To Do`;
-    completedHeading.textContent = `${label} Completed`;
+    todoHeading.textContent = `${label} ${t("todo")}`;
+    completedHeading.textContent = `${label} ${t("completedHeading")}`;
 
     const total = filteredTasks.length;
     const doneCount = doneTasks.length;
@@ -687,50 +934,31 @@ document.addEventListener("DOMContentLoaded", () => {
     progressFill.style.width = `${percent}%`;
 
     renderGamification();
+    updateQuote(true);
   }
 
   let searchTimeout;
   let draggedElementId = null;
+  let currentQuoteIndex = Math.floor(Math.random() * translations.en.quotes.length);
 
-  settingsBtn.addEventListener("click", (event) => {
-    event.stopPropagation();
-    settingsPanel.classList.toggle("hidden");
-  });
+  function updateQuote(forceInstant = false) {
+    const quotes = t("quotes");
+    const quote = quotes[currentQuoteIndex % quotes.length];
 
-  document.addEventListener("click", (event) => {
-    if (
-      !settingsPanel.classList.contains("hidden") &&
-      !settingsPanel.contains(event.target) &&
-      !settingsBtn.contains(event.target)
-    ) {
-      settingsPanel.classList.add("hidden");
+    if (forceInstant) {
+      quoteText.textContent = `"${quote.text}"`;
+      quoteAuthor.textContent = `- ${quote.author}`;
+      return;
     }
-  });
 
-  themeSelect.addEventListener("change", () => {
-    localStorage.setItem("theme", themeSelect.value);
-    applyTheme(themeSelect.value);
-  });
-
-  darkModeToggle.addEventListener("change", () => {
-    localStorage.setItem("darkMode", JSON.stringify(darkModeToggle.checked));
-    applyTheme(themeSelect.value);
-  });
-
-  if (levelToggle && levelCard) {
-    levelToggle.addEventListener("click", () => {
-      levelCard.classList.toggle("collapsed");
-      const isExpanded = !levelCard.classList.contains("collapsed");
-      levelToggle.setAttribute("aria-expanded", String(isExpanded));
-    });
-  }
-
-  if (challengeToggle && challengeCard) {
-    challengeToggle.addEventListener("click", () => {
-      challengeCard.classList.toggle("collapsed");
-      const isExpanded = !challengeCard.classList.contains("collapsed");
-      challengeToggle.setAttribute("aria-expanded", String(isExpanded));
-    });
+    quoteContent.classList.add("quote-fade-out");
+    setTimeout(() => {
+      currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
+      const nextQuote = quotes[currentQuoteIndex];
+      quoteText.textContent = `"${nextQuote.text}"`;
+      quoteAuthor.textContent = `- ${nextQuote.author}`;
+      quoteContent.classList.remove("quote-fade-out");
+    }, 400);
   }
 
   function tryAddTask() {
@@ -758,6 +986,51 @@ document.addEventListener("DOMContentLoaded", () => {
     taskInput.focus();
   }
 
+  settingsBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    settingsPanel.classList.toggle("hidden");
+  });
+
+  document.addEventListener("click", (event) => {
+    if (
+      !settingsPanel.classList.contains("hidden") &&
+      !settingsPanel.contains(event.target) &&
+      !settingsBtn.contains(event.target)
+    ) {
+      settingsPanel.classList.add("hidden");
+    }
+  });
+
+  themeSelect.addEventListener("change", () => {
+    localStorage.setItem("theme", themeSelect.value);
+    applyTheme(themeSelect.value);
+  });
+
+  languageSelect.addEventListener("change", () => {
+    State.setLanguage(languageSelect.value);
+  });
+
+  darkModeToggle.addEventListener("change", () => {
+    localStorage.setItem("darkMode", JSON.stringify(darkModeToggle.checked));
+    applyTheme(themeSelect.value);
+  });
+
+  if (levelToggle && levelCard) {
+    levelToggle.addEventListener("click", () => {
+      levelCard.classList.toggle("collapsed");
+      const isExpanded = !levelCard.classList.contains("collapsed");
+      levelToggle.setAttribute("aria-expanded", String(isExpanded));
+    });
+  }
+
+  if (challengeToggle && challengeCard) {
+    challengeToggle.addEventListener("click", () => {
+      challengeCard.classList.toggle("collapsed");
+      const isExpanded = !challengeCard.classList.contains("collapsed");
+      challengeToggle.setAttribute("aria-expanded", String(isExpanded));
+    });
+  }
+
   addTaskBtn.addEventListener("click", tryAddTask);
 
   [taskInput, dueDateInput, priorityInput].forEach((element) => {
@@ -770,7 +1043,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   resetBtn.addEventListener("click", () => {
-    if (confirm("Clear all tasks and reset game progress?")) {
+    if (confirm(t("clearConfirm"))) {
       State.resetAllData();
     }
   });
@@ -825,7 +1098,8 @@ document.addEventListener("DOMContentLoaded", () => {
   exportBtn.addEventListener("click", () => {
     const exportData = {
       tasks: State.tasks,
-      player: State.player
+      player: State.player,
+      language: State.language
     };
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
     const downloadAnchor = document.createElement("a");
@@ -848,12 +1122,16 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
           State.tasks = sanitizeTasks(imported.tasks || []);
           State.player = sanitizePlayer(imported.player || defaultPlayer());
+          if (imported.language && translations[imported.language]) {
+            State.language = imported.language;
+            languageSelect.value = imported.language;
+          }
         }
 
         State.notify();
-        alert("Import successful!");
+        alert(t("importSuccess"));
       } catch (error) {
-        alert("Invalid file.");
+        alert(t("invalidFile"));
       }
 
       importFile.value = "";
@@ -878,33 +1156,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  const quotes = [
-    { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
-    { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
-    { text: "Quality is not an act, it is a habit.", author: "Aristotle" },
-    { text: "Focus on being productive instead of busy.", author: "Tim Ferriss" },
-    { text: "Action is the foundational key to all success.", author: "Pablo Picasso" },
-    { text: "Small daily improvements are the key to long-term results.", author: "Unknown" }
-  ];
-
-  function updateQuote() {
-    quoteContent.classList.add("quote-fade-out");
-    setTimeout(() => {
-      const quote = quotes[Math.floor(Math.random() * quotes.length)];
-      quoteText.textContent = `"${quote.text}"`;
-      quoteAuthor.textContent = `- ${quote.author}`;
-      quoteContent.classList.remove("quote-fade-out");
-    }, 400);
-  }
-
   themeSelect.value = localStorage.getItem("theme") || "default";
+  languageSelect.value = State.language;
   applyTheme(themeSelect.value);
-  updateEditModeUI();
   setDateConstraints();
   formatHeaderDate();
 
   State.subscribe(render);
-  updateQuote();
-  setInterval(updateQuote, 15000);
-  State.notify();
+  render(State);
+  setInterval(() => updateQuote(false), 15000);
 });

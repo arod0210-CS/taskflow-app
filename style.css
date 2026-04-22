@@ -12,7 +12,6 @@
   --btn-neutral-bg: #e5e7eb;
   --btn-neutral-fg: #111827;
   --app-font: "DM Sans", sans-serif;
-  --display-font: "DM Sans", sans-serif;
 }
 
 * {
@@ -92,6 +91,7 @@ select {
   border-radius: 14px;
   font-weight: 700;
   font-size: 14px;
+  white-space: nowrap;
 }
 
 .dashboard-grid {
@@ -130,6 +130,7 @@ select {
   border-radius: 16px;
   background: color-mix(in srgb, var(--accent-color) 8%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent-color) 15%, transparent);
+  min-width: 0;
 }
 
 .stat-label,
@@ -158,7 +159,9 @@ select {
 .progress-text {
   display: flex;
   justify-content: space-between;
+  gap: 12px;
   font-weight: 700;
+  flex-wrap: wrap;
 }
 
 .progress-bar {
@@ -192,6 +195,7 @@ select {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  min-height: 100%;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
@@ -200,6 +204,7 @@ select {
   height: 84px;
   margin-bottom: 12px;
   opacity: 0.9;
+  flex-shrink: 0;
 }
 
 .quote-text {
@@ -224,7 +229,6 @@ select {
   opacity: 0;
 }
 
-/* COMPACT CARDS */
 .level-card,
 .challenge-card {
   padding: 14px 18px;
@@ -249,17 +253,20 @@ select {
 .level-toggle-left,
 .challenge-toggle-left {
   min-width: 0;
+  flex: 1;
 }
 
 .level-rank {
   margin: 4px 0 0;
   font-size: 22px;
   line-height: 1.1;
+  word-break: break-word;
 }
 
 .challenge-toggle-left h3 {
   margin: 4px 0 0;
   font-size: 16px;
+  line-height: 1.2;
 }
 
 .level-toggle-right,
@@ -269,6 +276,7 @@ select {
   gap: 10px;
   flex-wrap: wrap;
   justify-content: flex-end;
+  flex-shrink: 0;
 }
 
 .mini-info-pill {
@@ -290,6 +298,7 @@ select {
   font-weight: 800;
   line-height: 1;
   transition: transform 0.28s ease;
+  flex-shrink: 0;
 }
 
 .collapsed-xp-preview {
@@ -376,14 +385,17 @@ select {
   border-radius: 14px;
   background: color-mix(in srgb, var(--accent-color) 6%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent-color) 12%, transparent);
+  min-width: 0;
 }
 
 .player-stat-pill strong {
   font-size: 15px;
+  word-break: break-word;
 }
 
 .player-stat-emoji {
   font-size: 18px;
+  flex-shrink: 0;
 }
 
 .player-stat-label {
@@ -441,18 +453,20 @@ select {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .challenge-title {
   font-weight: 700;
   line-height: 1.25;
   font-size: 14px;
+  flex: 1;
 }
 
 .challenge-progress {
   font-weight: 800;
   font-size: 12px;
+  white-space: nowrap;
 }
 
 .challenge-meta {
@@ -493,7 +507,8 @@ select {
   position: absolute;
   top: 60px;
   right: 0;
-  width: 260px;
+  width: 280px;
+  max-width: calc(100vw - 32px);
   background: var(--card-solid);
   border: 1px solid var(--border-color);
   border-radius: 18px;
@@ -528,11 +543,12 @@ select {
   gap: 12px;
   font-size: 14px;
   font-weight: 600;
-  padding: 4px 0;
+  padding: 6px 0;
 }
 
 .setting-select-row select {
-  max-width: 140px;
+  max-width: 145px;
+  min-width: 120px;
 }
 
 .setting-action-btn {
@@ -639,6 +655,7 @@ select {
   padding: 12px;
   color: var(--text-main);
   outline: none;
+  min-width: 0;
 }
 
 .task-input input:focus,
@@ -662,6 +679,7 @@ select {
   padding: 0 20px;
   font-weight: 700;
   cursor: pointer;
+  min-height: 48px;
 }
 
 #addTaskBtn {
@@ -713,6 +731,7 @@ select {
   background: var(--input-bg);
   color: var(--text-main);
   min-width: 220px;
+  max-width: 100%;
 }
 
 .section {
@@ -1030,6 +1049,10 @@ body.dark-mode .delete-btn {
     grid-template-columns: 1fr;
   }
 
+  .quote-card {
+    min-height: unset;
+  }
+
   .level-toggle,
   .challenge-toggle {
     align-items: flex-start;
@@ -1041,27 +1064,91 @@ body.dark-mode .delete-btn {
     width: 100%;
     justify-content: flex-start;
   }
+
+  .container {
+    padding: 24px;
+  }
 }
 
 @media (max-width: 640px) {
-  .task-input {
-    grid-template-columns: 1fr;
+  .app-shell {
+    padding: 16px 10px;
+  }
+
+  .container {
+    padding: 18px 14px;
+    border-radius: 20px;
   }
 
   .top-bar {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 12px;
   }
 
   .top-bar-right {
     width: 100%;
     justify-content: space-between;
-    margin-top: 10px;
+    align-items: center;
+    gap: 10px;
+    margin-top: 0;
+  }
+
+  .logo-text {
+    font-size: 34px;
+  }
+
+  .date-box {
+    font-size: 12px;
+    padding: 10px 14px;
+    max-width: calc(100vw - 110px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .hamburger-menu {
+    top: 52px;
+    right: 0;
+    left: auto;
+    width: min(280px, calc(100vw - 20px));
+  }
+
+  .dashboard-grid,
+  .gamify-grid {
+    gap: 12px;
+  }
+
+  .stats-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .task-input {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .task-input input,
+  .task-input select,
+  #addTaskBtn,
+  #resetBtn {
+    width: 100%;
   }
 
   .view-bar {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
+  }
+
+  .view-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .view-btn {
+    text-align: center;
   }
 
   #searchInput {
@@ -1072,23 +1159,65 @@ body.dark-mode .delete-btn {
   .task-card {
     flex-direction: column;
     align-items: stretch;
+    padding: 14px;
   }
 
   .task-actions {
     width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 
   .task-action-btn {
-    flex: 1;
+    width: 100%;
   }
 
-  .stats-row {
+  .challenge-item-top {
+    align-items: flex-start;
+  }
+
+  .challenge-count {
+    min-width: 44px;
+  }
+
+  .level-card,
+  .challenge-card,
+  .stats-card,
+  .quote-card {
+    padding: 14px;
+    border-radius: 18px;
+  }
+
+  .level-card.collapsed,
+  .challenge-card.collapsed {
+    min-height: 98px;
+  }
+
+  .mini-info-pill {
+    font-size: 12px;
+    padding: 7px 10px;
+  }
+
+  .level-rank {
+    font-size: 18px;
+  }
+
+  .player-stats-row {
     grid-template-columns: 1fr;
   }
 
-  .level-top {
+  .reward-rules span {
+    width: 100%;
+    text-align: center;
+  }
+
+  .modal-card {
+    padding: 20px 16px;
+    border-radius: 18px;
+  }
+
+  .modal-actions {
     flex-direction: column;
-    align-items: flex-start;
   }
 }
 
