@@ -2,7 +2,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const STORAGE_KEY = "taskflow-tasks-v3";
   const PLAYER_KEY = "taskflow-player-v1";
   const LANG_KEY = "taskflow-language-v1";
+  const HABITS_KEY = "taskflow-habits-v1";
+  const TAB_KEY = "taskflow-active-tab-v1";
   const THEME_CLASSES = ["theme-blue", "theme-green", "theme-purple", "theme-fritolay"];
+
+  const DEFAULT_HABITS = [
+    { emoji: "🚿", name: "Shower" },
+    { emoji: "🦷", name: "Brush Teeth" },
+    { emoji: "🚶", name: "Walk" },
+    { emoji: "💧", name: "Drink Water" },
+    { emoji: "💊", name: "Take Vitamins" },
+    { emoji: "🧘", name: "Stretch" },
+    { emoji: "😴", name: "Wind Down" }
+  ];
 
   const translations = {
     en: {
@@ -103,6 +115,21 @@ document.addEventListener("DOMContentLoaded", () => {
       badgePolyglotDesc: "Use both languages",
       badgeNightOwl: "Night Owl",
       badgeNightOwlDesc: "Enable dark mode",
+      tabTasks: "Tasks",
+      tabHabits: "Habits",
+      tabStats: "Stats",
+      habitsTitle: "Daily Habits",
+      habitsSubtitle: "Your daily routines",
+      habitsDoneLabel: " done",
+      addHabitPlaceholder: "New habit name...",
+      addHabitBtn: "Add",
+      addHabitHint: "Reminders only fire while this page is open",
+      habitEmojiPlaceholder: "🌟",
+      noHabits: "No habits yet — add one below!",
+      reminderSet: "⏰ Reminder set!",
+      reminderCleared: "Reminder cleared.",
+      notifPermDenied: "Notifications blocked. Enable them in browser settings.",
+      notifBody: "Time to: ",
       quotes: [
         { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
         { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
@@ -210,6 +237,21 @@ document.addEventListener("DOMContentLoaded", () => {
       badgePolyglotDesc: "Usa ambos idiomas",
       badgeNightOwl: "Noctámbulo",
       badgeNightOwlDesc: "Activa el modo oscuro",
+      tabTasks: "Tareas",
+      tabHabits: "Hábitos",
+      tabStats: "Stats",
+      habitsTitle: "Hábitos diarios",
+      habitsSubtitle: "Tus rutinas diarias",
+      habitsDoneLabel: " hechos",
+      addHabitPlaceholder: "Nombre del hábito...",
+      addHabitBtn: "Agregar",
+      addHabitHint: "Los recordatorios solo funcionan con la página abierta",
+      habitEmojiPlaceholder: "🌟",
+      noHabits: "¡Sin hábitos aún — agrega uno abajo!",
+      reminderSet: "⏰ ¡Recordatorio establecido!",
+      reminderCleared: "Recordatorio eliminado.",
+      notifPermDenied: "Notificaciones bloqueadas. Actívalas en la configuración del navegador.",
+      notifBody: "Hora de: ",
       quotes: [
         { text: "El secreto para avanzar es empezar.", author: "Mark Twain" },
         { text: "Siempre parece imposible hasta que se hace.", author: "Nelson Mandela" },
@@ -285,6 +327,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const State = {
     tasks: sanitizeTasks(JSON.parse(localStorage.getItem(STORAGE_KEY)) || []),
     player: sanitizePlayer(JSON.parse(localStorage.getItem(PLAYER_KEY)) || defaultPlayer()),
+    habits: sanitizeHabits(JSON.parse(localStorage.getItem(HABITS_KEY)) || null),
     view: "all",
     searchQuery: "",
     editMode: JSON.parse(localStorage.getItem("editMode")) || false,
@@ -297,6 +340,7 @@ document.addEventListener("DOMContentLoaded", () => {
     notify() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.tasks));
       localStorage.setItem(PLAYER_KEY, JSON.stringify(this.player));
+      localStorage.setItem(HABITS_KEY, JSON.stringify(this.habits));
       localStorage.setItem(LANG_KEY, this.language);
       this.listeners.forEach((listener) => listener(this));
     },
@@ -367,10 +411,54 @@ document.addEventListener("DOMContentLoaded", () => {
     resetAllData() {
       this.tasks = [];
       this.player = defaultPlayer();
+      this.habits = sanitizeHabits(null);
       this.notify();
     },
     clearCompleted() {
       this.tasks = this.tasks.filter((task) => !task.completed);
+      this.notify();
+    },
+    addHabit(habit) {
+      this.habits.push(habit);
+      this.notify();
+    },
+    toggleHabit(id) {
+      const habit = this.habits.find((h) => h.id === id);
+      if (!habit) return;
+      const today = getTodayString();
+      const doneToday = habit.completedDates.includes(today);
+      if (!doneToday) {
+        habit.completedDates.push(today);
+        const yesterday = getYesterdayString();
+        if (habit.lastCompletedDate === yesterday) {
+          habit.streak += 1;
+        } else if (habit.lastCompletedDate !== today) {
+          habit.streak = 1;
+        }
+        habit.lastCompletedDate = today;
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - 30);
+        const cutoffStr = cutoff.toISOString().slice(0, 10);
+        habit.completedDates = habit.completedDates.filter((d) => d >= cutoffStr);
+        addXpAndCoins(5, 1);
+        showToast(5, 1);
+      } else {
+        habit.completedDates = habit.completedDates.filter((d) => d !== today);
+        if (habit.streak > 0) habit.streak -= 1;
+        habit.lastCompletedDate = habit.completedDates.length > 0
+          ? habit.completedDates[habit.completedDates.length - 1]
+          : null;
+      }
+      this.notify();
+    },
+    deleteHabit(id) {
+      this.habits = this.habits.filter((h) => h.id !== id);
+      this.notify();
+    },
+    setHabitReminder(id, time) {
+      const habit = this.habits.find((h) => h.id === id);
+      if (!habit) return;
+      habit.reminderTime = time || null;
       this.notify();
     }
   };
@@ -493,12 +581,46 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
+  function sanitizeHabits(rawHabits) {
+    if (!Array.isArray(rawHabits)) {
+      return DEFAULT_HABITS.map((h, i) => ({
+        id: `default-${i}`,
+        name: h.name,
+        emoji: h.emoji,
+        reminderTime: null,
+        completedDates: [],
+        streak: 0,
+        lastCompletedDate: null
+      }));
+    }
+    return rawHabits
+      .map((h, i) => ({
+        id: String(h.id ?? `habit-${Date.now()}-${i}`),
+        name: String(h.name ?? "").trim(),
+        emoji: String(h.emoji ?? "🌟").trim() || "🌟",
+        reminderTime: h.reminderTime || null,
+        completedDates: Array.isArray(h.completedDates) ? h.completedDates : [],
+        streak: Number(h.streak ?? 0),
+        lastCompletedDate: h.lastCompletedDate || null
+      }))
+      .filter((h) => h.name !== "");
+  }
+
   function getTodayString() {
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, "0");
     const day = String(now.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
+  }
+
+  function getYesterdayString() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
   }
 
   function startOfToday() {
@@ -617,6 +739,26 @@ document.addEventListener("DOMContentLoaded", () => {
     editPriorityInput.options[0].text = t("highPriority");
     editPriorityInput.options[1].text = t("mediumPriority");
     editPriorityInput.options[2].text = t("lowPriority");
+
+    const tabTasksLabel = document.getElementById("tabTasksLabel");
+    const tabHabitsLabel = document.getElementById("tabHabitsLabel");
+    const tabStatsLabel = document.getElementById("tabStatsLabel");
+    if (tabTasksLabel) tabTasksLabel.textContent = t("tabTasks");
+    if (tabHabitsLabel) tabHabitsLabel.textContent = t("tabHabits");
+    if (tabStatsLabel) tabStatsLabel.textContent = t("tabStats");
+
+    const habitsTitleEl = document.getElementById("habitsTitle");
+    const habitsSubtitleEl = document.getElementById("habitsSubtitle");
+    const addHabitHintEl = document.getElementById("addHabitHint");
+    const habitNameInputEl = document.getElementById("habitNameInput");
+    const habitEmojiInputEl = document.getElementById("habitEmojiInput");
+    const addHabitBtnEl = document.getElementById("addHabitBtn");
+    if (habitsTitleEl) habitsTitleEl.textContent = t("habitsTitle");
+    if (habitsSubtitleEl) habitsSubtitleEl.textContent = t("habitsSubtitle");
+    if (addHabitHintEl) addHabitHintEl.textContent = t("addHabitHint");
+    if (habitNameInputEl) habitNameInputEl.placeholder = t("addHabitPlaceholder");
+    if (habitEmojiInputEl) habitEmojiInputEl.placeholder = t("habitEmojiPlaceholder");
+    if (addHabitBtnEl) addHabitBtnEl.textContent = t("addHabitBtn");
 
     updateEditModeUI();
     formatHeaderDate();
@@ -780,6 +922,190 @@ document.addEventListener("DOMContentLoaded", () => {
       group.appendChild(track);
       group.appendChild(label);
       chart.appendChild(group);
+    });
+  }
+
+  function switchTab(name) {
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+      const isActive = btn.dataset.tab === name;
+      btn.classList.toggle("active", isActive);
+      btn.setAttribute("aria-selected", String(isActive));
+    });
+    document.querySelectorAll(".tab-panel").forEach((panel) => {
+      panel.classList.toggle("active", panel.id === `panel-${name}`);
+    });
+    localStorage.setItem(TAB_KEY, name);
+  }
+
+  const notifiedThisSession = new Set();
+
+  function checkHabitReminders() {
+    if (Notification.permission !== "granted") return;
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, "0");
+    const mm = String(now.getMinutes()).padStart(2, "0");
+    const currentTime = `${hh}:${mm}`;
+    const today = getTodayString();
+    State.habits.forEach((habit) => {
+      if (!habit.reminderTime || habit.reminderTime !== currentTime) return;
+      if (habit.completedDates.includes(today)) return;
+      const key = `${habit.id}-${today}-${currentTime}`;
+      if (notifiedThisSession.has(key)) return;
+      notifiedThisSession.add(key);
+      new Notification("TaskFlow", {
+        body: `${t("notifBody")}${habit.name} ${habit.emoji}`,
+        icon: "favicon.svg"
+      });
+    });
+  }
+
+  function checkHabitResets() {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 30);
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+    let changed = false;
+    State.habits.forEach((habit) => {
+      const before = habit.completedDates.length;
+      habit.completedDates = habit.completedDates.filter((d) => d >= cutoffStr);
+      if (habit.completedDates.length !== before) changed = true;
+    });
+    if (changed) State.notify();
+  }
+
+  function showReminderBanner(message) {
+    const banner = document.getElementById("reminderBanner");
+    const text = document.getElementById("reminderBannerText");
+    if (!banner || !text) return;
+    text.textContent = message;
+    banner.classList.remove("hidden");
+    setTimeout(() => banner.classList.add("hidden"), 3500);
+  }
+
+  function handleSetReminder(habitId, currentTime) {
+    const doPrompt = () => {
+      const val = prompt(
+        State.language === "es"
+          ? "Hora del recordatorio (HH:MM) o vacío para eliminar:"
+          : "Reminder time (HH:MM) or empty to clear:",
+        currentTime || ""
+      );
+      if (val === null) return;
+      const trimmed = val.trim();
+      if (trimmed && !/^\d{2}:\d{2}$/.test(trimmed)) return;
+      State.setHabitReminder(habitId, trimmed);
+      showReminderBanner(trimmed ? t("reminderSet") : t("reminderCleared"));
+    };
+
+    if (typeof Notification === "undefined") {
+      doPrompt();
+      return;
+    }
+    if (Notification.permission === "default") {
+      Notification.requestPermission().then((perm) => {
+        if (perm === "denied") {
+          showReminderBanner(t("notifPermDenied"));
+        } else {
+          doPrompt();
+        }
+      });
+    } else if (Notification.permission === "denied") {
+      showReminderBanner(t("notifPermDenied"));
+    } else {
+      doPrompt();
+    }
+  }
+
+  function buildHabitElement(habit) {
+    const today = getTodayString();
+    const doneToday = habit.completedDates.includes(today);
+
+    const card = document.createElement("div");
+    card.className = "habit-card" + (doneToday ? " habit-done" : "");
+    card.dataset.id = habit.id;
+
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "habit-toggle" + (doneToday ? " done" : "");
+    toggle.setAttribute("aria-label", doneToday ? "Mark as not done" : "Mark as done");
+    toggle.textContent = doneToday ? "✓" : "";
+    toggle.addEventListener("click", () => State.toggleHabit(habit.id));
+
+    const emojiSpan = document.createElement("span");
+    emojiSpan.className = "habit-emoji";
+    emojiSpan.textContent = habit.emoji;
+
+    const info = document.createElement("div");
+    info.className = "habit-info";
+
+    const name = document.createElement("span");
+    name.className = "habit-name";
+    name.textContent = habit.name;
+    info.appendChild(name);
+
+    if (habit.streak >= 2) {
+      const streak = document.createElement("span");
+      streak.className = "habit-streak";
+      streak.textContent = `🔥 ${habit.streak} ${State.language === "es" ? "días" : "days"}`;
+      info.appendChild(streak);
+    }
+
+    const meta = document.createElement("div");
+    meta.className = "habit-meta";
+
+    const reminderBtn = document.createElement("button");
+    reminderBtn.type = "button";
+    reminderBtn.className = "habit-reminder-btn";
+    reminderBtn.title = habit.reminderTime
+      ? (State.language === "es" ? `Recordatorio: ${habit.reminderTime}` : `Reminder: ${habit.reminderTime}`)
+      : (State.language === "es" ? "Establecer recordatorio" : "Set reminder");
+    reminderBtn.textContent = habit.reminderTime ? `⏰ ${habit.reminderTime}` : "⏰";
+    reminderBtn.addEventListener("click", () => handleSetReminder(habit.id, habit.reminderTime));
+    meta.appendChild(reminderBtn);
+
+    if (State.editMode) {
+      const deleteBtn = document.createElement("button");
+      deleteBtn.type = "button";
+      deleteBtn.className = "habit-delete-btn";
+      deleteBtn.textContent = State.language === "es" ? "Eliminar" : "Delete";
+      deleteBtn.addEventListener("click", () => State.deleteHabit(habit.id));
+      meta.appendChild(deleteBtn);
+    }
+
+    card.appendChild(toggle);
+    card.appendChild(emojiSpan);
+    card.appendChild(info);
+    card.appendChild(meta);
+    return card;
+  }
+
+  function renderHabits() {
+    const habitsList = document.getElementById("habitsList");
+    const habitsDoneCount = document.getElementById("habitsDoneCount");
+    const habitsTotalCount = document.getElementById("habitsTotalCount");
+    const habitsDoneLabelEl = document.getElementById("habitsDoneLabel");
+    if (!habitsList) return;
+
+    const today = getTodayString();
+    const habits = State.habits;
+    const doneCount = habits.filter((h) => h.completedDates.includes(today)).length;
+
+    if (habitsDoneCount) habitsDoneCount.textContent = doneCount;
+    if (habitsTotalCount) habitsTotalCount.textContent = habits.length;
+    if (habitsDoneLabelEl) habitsDoneLabelEl.textContent = t("habitsDoneLabel");
+
+    habitsList.innerHTML = "";
+
+    if (habits.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "empty-state";
+      empty.style.padding = "16px 0";
+      empty.textContent = t("noHabits");
+      habitsList.appendChild(empty);
+      return;
+    }
+
+    habits.forEach((habit) => {
+      habitsList.appendChild(buildHabitElement(habit));
     });
   }
 
@@ -1220,6 +1546,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderGamification();
     renderBadges();
     renderAnalytics();
+    renderHabits();
     updateQuote(true);
   }
 
@@ -1364,6 +1691,55 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  document.querySelectorAll(".tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+  });
+
+  const addHabitBtnEl = document.getElementById("addHabitBtn");
+  const habitNameInputEl = document.getElementById("habitNameInput");
+  const habitEmojiInputEl = document.getElementById("habitEmojiInput");
+  const habitReminderInputEl = document.getElementById("habitReminderInput");
+
+  function tryAddHabit() {
+    const name = habitNameInputEl ? habitNameInputEl.value.trim() : "";
+    if (!name) {
+      if (habitNameInputEl) {
+        habitNameInputEl.classList.add("input-error");
+        habitNameInputEl.focus();
+        habitNameInputEl.addEventListener("input", () => habitNameInputEl.classList.remove("input-error"), { once: true });
+      }
+      return;
+    }
+    const emoji = (habitEmojiInputEl ? habitEmojiInputEl.value.trim() : "") || "🌟";
+    const reminderTime = (habitReminderInputEl ? habitReminderInputEl.value.trim() : "") || null;
+    State.addHabit({
+      id: String(Date.now()),
+      name,
+      emoji,
+      reminderTime,
+      completedDates: [],
+      streak: 0,
+      lastCompletedDate: null
+    });
+    if (habitNameInputEl) habitNameInputEl.value = "";
+    if (habitEmojiInputEl) habitEmojiInputEl.value = "";
+    if (habitReminderInputEl) habitReminderInputEl.value = "";
+  }
+
+  if (addHabitBtnEl) addHabitBtnEl.addEventListener("click", tryAddHabit);
+  if (habitNameInputEl) {
+    habitNameInputEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); tryAddHabit(); }
+    });
+  }
+
+  const reminderBannerClose = document.getElementById("reminderBannerClose");
+  if (reminderBannerClose) {
+    reminderBannerClose.addEventListener("click", () => {
+      document.getElementById("reminderBanner").classList.add("hidden");
+    });
+  }
+
   addTaskBtn.addEventListener("click", tryAddTask);
 
   [taskInput, dueDateInput, priorityInput].forEach((element) => {
@@ -1438,6 +1814,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const exportData = {
       tasks: State.tasks,
       player: State.player,
+      habits: State.habits,
       language: State.language
     };
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
@@ -1461,6 +1838,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
           State.tasks = sanitizeTasks(imported.tasks || []);
           State.player = sanitizePlayer(imported.player || defaultPlayer());
+          if (imported.habits) State.habits = sanitizeHabits(imported.habits);
           if (imported.language && translations[imported.language]) {
             State.language = imported.language;
             languageSelect.value = imported.language;
@@ -1500,6 +1878,12 @@ document.addEventListener("DOMContentLoaded", () => {
   applyTheme(themeSelect.value);
   setDateConstraints();
   formatHeaderDate();
+
+  const savedTab = localStorage.getItem(TAB_KEY) || "tasks";
+  switchTab(savedTab);
+
+  checkHabitResets();
+  setInterval(checkHabitReminders, 60000);
 
   State.subscribe(render);
   render(State);
