@@ -109,7 +109,7 @@ textarea {
 /* ===== STATS CARD ===== */
 .stats-card {
   background: var(--card-bg);
-  border-radius: 16px;
+  border-radius: 22px;
   box-shadow: var(--shadow);
   padding: 18px;
   margin: 12px 16px;
@@ -124,7 +124,7 @@ textarea {
 
 .stat {
   padding: 14px;
-  border-radius: 12px;
+  border-radius: 16px;
   background: rgba(0, 122, 255, 0.07);
   min-width: 0;
 }
@@ -188,7 +188,7 @@ textarea {
 .quote-card {
   background: rgba(0, 122, 255, 0.08);
   color: var(--text-main);
-  border-radius: 16px;
+  border-radius: 22px;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -203,7 +203,7 @@ textarea {
   padding: 16px 20px;
   margin: 12px 16px 0;
   min-height: unset;
-  border-radius: 16px;
+  border-radius: 22px;
 }
 
 .quote-card-full .quote-icon {
@@ -252,7 +252,7 @@ textarea {
 .level-card,
 .challenge-card {
   background: var(--card-bg);
-  border-radius: 16px;
+  border-radius: 22px;
   box-shadow: var(--shadow);
   padding: 16px 18px;
   margin: 0 16px;
@@ -385,7 +385,7 @@ textarea {
   min-width: 72px;
   text-align: center;
   padding: 10px 12px;
-  border-radius: 12px;
+  border-radius: 14px;
   background: rgba(0, 122, 255, 0.09);
 }
 
@@ -409,7 +409,7 @@ textarea {
   align-items: center;
   gap: 8px;
   padding: 10px;
-  border-radius: 12px;
+  border-radius: 14px;
   background: var(--input-bg);
   min-width: 0;
 }
@@ -469,7 +469,7 @@ textarea {
 
 .challenge-item {
   padding: 12px;
-  border-radius: 12px;
+  border-radius: 16px;
   background: var(--input-bg);
 }
 
@@ -541,7 +541,7 @@ textarea {
   max-width: calc(100vw - 32px);
   background: var(--card-bg);
   border: 1px solid var(--separator);
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 14px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   z-index: 200;
@@ -593,7 +593,7 @@ textarea {
   width: 100%;
   padding: 11px;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   background: var(--accent-color);
   color: white;
   font-weight: 600;
@@ -684,7 +684,7 @@ textarea {
 /* ===== TASK INPUT ===== */
 .task-input {
   background: var(--card-bg);
-  border-radius: 16px;
+  border-radius: 22px;
   box-shadow: var(--shadow);
   margin: 12px 16px 0;
   overflow: hidden;
@@ -758,7 +758,7 @@ body.dark-mode .danger-action {
   margin: 0 16px;
   background: var(--card-bg);
   border-top: none;
-  border-radius: 0 0 16px 16px;
+  border-radius: 0 0 22px 22px;
   box-shadow: var(--shadow);
   overflow: hidden;
 }
@@ -923,7 +923,7 @@ body.dark-mode .clear-completed-btn {
   padding: 0;
   margin: 0 16px;
   background: var(--card-bg);
-  border-radius: 16px;
+  border-radius: 22px;
   overflow: hidden;
   box-shadow: var(--shadow);
 }
@@ -1133,7 +1133,7 @@ body.dark-mode .clear-completed-btn {
 
 .modal-card {
   background: var(--card-bg);
-  border-radius: 20px;
+  border-radius: 28px;
   padding: 24px;
   width: 100%;
   max-width: 420px;
@@ -1186,7 +1186,7 @@ body.dark-mode .clear-completed-btn {
   flex: 1;
   padding: 13px;
   border: none;
-  border-radius: 14px;
+  border-radius: 16px;
   cursor: pointer;
   font-weight: 600;
   font-size: 16px;
@@ -1209,41 +1209,64 @@ body.dark-mode .clear-completed-btn {
 }
 
 /* ===== THEME VARIANTS ===== */
-body.theme-blue {
-  --accent-color: #0ea5e9;
-  --accent-hover: #0284c7;
-  --page-bg: #f0f9ff;
-  --input-bg: #e0f2fe;
-  --separator: #bae6fd;
-  --btn-neutral-bg: #e0f2fe;
+body.theme-sunset {
+  --accent-color: #ff6b35;
+  --accent-hover: #e85520;
+  --page-bg: #fff4ef;
+  --card-bg: #fffbf9;
+  --card-solid: #fffbf9;
+  --input-bg: #fff0e8;
+  --separator: #ffd9c8;
+  --btn-neutral-bg: #ffe8db;
+  --btn-neutral-fg: #4a1500;
 }
 
-body.theme-green {
-  --accent-color: #10b981;
-  --accent-hover: #059669;
-  --page-bg: #f0fdf4;
-  --input-bg: #dcfce7;
-  --separator: #bbf7d0;
-  --btn-neutral-bg: #dcfce7;
+body.theme-mint {
+  --accent-color: #00b894;
+  --accent-hover: #00957a;
+  --page-bg: #f0fdf8;
+  --card-bg: #f8fffc;
+  --card-solid: #f8fffc;
+  --input-bg: #e0faf3;
+  --separator: #b8f0e0;
+  --btn-neutral-bg: #d4f5ec;
+  --btn-neutral-fg: #00382d;
 }
 
-body.theme-purple {
-  --accent-color: #8b5cf6;
-  --accent-hover: #7c3aed;
+body.theme-galaxy {
+  --accent-color: #7c3aed;
+  --accent-hover: #6d28d9;
   --page-bg: #f5f3ff;
+  --card-bg: #fdfcff;
+  --card-solid: #fdfcff;
   --input-bg: #ede9fe;
   --separator: #ddd6fe;
-  --btn-neutral-bg: #ede9fe;
+  --btn-neutral-bg: #e9e4fc;
+  --btn-neutral-fg: #2e1065;
 }
 
-body.theme-fritolay {
-  --accent-color: #c41230;
-  --accent-hover: #a00f28;
-  --page-bg: #f5f5f5;
-  --card-bg: #ffffff;
-  --text-main: #212121;
-  --separator: #e0e0e0;
-  --btn-neutral-bg: #f1f1f1;
+body.theme-rose {
+  --accent-color: #ff2d55;
+  --accent-hover: #d90032;
+  --page-bg: #fff0f4;
+  --card-bg: #fffbfc;
+  --card-solid: #fffbfc;
+  --input-bg: #ffe4ec;
+  --separator: #ffbdd0;
+  --btn-neutral-bg: #ffd6e4;
+  --btn-neutral-fg: #4a0018;
+}
+
+body.theme-ocean {
+  --accent-color: #0096c7;
+  --accent-hover: #007aad;
+  --page-bg: #f0f8ff;
+  --card-bg: #f8fcff;
+  --card-solid: #f8fcff;
+  --input-bg: #ddf0fa;
+  --separator: #b8e0f5;
+  --btn-neutral-bg: #d0eaf8;
+  --btn-neutral-fg: #002d3d;
 }
 
 /* ===== DARK MODE — iOS Dark ===== */
@@ -1384,7 +1407,7 @@ body.dark-mode .task-card.due-today {
 /* ===== BADGES / ACHIEVEMENTS ===== */
 .badges-section {
   background: var(--card-bg);
-  border-radius: 16px;
+  border-radius: 22px;
   box-shadow: var(--shadow);
   padding: 14px 18px;
   margin: 0 16px 12px;
@@ -1420,7 +1443,7 @@ body.dark-mode .task-card.due-today {
   align-items: center;
   gap: 5px;
   padding: 12px 6px;
-  border-radius: 12px;
+  border-radius: 16px;
   background: rgba(0, 122, 255, 0.07);
   text-align: center;
   cursor: default;
@@ -1451,7 +1474,7 @@ body.dark-mode .task-card.due-today {
 /* ===== ANALYTICS ===== */
 .analytics-section {
   background: var(--card-bg);
-  border-radius: 16px;
+  border-radius: 22px;
   box-shadow: var(--shadow);
   padding: 14px 18px;
   margin: 0 16px 12px;
@@ -1538,7 +1561,7 @@ body.dark-mode .task-card.due-today {
 .toast {
   background: var(--card-bg);
   border: 1px solid var(--separator);
-  border-radius: 14px;
+  border-radius: 18px;
   padding: 12px 16px;
   font-weight: 600;
   font-size: 14px;
@@ -1639,7 +1662,7 @@ body.dark-mode .task-card.due-today {
   gap: 12px;
   background: rgba(255, 149, 0, 0.1);
   border: 1px solid rgba(255, 149, 0, 0.3);
-  border-radius: 14px;
+  border-radius: 18px;
   padding: 12px 16px;
   margin: 0 16px 12px;
   font-weight: 500;
@@ -1664,7 +1687,7 @@ body.dark-mode .task-card.due-today {
   gap: 0;
   margin: 0 16px 16px;
   background: var(--card-bg);
-  border-radius: 16px;
+  border-radius: 22px;
   overflow: hidden;
   box-shadow: var(--shadow);
 }
@@ -1803,7 +1826,7 @@ body.dark-mode .habit-delete-btn:hover {
 /* Add custom habit form */
 .add-habit-form {
   background: var(--card-bg);
-  border-radius: 16px;
+  border-radius: 22px;
   box-shadow: var(--shadow);
   margin: 0 16px 16px;
   overflow: hidden;
@@ -2071,7 +2094,7 @@ body.dark-mode .habit-delete-btn:hover {
 
   .modal-card {
     padding: 20px 16px;
-    border-radius: 20px;
+    border-radius: 28px;
   }
 
   .modal-actions {

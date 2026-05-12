@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const LANG_KEY = "taskflow-language-v1";
   const HABITS_KEY = "taskflow-habits-v1";
   const TAB_KEY = "taskflow-active-tab-v1";
-  const THEME_CLASSES = ["theme-blue", "theme-green", "theme-purple", "theme-fritolay"];
+  const THEME_CLASSES = ["theme-sunset", "theme-mint", "theme-galaxy", "theme-rose", "theme-ocean"];
 
   const DEFAULT_HABITS = [
     { emoji: "🚿", name: "Shower" },
