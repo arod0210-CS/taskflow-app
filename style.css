@@ -684,7 +684,7 @@ textarea {
 /* ===== TASK INPUT ===== */
 .task-input {
   background: var(--card-bg);
-  border-radius: 22px;
+  border-radius: 22px 22px 0 0;
   box-shadow: var(--shadow);
   margin: 12px 16px 0;
   overflow: hidden;
@@ -1348,7 +1348,7 @@ body.dark-mode .task-card.due-today {
   margin-bottom: 0;
   border-radius: 0;
   position: sticky;
-  top: 72px;
+  top: 68px;
   z-index: 90;
 }
 
