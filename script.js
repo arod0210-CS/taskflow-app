@@ -324,13 +324,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const quoteText = document.getElementById("quoteText");
   const quoteAuthor = document.getElementById("quoteAuthor");
 
+  function safeParse(value, fallback) {
+    if (value === null || value === undefined || value === "") return fallback;
+    try {
+      const parsed = JSON.parse(value);
+      return parsed === null || parsed === undefined ? fallback : parsed;
+    } catch {
+      return fallback;
+    }
+  }
+
   const State = {
-    tasks: sanitizeTasks(JSON.parse(localStorage.getItem(STORAGE_KEY)) || []),
-    player: sanitizePlayer(JSON.parse(localStorage.getItem(PLAYER_KEY)) || defaultPlayer()),
-    habits: sanitizeHabits(JSON.parse(localStorage.getItem(HABITS_KEY)) || null),
+    tasks: sanitizeTasks(safeParse(localStorage.getItem(STORAGE_KEY), [])),
+    player: sanitizePlayer(safeParse(localStorage.getItem(PLAYER_KEY), defaultPlayer())),
+    habits: sanitizeHabits(safeParse(localStorage.getItem(HABITS_KEY), null)),
     view: "all",
     searchQuery: "",
-    editMode: JSON.parse(localStorage.getItem("editMode")) || false,
+    editMode: safeParse(localStorage.getItem("editMode"), false),
     editingTaskId: null,
     language: localStorage.getItem(LANG_KEY) || "en",
     listeners: [],
@@ -669,7 +679,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.body.classList.add(`theme-${theme}`);
     }
 
-    const isDark = JSON.parse(localStorage.getItem("darkMode")) || false;
+    const isDark = safeParse(localStorage.getItem("darkMode"), false) === true;
     document.body.classList.toggle("dark-mode", isDark);
     darkModeToggle.checked = isDark;
   }
@@ -1874,7 +1884,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  themeSelect.value = localStorage.getItem("theme") || "default";
+  const validThemes = ["default", "sunset", "mint", "galaxy", "rose", "ocean"];
+  const savedTheme = localStorage.getItem("theme") || "default";
+  themeSelect.value = validThemes.includes(savedTheme) ? savedTheme : "default";
   languageSelect.value = State.language;
   applyTheme(themeSelect.value);
   setDateConstraints();
