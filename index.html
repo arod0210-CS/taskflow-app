@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#6366f1" />
 </head>
 <body>
   <div class="app-shell">
@@ -72,6 +75,11 @@
                 <span id="importBtnText">Import Data</span>
                 <input type="file" id="importFile" accept=".json" hidden />
               </label>
+            </div>
+
+            <div class="menu-section">
+              <h3 id="dangerZoneHeaderText">Danger Zone</h3>
+              <button id="resetBtn" class="setting-action-btn danger-action" type="button">Reset</button>
             </div>
 
             <div class="menu-section">
@@ -213,6 +221,19 @@
         </div>
       </div>
 
+      <div class="badges-section" id="badgesSection">
+        <button class="badges-toggle" id="badgesToggle" type="button" aria-expanded="false" aria-controls="badgesBody">
+          <span id="achievementsHeaderText">Achievements</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span id="badgesCount" class="challenge-count">0/8</span>
+            <span class="level-toggle-arrow" id="badgesToggleArrow">▾</span>
+          </div>
+        </button>
+        <div class="badges-body hidden" id="badgesBody">
+          <div id="badgesList" class="badges-grid"></div>
+        </div>
+      </div>
+
       <div class="task-input">
         <input type="text" id="taskInput" placeholder="Add a new task..." />
         <input type="date" id="dueDateInput" />
@@ -222,7 +243,15 @@
           <option value="low">Low Priority</option>
         </select>
         <button id="addTaskBtn" type="button">Add Task</button>
-        <button id="resetBtn" type="button">Reset</button>
+      </div>
+      <div class="notes-expander">
+        <button id="notesToggle" class="notes-toggle-btn" type="button" aria-expanded="false">
+          <span id="notesToggleLabel">+ Add Notes</span>
+          <span class="notes-chevron">▾</span>
+        </button>
+        <div id="notesArea" class="notes-area hidden">
+          <textarea id="notesInput" rows="3" placeholder="Optional notes..."></textarea>
+        </div>
       </div>
 
       <div class="view-bar">
@@ -246,8 +275,19 @@
       <div class="section">
         <div class="section-header">
           <h2 id="completedHeading">Completed</h2>
+          <button id="clearCompletedBtn" class="clear-completed-btn" type="button">Clear Completed</button>
         </div>
         <ul id="completedList" class="task-list"></ul>
+      </div>
+
+      <div class="analytics-section" id="analyticsSection">
+        <button class="analytics-toggle" id="analyticsToggle" type="button" aria-expanded="false" aria-controls="analyticsBody">
+          <span id="analyticsHeaderText">Weekly Progress</span>
+          <span class="level-toggle-arrow" id="analyticsToggleArrow">▾</span>
+        </button>
+        <div class="analytics-body hidden" id="analyticsBody">
+          <div id="analyticsChart" class="analytics-chart"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -275,11 +315,21 @@
         </select>
       </div>
 
+      <div class="modal-field">
+        <label for="editNotesInput" id="editNotesLabel">Notes</label>
+        <textarea id="editNotesInput" rows="3" placeholder="Optional notes..."></textarea>
+      </div>
+
       <div class="modal-actions">
         <button id="editCancelBtn" class="modal-btn modal-btn-cancel" type="button">Cancel</button>
         <button id="editSaveBtn" class="modal-btn modal-btn-save" type="button">Save</button>
       </div>
     </div>
+  </div>
+
+  <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="false"></div>
+  <div id="levelUpBanner" class="level-up-banner hidden" aria-live="assertive">
+    <span id="levelUpText"></span>
   </div>
 
   <script src="script.js"></script>

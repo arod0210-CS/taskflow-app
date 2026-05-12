@@ -79,6 +79,30 @@ document.addEventListener("DOMContentLoaded", () => {
       taskMaster: "Task Master",
       elitePlanner: "Elite Planner",
       taskLegend: "Task Legend",
+      dangerZone: "Danger Zone",
+      clearCompleted: "Clear Completed",
+      clearCompletedConfirm: "Clear all completed tasks?",
+      notesLabel: "Notes",
+      addNotes: "+ Add Notes",
+      optionalNotesPlaceholder: "Optional notes...",
+      achievements: "Achievements",
+      weeklyProgress: "Weekly Progress",
+      badgeFirstTask: "First Step",
+      badgeFirstTaskDesc: "Complete your first task",
+      badgeEarlyBird: "Early Bird",
+      badgeEarlyBirdDesc: "Complete 5 tasks total",
+      badgeTaskStreak: "On Fire",
+      badgeTaskStreakDesc: "Reach a 5-day streak",
+      badgeCentury: "Century",
+      badgeCenturyDesc: "Complete 100 tasks total",
+      badgePriorityKing: "Priority King",
+      badgePriorityKingDesc: "Complete 10 high-priority tasks",
+      badgeSpeedRunner: "Speed Runner",
+      badgeSpeedRunnerDesc: "Complete 5 tasks on or before due date",
+      badgePolyglot: "Polyglot",
+      badgePolyglotDesc: "Use both languages",
+      badgeNightOwl: "Night Owl",
+      badgeNightOwlDesc: "Enable dark mode",
       quotes: [
         { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
         { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
@@ -162,6 +186,30 @@ document.addEventListener("DOMContentLoaded", () => {
       taskMaster: "Maestro de tareas",
       elitePlanner: "Planificador élite",
       taskLegend: "Leyenda de tareas",
+      dangerZone: "Zona de peligro",
+      clearCompleted: "Borrar completadas",
+      clearCompletedConfirm: "¿Eliminar todas las tareas completadas?",
+      notesLabel: "Notas",
+      addNotes: "+ Agregar notas",
+      optionalNotesPlaceholder: "Notas opcionales...",
+      achievements: "Logros",
+      weeklyProgress: "Progreso semanal",
+      badgeFirstTask: "Primer paso",
+      badgeFirstTaskDesc: "Completa tu primera tarea",
+      badgeEarlyBird: "Madrugador",
+      badgeEarlyBirdDesc: "Completa 5 tareas en total",
+      badgeTaskStreak: "En llamas",
+      badgeTaskStreakDesc: "Alcanza una racha de 5 días",
+      badgeCentury: "Centenario",
+      badgeCenturyDesc: "Completa 100 tareas en total",
+      badgePriorityKing: "Rey de prioridades",
+      badgePriorityKingDesc: "Completa 10 tareas de alta prioridad",
+      badgeSpeedRunner: "Corredor veloz",
+      badgeSpeedRunnerDesc: "Completa 5 tareas antes de su fecha límite",
+      badgePolyglot: "Políglota",
+      badgePolyglotDesc: "Usa ambos idiomas",
+      badgeNightOwl: "Noctámbulo",
+      badgeNightOwlDesc: "Activa el modo oscuro",
       quotes: [
         { text: "El secreto para avanzar es empezar.", author: "Mark Twain" },
         { text: "Siempre parece imposible hasta que se hace.", author: "Nelson Mandela" },
@@ -188,6 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const progressFill = document.getElementById("progressFill");
   const todoHeading = document.getElementById("todoHeading");
   const completedHeading = document.getElementById("completedHeading");
+  const clearCompletedBtn = document.getElementById("clearCompletedBtn");
 
   const todayDate = document.getElementById("todayDate");
   const settingsBtn = document.getElementById("settingsBtn");
@@ -205,6 +254,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const editPriorityInput = document.getElementById("editPriorityInput");
   const editSaveBtn = document.getElementById("editSaveBtn");
   const editCancelBtn = document.getElementById("editCancelBtn");
+  const editNotesInput = document.getElementById("editNotesInput");
+  const notesToggle = document.getElementById("notesToggle");
+  const notesArea = document.getElementById("notesArea");
+  const notesInput = document.getElementById("notesInput");
 
   const levelCard = document.getElementById("levelCard");
   const levelToggle = document.getElementById("levelToggle");
@@ -315,6 +368,10 @@ document.addEventListener("DOMContentLoaded", () => {
       this.tasks = [];
       this.player = defaultPlayer();
       this.notify();
+    },
+    clearCompleted() {
+      this.tasks = this.tasks.filter((task) => !task.completed);
+      this.notify();
     }
   };
 
@@ -323,6 +380,68 @@ document.addEventListener("DOMContentLoaded", () => {
     medium: { css: "medium", xp: 20, coins: 4 },
     low: { css: "low", xp: 10, coins: 2 }
   };
+
+  const BADGE_DEFINITIONS = [
+    {
+      id: "first_task",
+      emoji: "🌱",
+      nameKey: "badgeFirstTask",
+      descKey: "badgeFirstTaskDesc",
+      check: (p) => p.totalCompleted >= 1
+    },
+    {
+      id: "early_bird",
+      emoji: "🐦",
+      nameKey: "badgeEarlyBird",
+      descKey: "badgeEarlyBirdDesc",
+      check: (p) => p.totalCompleted >= 5
+    },
+    {
+      id: "task_streak",
+      emoji: "🔥",
+      nameKey: "badgeTaskStreak",
+      descKey: "badgeTaskStreakDesc",
+      check: (p) => p.streak >= 5
+    },
+    {
+      id: "century",
+      emoji: "💯",
+      nameKey: "badgeCentury",
+      descKey: "badgeCenturyDesc",
+      check: (p) => p.totalCompleted >= 100
+    },
+    {
+      id: "priority_king",
+      emoji: "👑",
+      nameKey: "badgePriorityKing",
+      descKey: "badgePriorityKingDesc",
+      check: (p, tasks) => tasks.filter((t) => t.completed && t.priority === "high").length >= 10
+    },
+    {
+      id: "speed_runner",
+      emoji: "⚡",
+      nameKey: "badgeSpeedRunner",
+      descKey: "badgeSpeedRunnerDesc",
+      check: (p, tasks) =>
+        tasks.filter(
+          (t) => t.completed && t.dueDate && t.completedAt && t.completedAt.slice(0, 10) <= t.dueDate
+        ).length >= 5
+    },
+    {
+      id: "polyglot",
+      emoji: "🌍",
+      nameKey: "badgePolyglot",
+      descKey: "badgePolyglotDesc",
+      check: (p) => p.usedBothLanguages === true
+    },
+    {
+      id: "night_owl",
+      emoji: "🦉",
+      nameKey: "badgeNightOwl",
+      descKey: "badgeNightOwlDesc",
+      check: (p) => p.usedDarkMode === true
+    }
+  ];
 
   function t(key) {
     return translations[State.language][key];
@@ -340,7 +459,10 @@ document.addEventListener("DOMContentLoaded", () => {
       totalCompleted: 0,
       challengeRewarded: [],
       challengeRewardedDate: null,
-      badges: []
+      badges: [],
+      usedBothLanguages: false,
+      usedDarkMode: false,
+      completedByDay: {}
     };
   }
 
@@ -358,7 +480,8 @@ document.addEventListener("DOMContentLoaded", () => {
         completedAt: task.completedAt || null,
         dueDate: task.dueDate || null,
         priority: normalizePriority(task.priority),
-        createdAt: task.createdAt || new Date().toISOString()
+        createdAt: task.createdAt || new Date().toISOString(),
+        notes: String(task.notes ?? "").trim()
       }))
       .filter((task) => task.text !== "");
   }
@@ -466,6 +589,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     addTaskBtn.textContent = t("addTask");
     resetBtn.textContent = t("reset");
+    document.getElementById("dangerZoneHeaderText").textContent = t("dangerZone");
+    clearCompletedBtn.textContent = t("clearCompleted");
+    document.getElementById("achievementsHeaderText") && (document.getElementById("achievementsHeaderText").textContent = t("achievements"));
+    document.getElementById("analyticsHeaderText") && (document.getElementById("analyticsHeaderText").textContent = t("weeklyProgress"));
 
     document.getElementById("viewAllBtn").textContent = t("all");
     document.getElementById("viewTodayBtn").textContent = t("today");
@@ -478,6 +605,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("editPriorityLabel").textContent = t("priority");
     editCancelBtn.textContent = t("cancel");
     editSaveBtn.textContent = t("save");
+    document.getElementById("editNotesLabel").textContent = t("notesLabel");
+    editNotesInput.placeholder = t("optionalNotesPlaceholder");
+    document.getElementById("notesToggleLabel").textContent = t("addNotes");
+    notesInput.placeholder = t("optionalNotesPlaceholder");
 
     priorityInput.options[0].text = t("highPriority");
     priorityInput.options[1].text = t("mediumPriority");
@@ -513,6 +644,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function addXpAndCoins(xp, coins) {
+    const levelBefore = State.player.level;
     State.player.xp += xp;
     State.player.coins += coins;
 
@@ -521,6 +653,134 @@ document.addEventListener("DOMContentLoaded", () => {
       State.player.level += 1;
       State.player.coins += 15;
     }
+
+    if (State.player.level > levelBefore) {
+      showLevelUpBanner(State.player.level);
+    }
+  }
+
+  function showToast(xpGained, coinsGained) {
+    const container = document.getElementById("toastContainer");
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.innerHTML = `<span class="toast-xp">+${xpGained} XP</span><span>·</span><span>+${coinsGained} 🪙</span>`;
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.classList.add("toast-exit");
+      toast.addEventListener("animationend", () => toast.remove(), { once: true });
+    }, 2500);
+  }
+
+  function showBadgeToast(badge, index) {
+    setTimeout(() => {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      toast.className = "toast toast-badge";
+      toast.innerHTML = `${badge.emoji} <span class="toast-badge-text"><strong>${t(badge.nameKey)}</strong> unlocked!</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add("toast-exit");
+        toast.addEventListener("animationend", () => toast.remove(), { once: true });
+      }, 3500);
+    }, index * 120);
+  }
+
+  function showLevelUpBanner(newLevel) {
+    const banner = document.getElementById("levelUpBanner");
+    const levelUpText = document.getElementById("levelUpText");
+    const prefix = State.language === "es"
+      ? "🎉 ¡Subiste de nivel! Llegaste al nivel "
+      : "🎉 Level Up! You reached Level ";
+    levelUpText.textContent = `${prefix}${newLevel}!`;
+    banner.classList.remove("hidden");
+    setTimeout(() => banner.classList.add("hidden"), 3000);
+  }
+
+  function checkBadges() {
+    const newBadges = [];
+    BADGE_DEFINITIONS.forEach((def) => {
+      if (!State.player.badges.includes(def.id) && def.check(State.player, State.tasks)) {
+        State.player.badges.push(def.id);
+        newBadges.push(def);
+      }
+    });
+    newBadges.forEach((badge, index) => showBadgeToast(badge, index));
+  }
+
+  function renderBadges() {
+    const badgesList = document.getElementById("badgesList");
+    const badgesCount = document.getElementById("badgesCount");
+    if (!badgesList || !badgesCount) return;
+
+    const earned = State.player.badges;
+    badgesCount.textContent = `${earned.length}/${BADGE_DEFINITIONS.length}`;
+    badgesList.innerHTML = "";
+
+    BADGE_DEFINITIONS.forEach((def) => {
+      const isEarned = earned.includes(def.id);
+      const card = document.createElement("div");
+      card.className = "badge-card" + (isEarned ? "" : " badge-locked");
+      card.title = t(def.descKey);
+
+      const emoji = document.createElement("span");
+      emoji.className = "badge-emoji";
+      emoji.textContent = def.emoji;
+
+      const name = document.createElement("span");
+      name.className = "badge-name";
+      name.textContent = t(def.nameKey);
+
+      card.appendChild(emoji);
+      card.appendChild(name);
+      badgesList.appendChild(card);
+    });
+  }
+
+  function renderAnalytics() {
+    const chart = document.getElementById("analyticsChart");
+    if (!chart) return;
+    chart.innerHTML = "";
+
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      days.push(d.toISOString().slice(0, 10));
+    }
+
+    const dayAbbr = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+    const counts = days.map((d) => (State.player.completedByDay || {})[d] || 0);
+    const maxCount = Math.max(...counts, 1);
+
+    days.forEach((day, i) => {
+      const count = counts[i];
+      const pct = (count / maxCount) * 100;
+      const date = new Date(day + "T00:00:00");
+
+      const group = document.createElement("div");
+      group.className = "analytics-bar-group";
+
+      const countLabel = document.createElement("span");
+      countLabel.className = "analytics-bar-count";
+      countLabel.textContent = count > 0 ? count : "";
+
+      const track = document.createElement("div");
+      track.className = "analytics-bar-track";
+
+      const fill = document.createElement("div");
+      fill.className = "analytics-bar-fill";
+      fill.style.height = `${pct}%`;
+
+      const label = document.createElement("span");
+      label.className = "analytics-bar-label";
+      label.textContent = dayAbbr[date.getDay()];
+
+      track.appendChild(fill);
+      group.appendChild(countLabel);
+      group.appendChild(track);
+      group.appendChild(label);
+      chart.appendChild(group);
+    });
   }
 
   function updateStreak() {
@@ -639,9 +899,22 @@ document.addEventListener("DOMContentLoaded", () => {
       coins += 10;
     }
 
+    const todayKey = getTodayString();
+    if (!State.player.completedByDay) State.player.completedByDay = {};
+    State.player.completedByDay[todayKey] = (State.player.completedByDay[todayKey] || 0) + 1;
+
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 30);
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+    Object.keys(State.player.completedByDay).forEach((key) => {
+      if (key < cutoffStr) delete State.player.completedByDay[key];
+    });
+
+    showToast(xp, coins);
     updateStreak();
     addXpAndCoins(xp, coins);
     checkChallengeRewards();
+    checkBadges();
   }
 
   function normalizeDailyPlayerStats() {
@@ -738,6 +1011,7 @@ document.addEventListener("DOMContentLoaded", () => {
     editTextInput.value = task.text;
     editDateInput.value = task.dueDate || "";
     editPriorityInput.value = normalizePriority(task.priority);
+    editNotesInput.value = task.notes || "";
 
     editModal.classList.remove("hidden");
     editTextInput.focus();
@@ -762,7 +1036,8 @@ document.addEventListener("DOMContentLoaded", () => {
     State.updateTask(State.editingTaskId, {
       text: newText,
       dueDate: editDateInput.value || null,
-      priority: editPriorityInput.value
+      priority: editPriorityInput.value,
+      notes: editNotesInput.value.trim()
     });
 
     closeEditModal();
@@ -821,6 +1096,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     content.appendChild(textSpan);
     content.appendChild(meta);
+
+    if (task.notes) {
+      const notesP = document.createElement("p");
+      notesP.className = "task-notes-preview";
+      notesP.textContent = task.notes;
+      content.appendChild(notesP);
+    }
 
     mainWrapper.appendChild(toggleBtn);
     mainWrapper.appendChild(content);
@@ -920,8 +1202,8 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     const label = labels[state.view] || t("allLabel");
 
-    todoHeading.textContent = `${label} ${t("todo")}`;
-    completedHeading.textContent = `${label} ${t("completedHeading")}`;
+    todoHeading.textContent = `${t("todo")} (${todoTasks.length})`;
+    completedHeading.textContent = `${t("completedHeading")} (${doneTasks.length})`;
 
     const total = filteredTasks.length;
     const doneCount = doneTasks.length;
@@ -933,7 +1215,11 @@ document.addEventListener("DOMContentLoaded", () => {
     progressPercent.textContent = `${percent}%`;
     progressFill.style.width = `${percent}%`;
 
+    clearCompletedBtn.disabled = doneTasks.length === 0;
+
     renderGamification();
+    renderBadges();
+    renderAnalytics();
     updateQuote(true);
   }
 
@@ -977,14 +1263,25 @@ document.addEventListener("DOMContentLoaded", () => {
       completedAt: null,
       dueDate: dueDateInput.value || null,
       priority: priorityInput.value || "medium",
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      notes: notesInput.value.trim()
     });
 
     taskInput.value = "";
     dueDateInput.value = "";
     priorityInput.value = "medium";
+    notesInput.value = "";
+    notesArea.classList.add("hidden");
+    notesToggle.setAttribute("aria-expanded", "false");
     taskInput.focus();
   }
+
+  notesToggle.addEventListener("click", () => {
+    const expanded = notesToggle.getAttribute("aria-expanded") === "true";
+    notesToggle.setAttribute("aria-expanded", String(!expanded));
+    notesArea.classList.toggle("hidden", expanded);
+    if (!expanded) notesInput.focus();
+  });
 
   settingsBtn.addEventListener("click", (event) => {
     event.stopPropagation();
@@ -1007,12 +1304,20 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   languageSelect.addEventListener("change", () => {
+    State.player.usedBothLanguages = true;
     State.setLanguage(languageSelect.value);
+    checkBadges();
+    State.notify();
   });
 
   darkModeToggle.addEventListener("change", () => {
     localStorage.setItem("darkMode", JSON.stringify(darkModeToggle.checked));
     applyTheme(themeSelect.value);
+    if (darkModeToggle.checked) {
+      State.player.usedDarkMode = true;
+      checkBadges();
+      State.notify();
+    }
   });
 
   if (levelToggle && levelCard) {
@@ -1031,6 +1336,34 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  const badgesToggle = document.getElementById("badgesToggle");
+  const badgesBody = document.getElementById("badgesBody");
+  const badgesToggleArrow = document.getElementById("badgesToggleArrow");
+  if (badgesToggle && badgesBody) {
+    badgesToggle.addEventListener("click", () => {
+      const expanded = badgesToggle.getAttribute("aria-expanded") === "true";
+      badgesToggle.setAttribute("aria-expanded", String(!expanded));
+      badgesBody.classList.toggle("hidden", expanded);
+      if (badgesToggleArrow) {
+        badgesToggleArrow.style.transform = expanded ? "" : "rotate(180deg)";
+      }
+    });
+  }
+
+  const analyticsToggle = document.getElementById("analyticsToggle");
+  const analyticsBody = document.getElementById("analyticsBody");
+  const analyticsToggleArrow = document.getElementById("analyticsToggleArrow");
+  if (analyticsToggle && analyticsBody) {
+    analyticsToggle.addEventListener("click", () => {
+      const expanded = analyticsToggle.getAttribute("aria-expanded") === "true";
+      analyticsToggle.setAttribute("aria-expanded", String(!expanded));
+      analyticsBody.classList.toggle("hidden", expanded);
+      if (analyticsToggleArrow) {
+        analyticsToggleArrow.style.transform = expanded ? "" : "rotate(180deg)";
+      }
+    });
+  }
+
   addTaskBtn.addEventListener("click", tryAddTask);
 
   [taskInput, dueDateInput, priorityInput].forEach((element) => {
@@ -1045,6 +1378,12 @@ document.addEventListener("DOMContentLoaded", () => {
   resetBtn.addEventListener("click", () => {
     if (confirm(t("clearConfirm"))) {
       State.resetAllData();
+    }
+  });
+
+  clearCompletedBtn.addEventListener("click", () => {
+    if (confirm(t("clearCompletedConfirm"))) {
+      State.clearCompleted();
     }
   });
 
