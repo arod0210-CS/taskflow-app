@@ -1380,6 +1380,7 @@ document.addEventListener("DOMContentLoaded", () => {
     li.className = "task-card";
     li.draggable = true;
     li.dataset.id = task.id;
+    li.dataset.priority = normalizePriority(task.priority);
 
     if (task.dueDate && !task.completed) {
       const today = getTodayString();
