@@ -226,6 +226,32 @@ textarea {
   color: white;
   box-shadow: 0 8px 32px rgba(124, 58, 237, 0.30);
   min-height: 110px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-card::before {
+  content: "";
+  position: absolute;
+  top: -30px;
+  right: -20px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+}
+
+.hero-card::after {
+  content: "";
+  position: absolute;
+  bottom: -24px;
+  left: 50px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
 }
 
 .hero-card-content {
@@ -279,10 +305,13 @@ textarea {
   gap: 4px;
   padding: 8px 4px;
   border-radius: 14px;
+  transition: transform 0.15s;
 }
 
 .week-day-today {
   background: var(--accent-color);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.35);
+  transform: scale(1.08);
 }
 
 .week-day-label {
@@ -1025,8 +1054,9 @@ body.dark-mode .danger-action {
 .section-header h2 {
   margin: 0;
   font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.2px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--text-main);
 }
 
 .clear-completed-btn {
@@ -1070,6 +1100,11 @@ body.dark-mode .clear-completed-btn {
   gap: 10px;
 }
 
+@keyframes cardSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 .task-card {
   display: flex;
   justify-content: space-between;
@@ -1082,19 +1117,34 @@ body.dark-mode .clear-completed-btn {
   transition: transform 0.15s, box-shadow 0.15s;
   cursor: grab;
   box-shadow: var(--shadow);
+  animation: cardSlideIn 0.22s ease both;
+}
+
+.task-card.completed-card {
+  opacity: 0.6;
+  background: var(--btn-neutral-bg) !important;
+  border-left: 4px solid var(--border-color) !important;
+}
+
+.task-card.completed-card .task-text {
+  text-decoration: line-through;
+  color: var(--text-soft);
 }
 
 /* Priority-colored card backgrounds */
 .task-card[data-priority="high"] {
-  background: linear-gradient(135deg, #fff0e8 0%, #ffddd0 100%);
+  background: linear-gradient(135deg, #fff0e6 0%, #ffd4b8 100%);
+  border-left: 4px solid #ff6b35;
 }
 
 .task-card[data-priority="medium"] {
-  background: linear-gradient(135deg, #fff8e0 0%, #ffedb8 100%);
+  background: linear-gradient(135deg, #fffbe6 0%, #fff0a0 100%);
+  border-left: 4px solid #f59e0b;
 }
 
 .task-card[data-priority="low"] {
-  background: linear-gradient(135deg, #edfaf3 0%, #c8f0dc 100%);
+  background: linear-gradient(135deg, #e8fff4 0%, #b8f0d8 100%);
+  border-left: 4px solid #00b894;
 }
 
 .task-card:last-child {
@@ -1184,13 +1234,17 @@ body.dark-mode .clear-completed-btn {
   flex-direction: column;
   gap: 4px;
   min-width: 0;
+  flex: 1;
 }
 
 .task-text {
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
   word-break: break-word;
   line-height: 1.3;
+  width: 100%;
+  display: block;
+  color: var(--text-main);
 }
 
 .task-text.completed {
@@ -1245,17 +1299,22 @@ body.dark-mode .clear-completed-btn {
 
 .task-actions {
   display: flex;
-  gap: 6px;
+  flex-direction: column;
+  gap: 5px;
   flex-shrink: 0;
+  align-items: flex-end;
 }
 
 .task-action-btn {
   border: none;
   border-radius: 10px;
-  padding: 8px 12px;
+  padding: 5px 10px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12px;
+  white-space: nowrap;
+  min-width: 60px;
+  text-align: center;
 }
 
 .edit-btn {
@@ -2151,12 +2210,18 @@ body.dark-mode .habit-delete-btn:hover {
   }
 
   .tab-icon {
-    font-size: 22px;
+    font-size: 26px;
+    transition: transform 0.2s;
   }
 
   .tab-label {
     font-size: 10px;
-    font-weight: 500;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+
+  .tab-btn.active .tab-icon {
+    transform: scale(1.15);
   }
 
   .tab-btn.active {

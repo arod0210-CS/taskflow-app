@@ -1441,6 +1441,15 @@ document.addEventListener("DOMContentLoaded", () => {
     return t("mediumBadge");
   }
 
+  function formatDueDate(dateStr) {
+    if (!dateStr) return "";
+    const [y, m, d] = dateStr.split("-").map(Number);
+    const date = new Date(y, m - 1, d);
+    return date.toLocaleDateString(State.language === "es" ? "es-ES" : "en-US", {
+      month: "short", day: "numeric"
+    });
+  }
+
   function buildTaskElement(task) {
     const li = document.createElement("li");
     li.className = "task-card";
@@ -1448,6 +1457,7 @@ document.addEventListener("DOMContentLoaded", () => {
     li.dataset.id = task.id;
     li.dataset.priority = normalizePriority(task.priority);
 
+    if (task.completed) li.classList.add("completed-card");
     if (task.dueDate && !task.completed) {
       const today = getTodayString();
       if (task.dueDate < today) li.classList.add("overdue");
@@ -1478,7 +1488,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (task.dueDate) {
       const dateSpan = document.createElement("span");
       dateSpan.className = "due-date";
-      dateSpan.textContent = `${t("duePrefix")}: ${task.dueDate}`;
+      dateSpan.textContent = `${t("duePrefix")}: ${formatDueDate(task.dueDate)}`;
       meta.appendChild(dateSpan);
     }
 
