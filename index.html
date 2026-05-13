@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#007aff" />
+  <meta name="theme-color" content="#7c3aed" />
 </head>
 <body>
   <div class="app-shell">
@@ -15,16 +15,20 @@
 
       <!-- ===== PERSISTENT TOP BAR ===== -->
       <div class="top-bar">
-        <div>
-          <p class="eyebrow" id="eyebrowText">Stay organized</p>
-          <h1 class="logo-text">TaskFlow</h1>
+        <div class="top-bar-left">
+          <div class="user-avatar">🎯</div>
+          <div class="greeting-block">
+            <h1 class="greeting-text" id="greetingText">Hello!</h1>
+            <div class="date-box" id="todayDate"></div>
+          </div>
         </div>
 
-        <div class="top-bar-right">
-          <div class="date-box" id="todayDate"></div>
+        <!-- hidden elements kept for JS compatibility -->
+        <p class="hidden" id="eyebrowText"></p>
 
+        <div class="top-bar-right">
           <button id="settingsBtn" class="hamburger-btn" type="button" aria-label="Menu">
-            <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <line x1="3" y1="12" x2="21" y2="12"></line>
               <line x1="3" y1="6" x2="21" y2="6"></line>
               <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -105,13 +109,23 @@
       <!-- ===== TASKS PANEL ===== -->
       <div class="tab-panel active" id="panel-tasks" role="tabpanel" aria-labelledby="tab-tasks">
 
-        <div class="quote-card quote-card-full">
-          <svg class="quote-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"></path>
-            <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"></path>
-          </svg>
+        <!-- Hero Card -->
+        <div class="hero-card" id="heroCard">
+          <div class="hero-card-content">
+            <div class="hero-card-label">Your Plan</div>
+            <div class="hero-card-title" id="heroTitle">Let's get started!</div>
+            <div class="hero-card-sub" id="heroSub">Ready to be productive today?</div>
+          </div>
+          <div class="hero-card-deco">🎯</div>
+        </div>
+
+        <!-- Week Calendar Strip -->
+        <div class="week-strip" id="weekStrip"></div>
+
+        <!-- Hidden quote elements kept for JS compatibility -->
+        <div class="hidden">
           <div class="quote-content">
-            <p id="quoteText" class="quote-text">"Loading inspiration..."</p>
+            <p id="quoteText" class="quote-text"></p>
             <span id="quoteAuthor" class="quote-author"></span>
           </div>
         </div>
