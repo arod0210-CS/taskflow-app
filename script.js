@@ -666,6 +666,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const locale = State.language === "es" ? "es-ES" : "en-US";
     const dateOptions = { weekday: "short", month: "short", day: "numeric", year: "numeric" };
     todayDate.textContent = new Date().toLocaleDateString(locale, dateOptions);
+
+    const greetingEl = document.getElementById("greetingText");
+    if (greetingEl) {
+      const hour = new Date().getHours();
+      if (State.language === "es") {
+        greetingEl.textContent = hour < 12 ? "¡Buenos días!" : hour < 18 ? "¡Buenas tardes!" : "¡Buenas noches!";
+      } else {
+        greetingEl.textContent = hour < 12 ? "Good morning!" : hour < 18 ? "Good afternoon!" : "Good evening!";
+      }
+    }
   }
 
   function updateEditModeUI() {
@@ -1086,6 +1096,52 @@ document.addEventListener("DOMContentLoaded", () => {
     card.appendChild(info);
     card.appendChild(meta);
     return card;
+  }
+
+  function renderHeroCard(todoCount, streak) {
+    const heroTitle = document.getElementById("heroTitle");
+    const heroSub = document.getElementById("heroSub");
+    const heroDeco = document.querySelector(".hero-card-deco");
+    if (!heroTitle) return;
+
+    if (todoCount === 0) {
+      heroTitle.textContent = State.language === "es" ? "¡Todo listo! 🎉" : "All done! 🎉";
+      heroSub.textContent = State.language === "es" ? "¡Completaste todo hoy!" : "You crushed it today!";
+      if (heroDeco) heroDeco.textContent = "🏆";
+    } else {
+      heroTitle.textContent = State.language === "es"
+        ? `${todoCount} tarea${todoCount !== 1 ? "s" : ""} pendiente${todoCount !== 1 ? "s" : ""}`
+        : `${todoCount} task${todoCount !== 1 ? "s" : ""} remaining`;
+      heroSub.textContent = streak > 1
+        ? `🔥 ${streak}${State.language === "es" ? " días seguidos" : "-day streak!"}`
+        : (State.language === "es" ? "¡Hagamos progreso hoy!" : "Let's make progress today!");
+      if (heroDeco) heroDeco.textContent = "🎯";
+    }
+  }
+
+  function renderWeekStrip() {
+    const strip = document.getElementById("weekStrip");
+    if (!strip) return;
+    const today = new Date();
+    const todayStr = getTodayString();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+    const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const dayLabelsEs = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+    const labels = State.language === "es" ? dayLabelsEs : dayLabels;
+
+    strip.innerHTML = labels.map((label, i) => {
+      const d = new Date(startOfWeek);
+      d.setDate(startOfWeek.getDate() + i);
+      const dStr = d.toISOString().slice(0, 10);
+      const isToday = dStr === todayStr;
+      const hasTasks = State.tasks.some((t) => !t.completed && t.dueDate === dStr);
+      return `<div class="week-day ${isToday ? "week-day-today" : ""}">
+        <span class="week-day-label">${label}</span>
+        <span class="week-day-num">${d.getDate()}</span>
+        ${hasTasks ? '<span class="week-dot"></span>' : '<span class="week-dot-empty"></span>'}
+      </div>`;
+    }).join("");
   }
 
   function renderHabits() {
@@ -1554,6 +1610,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     clearCompletedBtn.disabled = doneTasks.length === 0;
 
+    renderHeroCard(todoTasks.length, state.player.streak);
+    renderWeekStrip();
     renderGamification();
     renderBadges();
     renderAnalytics();
