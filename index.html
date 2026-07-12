@@ -1,401 +1,498 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TaskFlow</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#7c3aed" />
-</head>
-<body>
-  <div class="app-shell">
-    <div class="container">
-
-      <!-- ===== PERSISTENT TOP BAR ===== -->
-      <div class="top-bar">
-        <div class="top-bar-left">
-          <div class="user-avatar">🎯</div>
-          <div class="greeting-block">
-            <h1 class="greeting-text" id="greetingText">Hello!</h1>
-            <div class="date-box" id="todayDate"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TaskFlow</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#7c3aed" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <main class="container">
+        <!-- ===== PERSISTENT TOP BAR ===== -->
+        <div class="top-bar">
+          <div class="top-bar-left">
+            <div class="user-avatar">🎯</div>
+            <div class="greeting-block">
+              <h1 class="greeting-text" id="greetingText">Hello!</h1>
+              <div class="date-box" id="todayDate"></div>
+            </div>
           </div>
-        </div>
 
-        <!-- hidden elements kept for JS compatibility -->
-        <p class="hidden" id="eyebrowText"></p>
+          <!-- hidden elements kept for JS compatibility -->
+          <p class="hidden" id="eyebrowText"></p>
 
-        <div class="top-bar-right">
-          <button id="settingsBtn" class="hamburger-btn" type="button" aria-label="Menu">
-            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-          </button>
+          <div class="top-bar-right">
+            <button
+              id="settingsBtn"
+              class="hamburger-btn"
+              type="button"
+              aria-label="Open settings"
+              aria-expanded="false"
+              aria-controls="settingsPanel"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                stroke="currentColor"
+                stroke-width="2.5"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
 
-          <div id="settingsPanel" class="hamburger-menu hidden">
-            <div class="menu-section">
-              <h3 id="settingsHeaderText">Settings</h3>
-              <div class="setting-item">
-                <span id="darkModeLabel">Dark mode</span>
-                <label class="theme-switch">
-                  <input type="checkbox" id="darkModeToggle" />
-                  <span class="slider"><span class="slider-icon">🌙</span></span>
+            <div id="settingsPanel" class="hamburger-menu hidden" role="menu" aria-labelledby="settingsHeaderText">
+              <div class="menu-section">
+                <h3 id="settingsHeaderText">Settings</h3>
+                <div class="setting-item">
+                  <span id="darkModeLabel">Dark mode</span>
+                  <label class="theme-switch">
+                    <input type="checkbox" id="darkModeToggle" />
+                    <span class="slider"><span class="slider-icon">🌙</span></span>
+                  </label>
+                </div>
+                <label class="setting-item setting-select-row">
+                  <span id="languageLabel">Language</span>
+                  <select id="languageSelect">
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                  </select>
                 </label>
               </div>
-              <label class="setting-item setting-select-row">
-                <span id="languageLabel">Language</span>
-                <select id="languageSelect">
-                  <option value="en">English</option>
-                  <option value="es">Español</option>
-                </select>
-              </label>
-            </div>
 
-            <div class="menu-section">
-              <h3 id="themesHeaderText">Themes</h3>
-              <label class="setting-item setting-select-row">
-                <span id="themeColorLabel">Theme color</span>
-                <select id="themeSelect">
-                  <option value="default">Default</option>
-                  <option value="sunset">Sunset</option>
-                  <option value="mint">Mint</option>
-                  <option value="galaxy">Galaxy</option>
-                  <option value="rose">Rose</option>
-                  <option value="ocean">Ocean</option>
-                </select>
-              </label>
-            </div>
+              <div class="menu-section">
+                <h3 id="themesHeaderText">Themes</h3>
+                <label class="setting-item setting-select-row">
+                  <span id="themeColorLabel">Theme color</span>
+                  <select id="themeSelect">
+                    <option value="default">Default</option>
+                    <option value="sunset">Sunset</option>
+                    <option value="mint">Mint</option>
+                    <option value="galaxy">Galaxy</option>
+                    <option value="rose">Rose</option>
+                    <option value="ocean">Ocean</option>
+                  </select>
+                </label>
+              </div>
 
-            <div class="menu-section">
-              <h3 id="dataHeaderText">Data Management</h3>
-              <button id="exportBtn" class="setting-action-btn" type="button">Export Data (.json)</button>
-              <label class="setting-action-btn neutral-action upload-label">
-                <span id="importBtnText">Import Data</span>
-                <input type="file" id="importFile" accept=".json" hidden />
-              </label>
-            </div>
+              <div class="menu-section">
+                <h3 id="dataHeaderText">Data Management</h3>
+                <p id="backupNoticeText" class="backup-notice">
+                  Your TaskFlow information is stored locally in this browser. Export your data before clearing browser
+                  storage or switching devices.
+                </p>
+                <button id="exportBtn" class="setting-action-btn" type="button">Export Data (.json)</button>
+                <label class="setting-action-btn neutral-action upload-label">
+                  <span id="importBtnText">Import Data</span>
+                  <input type="file" id="importFile" accept=".json" hidden />
+                </label>
+              </div>
 
-            <div class="menu-section">
-              <h3 id="dangerZoneHeaderText">Danger Zone</h3>
-              <button id="resetBtn" class="setting-action-btn danger-action" type="button">Reset</button>
-            </div>
+              <div class="menu-section">
+                <h3 id="dangerZoneHeaderText">Danger Zone</h3>
+                <button id="resetBtn" class="setting-action-btn danger-action" type="button">Reset</button>
+              </div>
 
-            <div class="menu-section">
-              <button id="editModeToggle" class="setting-action-btn" type="button">Edit Mode: OFF</button>
+              <div class="menu-section">
+                <button id="editModeToggle" class="setting-action-btn" type="button">Edit Mode: OFF</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- ===== TAB NAVIGATION ===== -->
-      <nav class="tab-nav" role="tablist" aria-label="Main navigation">
-        <button class="tab-btn active" role="tab" data-tab="tasks" id="tab-tasks" aria-selected="true" aria-controls="panel-tasks">
-          <span class="tab-icon">📋</span>
-          <span class="tab-label" id="tabTasksLabel">Tasks</span>
-        </button>
-        <button class="tab-btn" role="tab" data-tab="habits" id="tab-habits" aria-selected="false" aria-controls="panel-habits">
-          <span class="tab-icon">🌅</span>
-          <span class="tab-label" id="tabHabitsLabel">Habits</span>
-        </button>
-        <button class="tab-btn" role="tab" data-tab="stats" id="tab-stats" aria-selected="false" aria-controls="panel-stats">
-          <span class="tab-icon">📊</span>
-          <span class="tab-label" id="tabStatsLabel">Stats</span>
-        </button>
-      </nav>
+        <!-- ===== TAB NAVIGATION ===== -->
+        <nav class="tab-nav" role="tablist" aria-label="Main navigation">
+          <button
+            class="tab-btn active"
+            type="button"
+            role="tab"
+            data-tab="tasks"
+            id="tab-tasks"
+            aria-selected="true"
+            aria-controls="panel-tasks"
+          >
+            <span class="tab-icon">📋</span>
+            <span class="tab-label" id="tabTasksLabel">Tasks</span>
+          </button>
+          <button
+            class="tab-btn"
+            type="button"
+            role="tab"
+            data-tab="habits"
+            id="tab-habits"
+            aria-selected="false"
+            aria-controls="panel-habits"
+          >
+            <span class="tab-icon">🌅</span>
+            <span class="tab-label" id="tabHabitsLabel">Habits</span>
+          </button>
+          <button
+            class="tab-btn"
+            type="button"
+            role="tab"
+            data-tab="stats"
+            id="tab-stats"
+            aria-selected="false"
+            aria-controls="panel-stats"
+          >
+            <span class="tab-icon">📊</span>
+            <span class="tab-label" id="tabStatsLabel">Stats</span>
+          </button>
+        </nav>
 
-      <!-- ===== TASKS PANEL ===== -->
-      <div class="tab-panel active" id="panel-tasks" role="tabpanel" aria-labelledby="tab-tasks">
-
-        <!-- Hero Card -->
-        <div class="hero-card" id="heroCard">
-          <div class="hero-card-content">
-            <div class="hero-card-label">Your Plan</div>
-            <div class="hero-card-title" id="heroTitle">Let's get started!</div>
-            <div class="hero-card-sub" id="heroSub">Ready to be productive today?</div>
+        <!-- ===== TASKS PANEL ===== -->
+        <div class="tab-panel active" id="panel-tasks" role="tabpanel" aria-labelledby="tab-tasks">
+          <!-- Hero Card -->
+          <div class="hero-card" id="heroCard">
+            <div class="hero-card-content">
+              <div class="hero-card-label">Your Plan</div>
+              <div class="hero-card-title" id="heroTitle">Let's get started!</div>
+              <div class="hero-card-sub" id="heroSub">Ready to be productive today?</div>
+            </div>
+            <div class="hero-card-deco">🎯</div>
           </div>
-          <div class="hero-card-deco">🎯</div>
+
+          <!-- Week Calendar Strip -->
+          <div class="week-strip" id="weekStrip"></div>
+
+          <!-- Hidden quote elements kept for JS compatibility -->
+          <div class="hidden">
+            <div class="quote-content">
+              <p id="quoteText" class="quote-text"></p>
+              <span id="quoteAuthor" class="quote-author"></span>
+            </div>
+          </div>
+
+          <div class="task-input">
+            <label class="sr-only" for="taskInput" id="taskInputLabel">Task description</label>
+            <input type="text" id="taskInput" placeholder="Add a new task..." autocomplete="off" />
+            <label class="sr-only" for="dueDateInput" id="dueDateInputLabel">Due Date</label>
+            <input type="date" id="dueDateInput" />
+            <label class="sr-only" for="priorityInput" id="priorityInputLabel">Priority</label>
+            <select id="priorityInput">
+              <option value="high">High Priority</option>
+              <option value="medium" selected>Medium Priority</option>
+              <option value="low">Low Priority</option>
+            </select>
+            <button id="addTaskBtn" type="button">Add Task</button>
+          </div>
+          <div class="notes-expander">
+            <button id="notesToggle" class="notes-toggle-btn" type="button" aria-expanded="false">
+              <span id="notesToggleLabel">+ Add Notes</span>
+              <span class="notes-chevron">▾</span>
+            </button>
+            <div id="notesArea" class="notes-area hidden">
+              <label class="sr-only" for="notesInput" id="notesInputLabel">Notes</label>
+              <textarea id="notesInput" rows="3" placeholder="Optional notes..."></textarea>
+            </div>
+          </div>
+
+          <div class="view-bar">
+            <div class="view-group">
+              <button class="view-btn active" type="button" data-view="all" id="viewAllBtn">All</button>
+              <button class="view-btn" type="button" data-view="today" id="viewTodayBtn">Today</button>
+              <button class="view-btn" type="button" data-view="week" id="viewWeekBtn">Week</button>
+              <button class="view-btn" type="button" data-view="month" id="viewMonthBtn">Month</button>
+            </div>
+            <label class="sr-only" for="searchInput" id="searchInputLabel">Search tasks</label>
+            <input type="text" id="searchInput" placeholder="Search tasks..." autocomplete="off" />
+          </div>
+
+          <div class="section">
+            <div class="section-header">
+              <h2 id="todoHeading">To Do</h2>
+            </div>
+            <ul id="todoList" class="task-list"></ul>
+          </div>
+
+          <div class="section">
+            <div class="section-header">
+              <h2 id="completedHeading">Completed</h2>
+              <button id="clearCompletedBtn" class="clear-completed-btn" type="button">Clear Completed</button>
+            </div>
+            <ul id="completedList" class="task-list"></ul>
+          </div>
         </div>
 
-        <!-- Week Calendar Strip -->
-        <div class="week-strip" id="weekStrip"></div>
+        <!-- ===== HABITS PANEL ===== -->
+        <div class="tab-panel" id="panel-habits" role="tabpanel" aria-labelledby="tab-habits">
+          <div class="habits-header">
+            <div>
+              <h2 id="habitsTitle" class="habits-heading">Daily Habits</h2>
+              <p id="habitsSubtitle" class="habits-subtitle">Your daily routines</p>
+            </div>
+            <div class="habits-progress-pill" id="habitsProgressPill">
+              <span id="habitsDoneCount">0</span>/<span id="habitsTotalCount">0</span>
+              <span id="habitsDoneLabel"> done</span>
+            </div>
+          </div>
 
-        <!-- Hidden quote elements kept for JS compatibility -->
-        <div class="hidden">
-          <div class="quote-content">
-            <p id="quoteText" class="quote-text"></p>
-            <span id="quoteAuthor" class="quote-author"></span>
+          <div id="reminderBanner" class="reminder-banner hidden">
+            <span id="reminderBannerText"></span>
+            <button
+              id="reminderBannerClose"
+              class="reminder-banner-close"
+              type="button"
+              aria-label="Dismiss reminder message"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div id="habitsList" class="habits-list"></div>
+
+          <div class="add-habit-form" id="addHabitForm">
+            <div class="add-habit-fields">
+              <label class="sr-only" for="habitEmojiInput" id="habitEmojiInputLabel">Habit emoji</label>
+              <input type="text" id="habitEmojiInput" class="habit-emoji-picker" maxlength="2" placeholder="🌟" />
+              <label class="sr-only" for="habitNameInput" id="habitNameInputLabel">Habit name</label>
+              <input type="text" id="habitNameInput" placeholder="New habit name..." autocomplete="off" />
+              <label class="sr-only" for="habitReminderInput" id="habitReminderInputLabel"
+                >Optional reminder time</label
+              >
+              <input type="time" id="habitReminderInput" title="Optional reminder time" />
+              <button id="addHabitBtn" type="button">Add</button>
+            </div>
+            <p id="addHabitHint" class="add-habit-hint">Reminders only fire while this page is open</p>
           </div>
         </div>
 
-        <div class="task-input">
-          <input type="text" id="taskInput" placeholder="Add a new task..." />
-          <input type="date" id="dueDateInput" />
-          <select id="priorityInput">
+        <!-- ===== STATS PANEL ===== -->
+        <div class="tab-panel" id="panel-stats" role="tabpanel" aria-labelledby="tab-stats">
+          <div class="stats-card">
+            <div class="stats-row">
+              <div class="stat">
+                <span class="stat-label" id="tasksLeftLabel">Tasks Left</span>
+                <span class="stat-number" id="tasksLeft">0</span>
+              </div>
+              <div class="stat">
+                <span class="stat-label" id="tasksCompletedLabel">Completed</span>
+                <span class="stat-number" id="tasksCompleted">0</span>
+              </div>
+            </div>
+            <div class="progress-section">
+              <div class="progress-text">
+                <span id="taskProgressLabel">Task Progress</span>
+                <span id="progressPercent">0%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="gamify-grid">
+            <div class="level-card collapsed" id="levelCard">
+              <button
+                class="level-toggle"
+                id="levelToggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="levelBody"
+              >
+                <span class="level-toggle-left">
+                  <span class="mini-label" id="playerRankMiniLabel">Player Rank</span>
+                  <span id="rankTitle" class="level-rank">Starter</span>
+                </span>
+                <span class="level-toggle-right">
+                  <span id="miniPlayerLevel" class="mini-info-pill">Lv 1</span>
+                  <span id="miniXpProgressText" class="mini-info-pill">0 / 100 XP</span>
+                  <span id="levelToggleArrow" class="level-toggle-arrow">▾</span>
+                </span>
+              </button>
+
+              <div class="collapsed-xp-preview">
+                <div class="progress-bar xp-bar">
+                  <div class="progress-fill xp-fill" id="collapsedXpFill"></div>
+                </div>
+              </div>
+
+              <div class="level-body" id="levelBody">
+                <div class="level-top">
+                  <div class="level-summary-text">
+                    <p class="mini-label" id="playerRankExpandedLabel">Player Rank</p>
+                    <h3 class="level-rank" id="progressSummaryLabel">Progress Summary</h3>
+                  </div>
+                  <div class="level-badge">
+                    <span class="mini-label" id="levelLabel">Level</span>
+                    <span id="playerLevel" class="level-number">1</span>
+                  </div>
+                </div>
+
+                <div class="xp-section">
+                  <div class="progress-text">
+                    <span id="xpProgressLabel">XP Progress</span>
+                    <span id="xpProgressText">0 / 100 XP</span>
+                  </div>
+                  <div class="progress-bar xp-bar">
+                    <div class="progress-fill xp-fill" id="xpFill"></div>
+                  </div>
+                </div>
+
+                <div class="player-stats-row">
+                  <div class="player-stat-pill">
+                    <span class="player-stat-emoji">🪙</span>
+                    <div>
+                      <span class="player-stat-label" id="coinsLabel">Coins</span>
+                      <strong id="playerCoins">0</strong>
+                    </div>
+                  </div>
+                  <div class="player-stat-pill">
+                    <span class="player-stat-emoji">🔥</span>
+                    <div>
+                      <span class="player-stat-label" id="streakLabel">Streak</span>
+                      <strong id="playerStreak">0 days</strong>
+                    </div>
+                  </div>
+                  <div class="player-stat-pill">
+                    <span class="player-stat-emoji">✅</span>
+                    <div>
+                      <span class="player-stat-label" id="doneTodayLabel">Done Today</span>
+                      <strong id="doneToday">0</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="reward-rules">
+                  <span id="rewardLow">Low: +10 XP / +2 coins</span>
+                  <span id="rewardMedium">Medium: +20 XP / +4 coins</span>
+                  <span id="rewardHigh">High: +35 XP / +7 coins</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="challenge-card collapsed" id="challengeCard">
+              <button
+                class="challenge-toggle"
+                id="challengeToggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="challengeBody"
+              >
+                <span class="challenge-toggle-left">
+                  <span class="mini-label" id="dailyChallengesLabel">Daily Challenges</span>
+                  <span id="todayMissionsLabel" class="challenge-heading">Today's Missions</span>
+                </span>
+                <span class="challenge-toggle-right">
+                  <span id="challengeCount" class="challenge-count">0/3</span>
+                  <span id="challengeToggleArrow" class="level-toggle-arrow">▾</span>
+                </span>
+              </button>
+              <div class="challenge-body" id="challengeBody">
+                <div id="challengeList" class="challenge-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="badges-section" id="badgesSection">
+            <button
+              class="badges-toggle"
+              id="badgesToggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="badgesBody"
+            >
+              <span id="achievementsHeaderText">Achievements</span>
+              <span class="toggle-count-group">
+                <span id="badgesCount" class="challenge-count">0/8</span>
+                <span class="level-toggle-arrow" id="badgesToggleArrow">▾</span>
+              </span>
+            </button>
+            <div class="badges-body hidden" id="badgesBody">
+              <div id="badgesList" class="badges-grid"></div>
+            </div>
+          </div>
+
+          <div class="analytics-section" id="analyticsSection">
+            <button
+              class="analytics-toggle"
+              id="analyticsToggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="analyticsBody"
+            >
+              <span id="analyticsHeaderText">Weekly Progress</span>
+              <span class="level-toggle-arrow" id="analyticsToggleArrow">▾</span>
+            </button>
+            <div class="analytics-body hidden" id="analyticsBody">
+              <div id="analyticsChart" class="analytics-chart"></div>
+            </div>
+          </div>
+        </div>
+        <!-- end panel-stats -->
+      </main>
+    </div>
+
+    <!-- ===== EDIT TASK MODAL ===== -->
+    <div id="editModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="editTaskTitle">
+      <div class="modal-card">
+        <h3 class="modal-title" id="editTaskTitle">Edit Task</h3>
+
+        <div class="modal-field">
+          <label for="editTextInput" id="editTaskLabel">Task</label>
+          <input type="text" id="editTextInput" placeholder="Task description" />
+        </div>
+
+        <div class="modal-field">
+          <label for="editDateInput" id="editDueDateLabel">Due Date</label>
+          <input type="date" id="editDateInput" />
+        </div>
+
+        <div class="modal-field">
+          <label for="editPriorityInput" id="editPriorityLabel">Priority</label>
+          <select id="editPriorityInput">
             <option value="high">High Priority</option>
             <option value="medium" selected>Medium Priority</option>
             <option value="low">Low Priority</option>
           </select>
-          <button id="addTaskBtn" type="button">Add Task</button>
-        </div>
-        <div class="notes-expander">
-          <button id="notesToggle" class="notes-toggle-btn" type="button" aria-expanded="false">
-            <span id="notesToggleLabel">+ Add Notes</span>
-            <span class="notes-chevron">▾</span>
-          </button>
-          <div id="notesArea" class="notes-area hidden">
-            <textarea id="notesInput" rows="3" placeholder="Optional notes..."></textarea>
-          </div>
         </div>
 
-        <div class="view-bar">
-          <div class="view-group">
-            <button class="view-btn active" type="button" data-view="all" id="viewAllBtn">All</button>
-            <button class="view-btn" type="button" data-view="today" id="viewTodayBtn">Today</button>
-            <button class="view-btn" type="button" data-view="week" id="viewWeekBtn">Week</button>
-            <button class="view-btn" type="button" data-view="month" id="viewMonthBtn">Month</button>
-          </div>
-          <input type="text" id="searchInput" placeholder="Search tasks..." />
+        <div class="modal-field">
+          <label for="editNotesInput" id="editNotesLabel">Notes</label>
+          <textarea id="editNotesInput" rows="3" placeholder="Optional notes..."></textarea>
         </div>
 
-        <div class="section">
-          <div class="section-header">
-            <h2 id="todoHeading">To Do</h2>
-          </div>
-          <ul id="todoList" class="task-list"></ul>
+        <div class="modal-actions">
+          <button id="editCancelBtn" class="modal-btn modal-btn-cancel" type="button">Cancel</button>
+          <button id="editSaveBtn" class="modal-btn modal-btn-save" type="button">Save</button>
         </div>
-
-        <div class="section">
-          <div class="section-header">
-            <h2 id="completedHeading">Completed</h2>
-            <button id="clearCompletedBtn" class="clear-completed-btn" type="button">Clear Completed</button>
-          </div>
-          <ul id="completedList" class="task-list"></ul>
-        </div>
-
-      </div>
-
-      <!-- ===== HABITS PANEL ===== -->
-      <div class="tab-panel" id="panel-habits" role="tabpanel" aria-labelledby="tab-habits">
-
-        <div class="habits-header">
-          <div>
-            <h2 id="habitsTitle" class="habits-heading">Daily Habits</h2>
-            <p id="habitsSubtitle" class="habits-subtitle">Your daily routines</p>
-          </div>
-          <div class="habits-progress-pill" id="habitsProgressPill">
-            <span id="habitsDoneCount">0</span>/<span id="habitsTotalCount">0</span>
-            <span id="habitsDoneLabel"> done</span>
-          </div>
-        </div>
-
-        <div id="reminderBanner" class="reminder-banner hidden">
-          <span id="reminderBannerText"></span>
-          <button id="reminderBannerClose" class="reminder-banner-close" type="button">✕</button>
-        </div>
-
-        <div id="habitsList" class="habits-list"></div>
-
-        <div class="add-habit-form" id="addHabitForm">
-          <div class="add-habit-fields">
-            <input type="text" id="habitEmojiInput" class="habit-emoji-picker" maxlength="2" placeholder="🌟" />
-            <input type="text" id="habitNameInput" placeholder="New habit name..." />
-            <input type="time" id="habitReminderInput" title="Optional reminder time" />
-            <button id="addHabitBtn" type="button">Add</button>
-          </div>
-          <p id="addHabitHint" class="add-habit-hint">Reminders only fire while this page is open</p>
-        </div>
-
-      </div>
-
-      <!-- ===== STATS PANEL ===== -->
-      <div class="tab-panel" id="panel-stats" role="tabpanel" aria-labelledby="tab-stats">
-
-        <div class="stats-card">
-          <div class="stats-row">
-            <div class="stat">
-              <span class="stat-label" id="tasksLeftLabel">Tasks Left</span>
-              <span class="stat-number" id="tasksLeft">0</span>
-            </div>
-            <div class="stat">
-              <span class="stat-label" id="tasksCompletedLabel">Completed</span>
-              <span class="stat-number" id="tasksCompleted">0</span>
-            </div>
-          </div>
-          <div class="progress-section">
-            <div class="progress-text">
-              <span id="taskProgressLabel">Task Progress</span>
-              <span id="progressPercent">0%</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" id="progressFill"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="gamify-grid">
-          <div class="level-card collapsed" id="levelCard">
-            <button class="level-toggle" id="levelToggle" type="button" aria-expanded="false" aria-controls="levelBody">
-              <div class="level-toggle-left">
-                <p class="mini-label" id="playerRankMiniLabel">Player Rank</p>
-                <h3 id="rankTitle" class="level-rank">Starter</h3>
-              </div>
-              <div class="level-toggle-right">
-                <span id="miniPlayerLevel" class="mini-info-pill">Lv 1</span>
-                <span id="miniXpProgressText" class="mini-info-pill">0 / 100 XP</span>
-                <span id="levelToggleArrow" class="level-toggle-arrow">▾</span>
-              </div>
-            </button>
-
-            <div class="collapsed-xp-preview">
-              <div class="progress-bar xp-bar">
-                <div class="progress-fill xp-fill" id="collapsedXpFill"></div>
-              </div>
-            </div>
-
-            <div class="level-body" id="levelBody">
-              <div class="level-top">
-                <div class="level-summary-text">
-                  <p class="mini-label" id="playerRankExpandedLabel">Player Rank</p>
-                  <h3 class="level-rank" id="progressSummaryLabel">Progress Summary</h3>
-                </div>
-                <div class="level-badge">
-                  <span class="mini-label" id="levelLabel">Level</span>
-                  <span id="playerLevel" class="level-number">1</span>
-                </div>
-              </div>
-
-              <div class="xp-section">
-                <div class="progress-text">
-                  <span id="xpProgressLabel">XP Progress</span>
-                  <span id="xpProgressText">0 / 100 XP</span>
-                </div>
-                <div class="progress-bar xp-bar">
-                  <div class="progress-fill xp-fill" id="xpFill"></div>
-                </div>
-              </div>
-
-              <div class="player-stats-row">
-                <div class="player-stat-pill">
-                  <span class="player-stat-emoji">🪙</span>
-                  <div>
-                    <span class="player-stat-label" id="coinsLabel">Coins</span>
-                    <strong id="playerCoins">0</strong>
-                  </div>
-                </div>
-                <div class="player-stat-pill">
-                  <span class="player-stat-emoji">🔥</span>
-                  <div>
-                    <span class="player-stat-label" id="streakLabel">Streak</span>
-                    <strong id="playerStreak">0 days</strong>
-                  </div>
-                </div>
-                <div class="player-stat-pill">
-                  <span class="player-stat-emoji">✅</span>
-                  <div>
-                    <span class="player-stat-label" id="doneTodayLabel">Done Today</span>
-                    <strong id="doneToday">0</strong>
-                  </div>
-                </div>
-              </div>
-
-              <div class="reward-rules">
-                <span id="rewardLow">Low: +10 XP / +2 coins</span>
-                <span id="rewardMedium">Medium: +20 XP / +4 coins</span>
-                <span id="rewardHigh">High: +35 XP / +7 coins</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="challenge-card collapsed" id="challengeCard">
-            <button class="challenge-toggle" id="challengeToggle" type="button" aria-expanded="false" aria-controls="challengeBody">
-              <div class="challenge-toggle-left">
-                <p class="mini-label" id="dailyChallengesLabel">Daily Challenges</p>
-                <h3 id="todayMissionsLabel">Today's Missions</h3>
-              </div>
-              <div class="challenge-toggle-right">
-                <div id="challengeCount" class="challenge-count">0/3</div>
-                <span id="challengeToggleArrow" class="level-toggle-arrow">▾</span>
-              </div>
-            </button>
-            <div class="challenge-body" id="challengeBody">
-              <div id="challengeList" class="challenge-list"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="badges-section" id="badgesSection">
-          <button class="badges-toggle" id="badgesToggle" type="button" aria-expanded="false" aria-controls="badgesBody">
-            <span id="achievementsHeaderText">Achievements</span>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span id="badgesCount" class="challenge-count">0/8</span>
-              <span class="level-toggle-arrow" id="badgesToggleArrow">▾</span>
-            </div>
-          </button>
-          <div class="badges-body hidden" id="badgesBody">
-            <div id="badgesList" class="badges-grid"></div>
-          </div>
-        </div>
-
-        <div class="analytics-section" id="analyticsSection">
-          <button class="analytics-toggle" id="analyticsToggle" type="button" aria-expanded="false" aria-controls="analyticsBody">
-            <span id="analyticsHeaderText">Weekly Progress</span>
-            <span class="level-toggle-arrow" id="analyticsToggleArrow">▾</span>
-          </button>
-          <div class="analytics-body hidden" id="analyticsBody">
-            <div id="analyticsChart" class="analytics-chart"></div>
-          </div>
-        </div>
-
-      </div>
-      <!-- end panel-stats -->
-
-    </div>
-  </div>
-
-  <!-- ===== EDIT TASK MODAL ===== -->
-  <div id="editModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Edit task">
-    <div class="modal-card">
-      <h3 class="modal-title" id="editTaskTitle">Edit Task</h3>
-
-      <div class="modal-field">
-        <label for="editTextInput" id="editTaskLabel">Task</label>
-        <input type="text" id="editTextInput" placeholder="Task description" />
-      </div>
-
-      <div class="modal-field">
-        <label for="editDateInput" id="editDueDateLabel">Due Date</label>
-        <input type="date" id="editDateInput" />
-      </div>
-
-      <div class="modal-field">
-        <label for="editPriorityInput" id="editPriorityLabel">Priority</label>
-        <select id="editPriorityInput">
-          <option value="high">High Priority</option>
-          <option value="medium" selected>Medium Priority</option>
-          <option value="low">Low Priority</option>
-        </select>
-      </div>
-
-      <div class="modal-field">
-        <label for="editNotesInput" id="editNotesLabel">Notes</label>
-        <textarea id="editNotesInput" rows="3" placeholder="Optional notes..."></textarea>
-      </div>
-
-      <div class="modal-actions">
-        <button id="editCancelBtn" class="modal-btn modal-btn-cancel" type="button">Cancel</button>
-        <button id="editSaveBtn" class="modal-btn modal-btn-save" type="button">Save</button>
       </div>
     </div>
-  </div>
 
-  <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="false"></div>
-  <div id="levelUpBanner" class="level-up-banner hidden" aria-live="assertive">
-    <span id="levelUpText"></span>
-  </div>
+    <div
+      id="confirmDialog"
+      class="modal-overlay hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirmDialogTitle"
+      aria-describedby="confirmDialogMessage"
+    >
+      <div class="modal-card confirm-card">
+        <h3 class="modal-title" id="confirmDialogTitle">Confirm action</h3>
+        <p class="confirm-message" id="confirmDialogMessage"></p>
+        <div class="modal-actions">
+          <button id="confirmCancelBtn" class="modal-btn modal-btn-cancel" type="button">Cancel</button>
+          <button id="confirmActionBtn" class="modal-btn modal-btn-danger" type="button">Confirm</button>
+        </div>
+      </div>
+    </div>
 
-  <script src="script.js"></script>
-</body>
+    <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="false"></div>
+    <div id="statusRegion" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div id="levelUpBanner" class="level-up-banner hidden" aria-live="assertive">
+      <span id="levelUpText"></span>
+    </div>
+
+    <script src="taskflow-core.js"></script>
+    <script src="script.js"></script>
+  </body>
 </html>
