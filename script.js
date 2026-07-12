@@ -5,6 +5,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const HABITS_KEY = "taskflow-habits-v1";
   const TAB_KEY = "taskflow-active-tab-v1";
   const THEME_CLASSES = ["theme-sunset", "theme-mint", "theme-galaxy", "theme-rose", "theme-ocean"];
+  const Core = window.TaskFlowCore;
+  const BACKUP_SCHEMA_VERSION = 1;
 
   const DEFAULT_HABITS = [
     { emoji: "🚿", name: "Shower" },
@@ -49,6 +51,8 @@ document.addEventListener("DOMContentLoaded", () => {
       addTask: "Add Task",
       reset: "Reset",
       searchPlaceholder: "Search tasks...",
+      openSettings: "Open settings",
+      closeSettings: "Close settings",
       all: "All",
       today: "Today",
       week: "Week",
@@ -69,10 +73,39 @@ document.addEventListener("DOMContentLoaded", () => {
       mediumBadge: "👷 Medium",
       lowBadge: "🌱 Low",
       duePrefix: "Due",
+      emptyTasksTitle: "No tasks yet.",
+      emptyTasksMessage: "Add your first mission to begin earning XP.",
+      noResultsTitle: "No matching tasks.",
+      noResultsMessage: "No tasks match your current search or filter.",
+      noCompletedTitle: "No completed tasks yet.",
+      noCompletedMessage: "Complete a mission to move it here.",
       emptyView: "No tasks in this view.",
-      clearConfirm: "Clear all tasks and reset game progress?",
+      clearConfirm:
+        "This will permanently delete all tasks, habits, achievements, XP, coins, streaks, and saved settings from this browser. This action cannot be undone.",
       importSuccess: "Import successful!",
+      importReplaceConfirm:
+        "This will replace your current tasks, habits, achievements, XP, coins, streaks, and saved settings with the imported backup. Continue?",
+      importError: "This backup could not be imported. Choose a valid TaskFlow JSON backup.",
       invalidFile: "Invalid file.",
+      exportSuccess: "Backup exported.",
+      taskAddedStatus: "Task added.",
+      taskCompletedStatus: "Task completed.",
+      taskUncompletedStatus: "Task marked incomplete.",
+      taskDeletedStatus: "Task deleted.",
+      taskRestoredStatus: "Task restored.",
+      habitAddedStatus: "Habit added.",
+      habitCompletedStatus: "Habit completed.",
+      habitUncompletedStatus: "Habit marked incomplete.",
+      habitDeletedStatus: "Habit deleted.",
+      completedClearedStatus: "Completed tasks cleared.",
+      resetStatus: "TaskFlow data reset.",
+      undo: "Undo",
+      confirmAction: "Confirm",
+      confirmTitle: "Confirm action",
+      deleteTaskConfirm: "Delete this task? You can undo this for a short time.",
+      deleteHabitConfirm: "This will permanently delete this habit and its streak history.",
+      localStorageNotice:
+        "Your TaskFlow information is stored locally in this browser. Export your data before clearing browser storage or switching devices.",
       complete3Tasks: "Complete 3 tasks today",
       complete1High: "Complete 1 high-priority task",
       complete2Medium: "Complete 2 medium tasks",
@@ -93,7 +126,8 @@ document.addEventListener("DOMContentLoaded", () => {
       taskLegend: "Task Legend",
       dangerZone: "Danger Zone",
       clearCompleted: "Clear Completed",
-      clearCompletedConfirm: "Clear all completed tasks?",
+      clearCompletedConfirm:
+        "This will permanently delete all completed tasks from this browser. This action cannot be undone.",
       notesLabel: "Notes",
       addNotes: "+ Add Notes",
       optionalNotesPlaceholder: "Optional notes...",
@@ -171,6 +205,8 @@ document.addEventListener("DOMContentLoaded", () => {
       addTask: "Agregar tarea",
       reset: "Reiniciar",
       searchPlaceholder: "Buscar tareas...",
+      openSettings: "Abrir configuración",
+      closeSettings: "Cerrar configuración",
       all: "Todas",
       today: "Hoy",
       week: "Semana",
@@ -191,10 +227,39 @@ document.addEventListener("DOMContentLoaded", () => {
       mediumBadge: "👷 Media",
       lowBadge: "🌱 Baja",
       duePrefix: "Vence",
+      emptyTasksTitle: "Aún no hay tareas.",
+      emptyTasksMessage: "Agrega tu primera misión para empezar a ganar XP.",
+      noResultsTitle: "No hay tareas coincidentes.",
+      noResultsMessage: "Ninguna tarea coincide con tu búsqueda o filtro actual.",
+      noCompletedTitle: "Aún no hay tareas completadas.",
+      noCompletedMessage: "Completa una misión para moverla aquí.",
       emptyView: "No hay tareas en esta vista.",
-      clearConfirm: "¿Borrar todas las tareas y reiniciar el progreso del juego?",
+      clearConfirm:
+        "Esto eliminará permanentemente todas las tareas, hábitos, logros, XP, monedas, rachas y configuraciones guardadas de este navegador. Esta acción no se puede deshacer.",
       importSuccess: "¡Importación exitosa!",
+      importReplaceConfirm:
+        "Esto reemplazará tus tareas, hábitos, logros, XP, monedas, rachas y configuraciones guardadas actuales con la copia importada. ¿Continuar?",
+      importError: "No se pudo importar esta copia. Elige un respaldo JSON válido de TaskFlow.",
       invalidFile: "Archivo inválido.",
+      exportSuccess: "Respaldo exportado.",
+      taskAddedStatus: "Tarea agregada.",
+      taskCompletedStatus: "Tarea completada.",
+      taskUncompletedStatus: "Tarea marcada como incompleta.",
+      taskDeletedStatus: "Tarea eliminada.",
+      taskRestoredStatus: "Tarea restaurada.",
+      habitAddedStatus: "Hábito agregado.",
+      habitCompletedStatus: "Hábito completado.",
+      habitUncompletedStatus: "Hábito marcado como incompleto.",
+      habitDeletedStatus: "Hábito eliminado.",
+      completedClearedStatus: "Tareas completadas eliminadas.",
+      resetStatus: "Datos de TaskFlow reiniciados.",
+      undo: "Deshacer",
+      confirmAction: "Confirmar",
+      confirmTitle: "Confirmar acción",
+      deleteTaskConfirm: "¿Eliminar esta tarea? Puedes deshacerlo por poco tiempo.",
+      deleteHabitConfirm: "Esto eliminará permanentemente este hábito y su historial de racha.",
+      localStorageNotice:
+        "Tu información de TaskFlow se guarda localmente en este navegador. Exporta tus datos antes de borrar el almacenamiento del navegador o cambiar de dispositivo.",
       complete3Tasks: "Completa 3 tareas hoy",
       complete1High: "Completa 1 tarea de prioridad alta",
       complete2Medium: "Completa 2 tareas medias",
@@ -215,7 +280,8 @@ document.addEventListener("DOMContentLoaded", () => {
       taskLegend: "Leyenda de tareas",
       dangerZone: "Zona de peligro",
       clearCompleted: "Borrar completadas",
-      clearCompletedConfirm: "¿Eliminar todas las tareas completadas?",
+      clearCompletedConfirm:
+        "Esto eliminará permanentemente todas las tareas completadas de este navegador. Esta acción no se puede deshacer.",
       notesLabel: "Notas",
       addNotes: "+ Agregar notas",
       optionalNotesPlaceholder: "Notas opcionales...",
@@ -289,6 +355,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const exportBtn = document.getElementById("exportBtn");
   const importFile = document.getElementById("importFile");
   const editModeToggle = document.getElementById("editModeToggle");
+  const statusRegion = document.getElementById("statusRegion");
+  const confirmDialog = document.getElementById("confirmDialog");
+  const confirmDialogTitle = document.getElementById("confirmDialogTitle");
+  const confirmDialogMessage = document.getElementById("confirmDialogMessage");
+  const confirmCancelBtn = document.getElementById("confirmCancelBtn");
+  const confirmActionBtn = document.getElementById("confirmActionBtn");
 
   const editModal = document.getElementById("editModal");
   const editTextInput = document.getElementById("editTextInput");
@@ -334,33 +406,76 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  const memoryStorage = new Map();
+
+  function getStoredValue(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return memoryStorage.has(key) ? memoryStorage.get(key) : null;
+    }
+  }
+
+  function setStoredValue(key, value) {
+    memoryStorage.set(key, value);
+    try {
+      localStorage.setItem(key, value);
+    } catch {
+      // Keep the in-memory fallback for browsers that block localStorage.
+    }
+  }
+
+  function removeStoredValue(key) {
+    memoryStorage.delete(key);
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      // Nothing else to clear when persistent storage is unavailable.
+    }
+  }
+
   const State = {
-    tasks: sanitizeTasks(safeParse(localStorage.getItem(STORAGE_KEY), [])),
-    player: sanitizePlayer(safeParse(localStorage.getItem(PLAYER_KEY), defaultPlayer())),
-    habits: sanitizeHabits(safeParse(localStorage.getItem(HABITS_KEY), null)),
+    tasks: sanitizeTasks(safeParse(getStoredValue(STORAGE_KEY), [])),
+    player: sanitizePlayer(safeParse(getStoredValue(PLAYER_KEY), defaultPlayer())),
+    habits: sanitizeHabits(safeParse(getStoredValue(HABITS_KEY), null)),
     view: "all",
     searchQuery: "",
-    editMode: safeParse(localStorage.getItem("editMode"), false),
+    editMode: safeParse(getStoredValue("editMode"), false),
     editingTaskId: null,
-    language: localStorage.getItem(LANG_KEY) || "en",
+    language: translations[getStoredValue(LANG_KEY)] ? getStoredValue(LANG_KEY) : "en",
     listeners: [],
     subscribe(listener) {
       this.listeners.push(listener);
     },
     notify() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.tasks));
-      localStorage.setItem(PLAYER_KEY, JSON.stringify(this.player));
-      localStorage.setItem(HABITS_KEY, JSON.stringify(this.habits));
-      localStorage.setItem(LANG_KEY, this.language);
+      setStoredValue(STORAGE_KEY, JSON.stringify(this.tasks));
+      setStoredValue(PLAYER_KEY, JSON.stringify(this.player));
+      setStoredValue(HABITS_KEY, JSON.stringify(this.habits));
+      setStoredValue(LANG_KEY, this.language);
       this.listeners.forEach((listener) => listener(this));
     },
     addTask(task) {
       this.tasks.unshift(task);
       this.notify();
+      showStatusToast(t("taskAddedStatus"));
     },
     deleteTask(id) {
+      const deletedTask = this.tasks.find((task) => task.id === id);
+      const deletedIndex = this.tasks.findIndex((task) => task.id === id);
       this.tasks = this.tasks.filter((task) => task.id !== id);
       this.notify();
+      if (deletedTask) {
+        showStatusToast(t("taskDeletedStatus"), {
+          label: t("undo"),
+          onClick: () => this.restoreTask(deletedTask, deletedIndex)
+        });
+      }
+    },
+    restoreTask(task, index = 0) {
+      if (this.tasks.some((item) => item.id === task.id)) return;
+      this.tasks.splice(Math.max(index, 0), 0, task);
+      this.notify();
+      showStatusToast(t("taskRestoredStatus"));
     },
     toggleTask(id) {
       const task = this.tasks.find((item) => item.id === id);
@@ -370,9 +485,11 @@ document.addEventListener("DOMContentLoaded", () => {
         task.completed = true;
         task.completedAt = new Date().toISOString();
         rewardForCompletion(task);
+        showStatusToast(t("taskCompletedStatus"));
       } else {
         task.completed = false;
         task.completedAt = null;
+        showStatusToast(t("taskUncompletedStatus"));
       }
 
       this.notify();
@@ -411,7 +528,7 @@ document.addEventListener("DOMContentLoaded", () => {
     },
     toggleEditMode() {
       this.editMode = !this.editMode;
-      localStorage.setItem("editMode", JSON.stringify(this.editMode));
+      setStoredValue("editMode", JSON.stringify(this.editMode));
       this.notify();
     },
     setLanguage(language) {
@@ -422,15 +539,23 @@ document.addEventListener("DOMContentLoaded", () => {
       this.tasks = [];
       this.player = defaultPlayer();
       this.habits = sanitizeHabits(null);
+      this.language = "en";
+      removeStoredValue("theme");
+      removeStoredValue("darkMode");
+      removeStoredValue("editMode");
+      this.editMode = false;
       this.notify();
+      showStatusToast(t("resetStatus"));
     },
     clearCompleted() {
       this.tasks = this.tasks.filter((task) => !task.completed);
       this.notify();
+      showStatusToast(t("completedClearedStatus"));
     },
     addHabit(habit) {
       this.habits.push(habit);
       this.notify();
+      showStatusToast(t("habitAddedStatus"));
     },
     toggleHabit(id) {
       const habit = this.habits.find((h) => h.id === id);
@@ -452,18 +577,20 @@ document.addEventListener("DOMContentLoaded", () => {
         habit.completedDates = habit.completedDates.filter((d) => d >= cutoffStr);
         addXpAndCoins(5, 1);
         showToast(5, 1);
+        showStatusToast(t("habitCompletedStatus"));
       } else {
         habit.completedDates = habit.completedDates.filter((d) => d !== today);
         if (habit.streak > 0) habit.streak -= 1;
-        habit.lastCompletedDate = habit.completedDates.length > 0
-          ? habit.completedDates[habit.completedDates.length - 1]
-          : null;
+        habit.lastCompletedDate =
+          habit.completedDates.length > 0 ? habit.completedDates[habit.completedDates.length - 1] : null;
+        showStatusToast(t("habitUncompletedStatus"));
       }
       this.notify();
     },
     deleteHabit(id) {
       this.habits = this.habits.filter((h) => h.id !== id);
       this.notify();
+      showStatusToast(t("habitDeletedStatus"));
     },
     setHabitReminder(id, time) {
       const habit = this.habits.find((h) => h.id === id);
@@ -521,9 +648,8 @@ document.addEventListener("DOMContentLoaded", () => {
       nameKey: "badgeSpeedRunner",
       descKey: "badgeSpeedRunnerDesc",
       check: (p, tasks) =>
-        tasks.filter(
-          (t) => t.completed && t.dueDate && t.completedAt && t.completedAt.slice(0, 10) <= t.dueDate
-        ).length >= 5
+        tasks.filter((t) => t.completed && t.dueDate && t.completedAt && t.completedAt.slice(0, 10) <= t.dueDate)
+          .length >= 5
     },
     {
       id: "polyglot",
@@ -545,75 +671,112 @@ document.addEventListener("DOMContentLoaded", () => {
     return translations[State.language][key];
   }
 
+  function announce(message) {
+    if (statusRegion) statusRegion.textContent = message;
+  }
+
+  function getFocusableElements(container) {
+    return [
+      ...container.querySelectorAll("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])")
+    ].filter((element) => !element.disabled && element.offsetParent !== null);
+  }
+
+  function trapFocus(event, container) {
+    if (event.key !== "Tab") return;
+    const focusable = getFocusableElements(container);
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  function showConfirmDialog(message, options = {}) {
+    const trigger = document.activeElement;
+    confirmDialogTitle.textContent = options.title || t("confirmTitle");
+    confirmDialogMessage.textContent = message;
+    confirmCancelBtn.textContent = options.cancelText || t("cancel");
+    confirmActionBtn.textContent = options.confirmText || t("confirmAction");
+    confirmActionBtn.disabled = false;
+    confirmDialog.classList.remove("hidden");
+    confirmCancelBtn.focus();
+
+    return new Promise((resolve) => {
+      let settled = false;
+
+      const close = (result) => {
+        if (settled) return;
+        settled = true;
+        confirmDialog.classList.add("hidden");
+        confirmActionBtn.disabled = false;
+        confirmCancelBtn.removeEventListener("click", onCancel);
+        confirmActionBtn.removeEventListener("click", onConfirm);
+        confirmDialog.removeEventListener("click", onBackdrop);
+        document.removeEventListener("keydown", onKeydown);
+        if (trigger && typeof trigger.focus === "function") trigger.focus();
+        resolve(result);
+      };
+
+      const onCancel = () => close(false);
+      const onConfirm = () => {
+        confirmActionBtn.disabled = true;
+        close(true);
+      };
+      const onBackdrop = (event) => {
+        if (event.target === confirmDialog) close(false);
+      };
+      const onKeydown = (event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          close(false);
+          return;
+        }
+        trapFocus(event, confirmDialog);
+      };
+
+      confirmCancelBtn.addEventListener("click", onCancel);
+      confirmActionBtn.addEventListener("click", onConfirm);
+      confirmDialog.addEventListener("click", onBackdrop);
+      document.addEventListener("keydown", onKeydown);
+    });
+  }
+
   function defaultPlayer() {
-    return {
-      xp: 0,
-      level: 1,
-      coins: 0,
-      streak: 0,
-      lastCompletedDate: null,
-      completedToday: 0,
-      completedWeek: 0,
-      totalCompleted: 0,
-      challengeRewarded: [],
-      challengeRewardedDate: null,
-      badges: [],
-      usedBothLanguages: false,
-      usedDarkMode: false,
-      completedByDay: {}
-    };
+    return Core.defaultPlayer();
   }
 
   function normalizePriority(priority) {
-    return ["high", "medium", "low"].includes(priority) ? priority : "medium";
+    return Core.normalizePriority(priority);
   }
 
   function sanitizeTasks(rawTasks) {
-    if (!Array.isArray(rawTasks)) return [];
-    return rawTasks
-      .map((task, index) => ({
-        id: String(task.id ?? `${Date.now()}-${index}`),
-        text: String(task.text ?? "").trim(),
-        completed: Boolean(task.completed),
-        completedAt: task.completedAt || null,
-        dueDate: task.dueDate || null,
-        priority: normalizePriority(task.priority),
-        createdAt: task.createdAt || new Date().toISOString(),
-        notes: String(task.notes ?? "").trim()
-      }))
-      .filter((task) => task.text !== "");
+    return Core.sanitizeTasks(rawTasks);
   }
 
   function sanitizePlayer(player) {
-    return {
-      ...defaultPlayer(),
-      ...player
-    };
+    return Core.sanitizePlayer(player);
   }
 
   function sanitizeHabits(rawHabits) {
     if (!Array.isArray(rawHabits)) {
-      return DEFAULT_HABITS.map((h, i) => ({
-        id: `default-${i}`,
-        name: h.name,
-        emoji: h.emoji,
-        reminderTime: null,
-        completedDates: [],
-        streak: 0,
-        lastCompletedDate: null
-      }));
+      return Core.sanitizeHabits(
+        DEFAULT_HABITS.map((h, i) => ({
+          id: `default-${i}`,
+          name: h.name,
+          emoji: h.emoji,
+          reminderTime: null,
+          completedDates: [],
+          streak: 0,
+          lastCompletedDate: null
+        }))
+      );
     }
-    return rawHabits
-      .map((h, i) => ({
-        id: String(h.id ?? `habit-${Date.now()}-${i}`),
-        name: String(h.name ?? "").trim(),
-        emoji: String(h.emoji ?? "🌟").trim() || "🌟",
-        reminderTime: h.reminderTime || null,
-        completedDates: Array.isArray(h.completedDates) ? h.completedDates : [],
-        streak: Number(h.streak ?? 0),
-        lastCompletedDate: h.lastCompletedDate || null
-      }))
-      .filter((h) => h.name !== "");
+    return Core.sanitizeHabits(rawHabits);
   }
 
   function getTodayString() {
@@ -633,27 +796,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return `${y}-${m}-${day}`;
   }
 
-  function startOfToday() {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  }
-
   function parseDateOnly(dateString) {
     return new Date(`${dateString}T00:00:00`);
-  }
-
-  function isInCurrentWeek(dateString) {
-    const today = startOfToday();
-    const weekEnd = new Date(today);
-    weekEnd.setDate(weekEnd.getDate() + 6);
-    const due = parseDateOnly(dateString);
-    return due >= today && due <= weekEnd;
-  }
-
-  function isInCurrentMonth(dateString) {
-    const today = startOfToday();
-    const due = parseDateOnly(dateString);
-    return due.getFullYear() === today.getFullYear() && due.getMonth() === today.getMonth();
   }
 
   function setDateConstraints() {
@@ -689,13 +833,17 @@ document.addEventListener("DOMContentLoaded", () => {
       document.body.classList.add(`theme-${theme}`);
     }
 
-    const isDark = safeParse(localStorage.getItem("darkMode"), false) === true;
+    const isDark = safeParse(getStoredValue("darkMode"), false) === true;
     document.body.classList.toggle("dark-mode", isDark);
     darkModeToggle.checked = isDark;
   }
 
   function updateStaticTranslations() {
     document.documentElement.lang = t("appLanguage");
+    settingsBtn.setAttribute(
+      "aria-label",
+      settingsPanel.classList.contains("hidden") ? t("openSettings") : t("closeSettings")
+    );
     document.getElementById("eyebrowText").textContent = t("eyebrow");
     document.getElementById("settingsHeaderText").textContent = t("settings");
     document.getElementById("darkModeLabel").textContent = t("darkMode");
@@ -703,6 +851,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("themesHeaderText").textContent = t("themes");
     document.getElementById("themeColorLabel").textContent = t("themeColor");
     document.getElementById("dataHeaderText").textContent = t("dataManagement");
+    document.getElementById("backupNoticeText").textContent = t("localStorageNotice");
     exportBtn.textContent = t("exportData");
     document.getElementById("importBtnText").textContent = t("importData");
 
@@ -727,14 +876,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     taskInput.placeholder = t("addTaskPlaceholder");
     searchInput.placeholder = t("searchPlaceholder");
+    document.getElementById("taskInputLabel").textContent = t("task");
+    document.getElementById("dueDateInputLabel").textContent = t("dueDate");
+    document.getElementById("priorityInputLabel").textContent = t("priority");
+    document.getElementById("searchInputLabel").textContent = t("searchPlaceholder");
     editTextInput.placeholder = t("taskDescriptionPlaceholder");
 
     addTaskBtn.textContent = t("addTask");
     resetBtn.textContent = t("reset");
     document.getElementById("dangerZoneHeaderText").textContent = t("dangerZone");
     clearCompletedBtn.textContent = t("clearCompleted");
-    document.getElementById("achievementsHeaderText") && (document.getElementById("achievementsHeaderText").textContent = t("achievements"));
-    document.getElementById("analyticsHeaderText") && (document.getElementById("analyticsHeaderText").textContent = t("weeklyProgress"));
+    document.getElementById("achievementsHeaderText") &&
+      (document.getElementById("achievementsHeaderText").textContent = t("achievements"));
+    document.getElementById("analyticsHeaderText") &&
+      (document.getElementById("analyticsHeaderText").textContent = t("weeklyProgress"));
 
     document.getElementById("viewAllBtn").textContent = t("all");
     document.getElementById("viewTodayBtn").textContent = t("today");
@@ -748,6 +903,7 @@ document.addEventListener("DOMContentLoaded", () => {
     editCancelBtn.textContent = t("cancel");
     editSaveBtn.textContent = t("save");
     document.getElementById("editNotesLabel").textContent = t("notesLabel");
+    document.getElementById("notesInputLabel").textContent = t("notesLabel");
     editNotesInput.placeholder = t("optionalNotesPlaceholder");
     document.getElementById("notesToggleLabel").textContent = t("addNotes");
     notesInput.placeholder = t("optionalNotesPlaceholder");
@@ -779,15 +935,36 @@ document.addEventListener("DOMContentLoaded", () => {
     if (habitNameInputEl) habitNameInputEl.placeholder = t("addHabitPlaceholder");
     if (habitEmojiInputEl) habitEmojiInputEl.placeholder = t("habitEmojiPlaceholder");
     if (addHabitBtnEl) addHabitBtnEl.textContent = t("addHabitBtn");
+    const habitEmojiLabel = document.getElementById("habitEmojiInputLabel");
+    const habitNameLabel = document.getElementById("habitNameInputLabel");
+    const habitReminderLabel = document.getElementById("habitReminderInputLabel");
+    if (habitEmojiLabel) habitEmojiLabel.textContent = State.language === "es" ? "Emoji del hábito" : "Habit emoji";
+    if (habitNameLabel) habitNameLabel.textContent = State.language === "es" ? "Nombre del hábito" : "Habit name";
+    if (habitReminderLabel)
+      habitReminderLabel.textContent =
+        State.language === "es" ? "Hora opcional de recordatorio" : "Optional reminder time";
+    const reminderClose = document.getElementById("reminderBannerClose");
+    if (reminderClose)
+      reminderClose.setAttribute(
+        "aria-label",
+        State.language === "es" ? "Cerrar mensaje de recordatorio" : "Dismiss reminder message"
+      );
 
     updateEditModeUI();
     formatHeaderDate();
   }
 
-  function createEmptyState(message) {
+  function createEmptyState(title, message) {
     const li = document.createElement("li");
     li.className = "empty-state";
-    li.textContent = message;
+    const titleEl = document.createElement("span");
+    titleEl.className = "empty-state-title";
+    titleEl.textContent = title;
+    const messageEl = document.createElement("span");
+    messageEl.className = "empty-state-note";
+    messageEl.textContent = message;
+    li.appendChild(titleEl);
+    li.appendChild(messageEl);
     return li;
   }
 
@@ -825,7 +1002,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const container = document.getElementById("toastContainer");
     const toast = document.createElement("div");
     toast.className = "toast";
-    toast.innerHTML = `<span class="toast-xp">+${xpGained} XP</span><span>·</span><span>+${coinsGained} 🪙</span>`;
+    const xp = document.createElement("span");
+    xp.className = "toast-xp";
+    xp.textContent = `+${xpGained} XP`;
+    const divider = document.createElement("span");
+    divider.textContent = "·";
+    const coins = document.createElement("span");
+    coins.textContent = `+${coinsGained} 🪙`;
+    toast.append(xp, divider, coins);
     container.appendChild(toast);
     setTimeout(() => {
       toast.classList.add("toast-exit");
@@ -838,7 +1022,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const container = document.getElementById("toastContainer");
       const toast = document.createElement("div");
       toast.className = "toast toast-badge";
-      toast.innerHTML = `${badge.emoji} <span class="toast-badge-text"><strong>${t(badge.nameKey)}</strong> unlocked!</span>`;
+      const emoji = document.createTextNode(`${badge.emoji} `);
+      const text = document.createElement("span");
+      text.className = "toast-badge-text";
+      const strong = document.createElement("strong");
+      strong.textContent = t(badge.nameKey);
+      text.append(strong, document.createTextNode(State.language === "es" ? " desbloqueado!" : " unlocked!"));
+      toast.append(emoji, text);
       container.appendChild(toast);
       setTimeout(() => {
         toast.classList.add("toast-exit");
@@ -847,12 +1037,45 @@ document.addEventListener("DOMContentLoaded", () => {
     }, index * 120);
   }
 
+  function showStatusToast(message, action) {
+    announce(message);
+    const container = document.getElementById("toastContainer");
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    const text = document.createElement("span");
+    text.textContent = message;
+    toast.appendChild(text);
+    if (action) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "toast-action";
+      button.textContent = action.label;
+      button.addEventListener(
+        "click",
+        () => {
+          action.onClick();
+          toast.remove();
+        },
+        { once: true }
+      );
+      toast.appendChild(button);
+    }
+    container.appendChild(toast);
+    setTimeout(
+      () => {
+        if (!toast.isConnected) return;
+        toast.classList.add("toast-exit");
+        toast.addEventListener("animationend", () => toast.remove(), { once: true });
+      },
+      action ? 7000 : 3200
+    );
+  }
+
   function showLevelUpBanner(newLevel) {
     const banner = document.getElementById("levelUpBanner");
     const levelUpText = document.getElementById("levelUpText");
-    const prefix = State.language === "es"
-      ? "🎉 ¡Subiste de nivel! Llegaste al nivel "
-      : "🎉 Level Up! You reached Level ";
+    const prefix =
+      State.language === "es" ? "🎉 ¡Subiste de nivel! Llegaste al nivel " : "🎉 Level Up! You reached Level ";
     levelUpText.textContent = `${prefix}${newLevel}!`;
     banner.classList.remove("hidden");
     setTimeout(() => banner.classList.add("hidden"), 3000);
@@ -954,7 +1177,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".tab-panel").forEach((panel) => {
       panel.classList.toggle("active", panel.id === `panel-${name}`);
     });
-    localStorage.setItem(TAB_KEY, name);
+    setStoredValue(TAB_KEY, name);
   }
 
   const notifiedThisSession = new Set();
@@ -1046,7 +1269,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const toggle = document.createElement("button");
     toggle.type = "button";
     toggle.className = "habit-toggle" + (doneToday ? " done" : "");
-    toggle.setAttribute("aria-label", doneToday ? "Mark as not done" : "Mark as done");
+    toggle.setAttribute(
+      "aria-label",
+      doneToday
+        ? State.language === "es"
+          ? `Marcar ${habit.name} como incompleto`
+          : `Mark ${habit.name} as not done`
+        : State.language === "es"
+          ? `Marcar ${habit.name} como hecho`
+          : `Mark ${habit.name} as done`
+    );
     toggle.textContent = doneToday ? "✓" : "";
     toggle.addEventListener("click", () => State.toggleHabit(habit.id));
 
@@ -1076,8 +1308,13 @@ document.addEventListener("DOMContentLoaded", () => {
     reminderBtn.type = "button";
     reminderBtn.className = "habit-reminder-btn";
     reminderBtn.title = habit.reminderTime
-      ? (State.language === "es" ? `Recordatorio: ${habit.reminderTime}` : `Reminder: ${habit.reminderTime}`)
-      : (State.language === "es" ? "Establecer recordatorio" : "Set reminder");
+      ? State.language === "es"
+        ? `Recordatorio: ${habit.reminderTime}`
+        : `Reminder: ${habit.reminderTime}`
+      : State.language === "es"
+        ? "Establecer recordatorio"
+        : "Set reminder";
+    reminderBtn.setAttribute("aria-label", reminderBtn.title);
     reminderBtn.textContent = habit.reminderTime ? `⏰ ${habit.reminderTime}` : "⏰";
     reminderBtn.addEventListener("click", () => handleSetReminder(habit.id, habit.reminderTime));
     meta.appendChild(reminderBtn);
@@ -1087,7 +1324,11 @@ document.addEventListener("DOMContentLoaded", () => {
       deleteBtn.type = "button";
       deleteBtn.className = "habit-delete-btn";
       deleteBtn.textContent = State.language === "es" ? "Eliminar" : "Delete";
-      deleteBtn.addEventListener("click", () => State.deleteHabit(habit.id));
+      deleteBtn.addEventListener("click", async () => {
+        if (await showConfirmDialog(t("deleteHabitConfirm"))) {
+          State.deleteHabit(habit.id);
+        }
+      });
       meta.appendChild(deleteBtn);
     }
 
@@ -1109,12 +1350,16 @@ document.addEventListener("DOMContentLoaded", () => {
       heroSub.textContent = State.language === "es" ? "¡Completaste todo hoy!" : "You crushed it today!";
       if (heroDeco) heroDeco.textContent = "🏆";
     } else {
-      heroTitle.textContent = State.language === "es"
-        ? `${todoCount} tarea${todoCount !== 1 ? "s" : ""} pendiente${todoCount !== 1 ? "s" : ""}`
-        : `${todoCount} task${todoCount !== 1 ? "s" : ""} remaining`;
-      heroSub.textContent = streak > 1
-        ? `🔥 ${streak}${State.language === "es" ? " días seguidos" : "-day streak!"}`
-        : (State.language === "es" ? "¡Hagamos progreso hoy!" : "Let's make progress today!");
+      heroTitle.textContent =
+        State.language === "es"
+          ? `${todoCount} tarea${todoCount !== 1 ? "s" : ""} pendiente${todoCount !== 1 ? "s" : ""}`
+          : `${todoCount} task${todoCount !== 1 ? "s" : ""} remaining`;
+      heroSub.textContent =
+        streak > 1
+          ? `🔥 ${streak}${State.language === "es" ? " días seguidos" : "-day streak!"}`
+          : State.language === "es"
+            ? "¡Hagamos progreso hoy!"
+            : "Let's make progress today!";
       if (heroDeco) heroDeco.textContent = "🎯";
     }
   }
@@ -1130,18 +1375,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const dayLabelsEs = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
     const labels = State.language === "es" ? dayLabelsEs : dayLabels;
 
-    strip.innerHTML = labels.map((label, i) => {
-      const d = new Date(startOfWeek);
-      d.setDate(startOfWeek.getDate() + i);
-      const dStr = d.toISOString().slice(0, 10);
-      const isToday = dStr === todayStr;
-      const hasTasks = State.tasks.some((t) => !t.completed && t.dueDate === dStr);
-      return `<div class="week-day ${isToday ? "week-day-today" : ""}">
+    strip.innerHTML = labels
+      .map((label, i) => {
+        const d = new Date(startOfWeek);
+        d.setDate(startOfWeek.getDate() + i);
+        const dStr = d.toISOString().slice(0, 10);
+        const isToday = dStr === todayStr;
+        const hasTasks = State.tasks.some((t) => !t.completed && t.dueDate === dStr);
+        return `<div class="week-day ${isToday ? "week-day-today" : ""}">
         <span class="week-day-label">${label}</span>
         <span class="week-day-num">${d.getDate()}</span>
         ${hasTasks ? '<span class="week-dot"></span>' : '<span class="week-dot-empty"></span>'}
       </div>`;
-    }).join("");
+      })
+      .join("");
   }
 
   function renderHabits() {
@@ -1395,10 +1642,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  let editModalTrigger = null;
+
   function openEditModal(taskId) {
     const task = State.tasks.find((item) => item.id === taskId);
     if (!task) return;
 
+    editModalTrigger = document.activeElement;
     State.editingTaskId = taskId;
     editTextInput.value = task.text;
     editDateInput.value = task.dueDate || "";
@@ -1412,6 +1662,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function closeEditModal() {
     State.editingTaskId = null;
     editModal.classList.add("hidden");
+    if (editModalTrigger && typeof editModalTrigger.focus === "function") editModalTrigger.focus();
+    editModalTrigger = null;
   }
 
   function saveEdit() {
@@ -1460,7 +1712,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const toggleBtn = document.createElement("button");
     toggleBtn.className = "toggle-btn";
     toggleBtn.type = "button";
-    toggleBtn.setAttribute("aria-label", task.completed ? "Mark as incomplete" : "Mark as complete");
+    toggleBtn.setAttribute(
+      "aria-label",
+      task.completed
+        ? State.language === "es"
+          ? `Marcar como incompleta: ${task.text}`
+          : `Mark as incomplete: ${task.text}`
+        : State.language === "es"
+          ? `Marcar como completa: ${task.text}`
+          : `Mark as complete: ${task.text}`
+    );
     if (task.completed) toggleBtn.classList.add("completed");
     toggleBtn.addEventListener("click", () => State.toggleTask(task.id));
 
@@ -1509,12 +1770,20 @@ document.addEventListener("DOMContentLoaded", () => {
       editBtn.className = "task-action-btn edit-btn";
       editBtn.type = "button";
       editBtn.textContent = t("editTask");
+      editBtn.setAttribute(
+        "aria-label",
+        State.language === "es" ? `Editar tarea: ${task.text}` : `Edit task: ${task.text}`
+      );
       editBtn.addEventListener("click", () => openEditModal(task.id));
 
       const deleteBtn = document.createElement("button");
       deleteBtn.className = "task-action-btn delete-btn";
       deleteBtn.type = "button";
       deleteBtn.textContent = State.language === "es" ? "Eliminar" : "Delete";
+      deleteBtn.setAttribute(
+        "aria-label",
+        State.language === "es" ? `Eliminar tarea: ${task.text}` : `Delete task: ${task.text}`
+      );
       deleteBtn.addEventListener("click", () => State.deleteTask(task.id));
 
       actions.appendChild(editBtn);
@@ -1526,24 +1795,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function filterTasks(state) {
-    return state.tasks.filter((task) => {
-      if (state.searchQuery && !task.text.toLowerCase().includes(state.searchQuery)) {
-        return false;
-      }
-
-      if (state.view === "today") {
-        return task.dueDate === getTodayString();
-      }
-
-      if (state.view === "week") {
-        return task.dueDate ? isInCurrentWeek(task.dueDate) : false;
-      }
-
-      if (state.view === "month") {
-        return task.dueDate ? isInCurrentMonth(task.dueDate) : false;
-      }
-
-      return true;
+    return Core.filterTasks(state.tasks, {
+      view: state.view,
+      searchQuery: state.searchQuery,
+      today: getTodayString()
     });
   }
 
@@ -1562,7 +1817,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const priorityDiff = priorityOrder[normalizePriority(a.priority)] - priorityOrder[normalizePriority(b.priority)];
       if (priorityDiff !== 0) return priorityDiff;
 
-      return Number(b.id) - Number(a.id);
+      return String(b.createdAt || b.id).localeCompare(String(a.createdAt || a.id));
     });
   }
 
@@ -1580,20 +1835,37 @@ document.addEventListener("DOMContentLoaded", () => {
     doneTasks.forEach((task) => completedList.appendChild(buildTaskElement(task)));
 
     if (todoTasks.length === 0) {
-      todoList.appendChild(createEmptyState(t("emptyView")));
+      const emptyState = Core.getTaskEmptyState(state.tasks, filteredTasks, todoTasks, doneTasks, {
+        section: "todo",
+        view: state.view,
+        searchQuery: state.searchQuery
+      });
+      if (emptyState === "emptyTasks") {
+        todoList.appendChild(createEmptyState(t("emptyTasksTitle"), t("emptyTasksMessage")));
+      } else if (emptyState === "noResults") {
+        todoList.appendChild(createEmptyState(t("noResultsTitle"), t("noResultsMessage")));
+      } else {
+        todoList.appendChild(
+          createEmptyState(
+            State.language === "es" ? "Todo listo." : "All clear.",
+            State.language === "es" ? "No hay tareas pendientes en esta vista." : "No to-do tasks in this view."
+          )
+        );
+      }
     }
 
     if (doneTasks.length === 0) {
-      completedList.appendChild(createEmptyState(t("emptyView")));
+      const emptyState = Core.getTaskEmptyState(state.tasks, filteredTasks, todoTasks, doneTasks, {
+        section: "completed",
+        view: state.view,
+        searchQuery: state.searchQuery
+      });
+      if (emptyState === "noResults") {
+        completedList.appendChild(createEmptyState(t("noResultsTitle"), t("noResultsMessage")));
+      } else {
+        completedList.appendChild(createEmptyState(t("noCompletedTitle"), t("noCompletedMessage")));
+      }
     }
-
-    const labels = {
-      all: t("allLabel"),
-      today: t("todayLabel"),
-      week: t("weekLabel"),
-      month: t("monthLabel")
-    };
-    const label = labels[state.view] || t("allLabel");
 
     todoHeading.textContent = `${t("todo")} (${todoTasks.length})`;
     completedHeading.textContent = `${t("completedHeading")} (${doneTasks.length})`;
@@ -1682,6 +1954,9 @@ document.addEventListener("DOMContentLoaded", () => {
   settingsBtn.addEventListener("click", (event) => {
     event.stopPropagation();
     settingsPanel.classList.toggle("hidden");
+    const isOpen = !settingsPanel.classList.contains("hidden");
+    settingsBtn.setAttribute("aria-expanded", String(isOpen));
+    settingsBtn.setAttribute("aria-label", isOpen ? t("closeSettings") : t("openSettings"));
   });
 
   document.addEventListener("click", (event) => {
@@ -1691,11 +1966,13 @@ document.addEventListener("DOMContentLoaded", () => {
       !settingsBtn.contains(event.target)
     ) {
       settingsPanel.classList.add("hidden");
+      settingsBtn.setAttribute("aria-expanded", "false");
+      settingsBtn.setAttribute("aria-label", t("openSettings"));
     }
   });
 
   themeSelect.addEventListener("change", () => {
-    localStorage.setItem("theme", themeSelect.value);
+    setStoredValue("theme", themeSelect.value);
     applyTheme(themeSelect.value);
   });
 
@@ -1707,7 +1984,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   darkModeToggle.addEventListener("change", () => {
-    localStorage.setItem("darkMode", JSON.stringify(darkModeToggle.checked));
+    setStoredValue("darkMode", JSON.stringify(darkModeToggle.checked));
     applyTheme(themeSelect.value);
     if (darkModeToggle.checked) {
       State.player.usedDarkMode = true;
@@ -1775,7 +2052,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (habitNameInputEl) {
         habitNameInputEl.classList.add("input-error");
         habitNameInputEl.focus();
-        habitNameInputEl.addEventListener("input", () => habitNameInputEl.classList.remove("input-error"), { once: true });
+        habitNameInputEl.addEventListener("input", () => habitNameInputEl.classList.remove("input-error"), {
+          once: true
+        });
       }
       return;
     }
@@ -1798,7 +2077,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (addHabitBtnEl) addHabitBtnEl.addEventListener("click", tryAddHabit);
   if (habitNameInputEl) {
     habitNameInputEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") { e.preventDefault(); tryAddHabit(); }
+      if (e.key === "Enter") {
+        e.preventDefault();
+        tryAddHabit();
+      }
     });
   }
 
@@ -1820,14 +2102,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  resetBtn.addEventListener("click", () => {
-    if (confirm(t("clearConfirm"))) {
+  resetBtn.addEventListener("click", async () => {
+    if (await showConfirmDialog(t("clearConfirm"))) {
       State.resetAllData();
+      themeSelect.value = "default";
+      darkModeToggle.checked = false;
+      applyTheme("default");
     }
   });
 
-  clearCompletedBtn.addEventListener("click", () => {
-    if (confirm(t("clearCompletedConfirm"))) {
+  clearCompletedBtn.addEventListener("click", async () => {
+    if (await showConfirmDialog(t("clearCompletedConfirm"))) {
       State.clearCompleted();
     }
   });
@@ -1881,16 +2166,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
   exportBtn.addEventListener("click", () => {
     const exportData = {
+      schemaVersion: BACKUP_SCHEMA_VERSION,
+      exportedAt: new Date().toISOString(),
       tasks: State.tasks,
       player: State.player,
       habits: State.habits,
-      language: State.language
+      language: State.language,
+      settings: {
+        theme: themeSelect.value,
+        darkMode: darkModeToggle.checked,
+        editMode: State.editMode
+      }
     };
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+    const dataUrl = URL.createObjectURL(blob);
     const downloadAnchor = document.createElement("a");
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", "taskflow_data.json");
+    const today = getTodayString();
+    downloadAnchor.setAttribute("href", dataUrl);
+    downloadAnchor.setAttribute("download", `taskflow-backup-${today}.json`);
     downloadAnchor.click();
+    URL.revokeObjectURL(dataUrl);
+    showStatusToast(t("exportSuccess"));
   });
 
   importFile.addEventListener("change", (event) => {
@@ -1898,28 +2194,34 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (loadEvent) => {
-      try {
-        const imported = JSON.parse(loadEvent.target.result);
-
-        if (Array.isArray(imported)) {
-          State.tasks = sanitizeTasks(imported);
-        } else {
-          State.tasks = sanitizeTasks(imported.tasks || []);
-          State.player = sanitizePlayer(imported.player || defaultPlayer());
-          if (imported.habits) State.habits = sanitizeHabits(imported.habits);
-          if (imported.language && translations[imported.language]) {
-            State.language = imported.language;
-            languageSelect.value = imported.language;
-          }
-        }
-
-        State.notify();
-        alert(t("importSuccess"));
-      } catch (error) {
-        alert(t("invalidFile"));
+    reader.onload = async (loadEvent) => {
+      const result = Core.validateBackup(loadEvent.target.result, sanitizeHabits(null));
+      if (!result.ok) {
+        showStatusToast(t("importError"));
+        importFile.value = "";
+        return;
       }
 
+      if (await showConfirmDialog(t("importReplaceConfirm"))) {
+        State.tasks = result.data.tasks;
+        State.player = result.data.player;
+        State.habits = result.data.habits;
+        State.language = result.data.language;
+        State.editMode = result.data.settings.editMode;
+        languageSelect.value = State.language;
+        themeSelect.value = result.data.settings.theme;
+        darkModeToggle.checked = result.data.settings.darkMode;
+        setStoredValue("theme", result.data.settings.theme);
+        setStoredValue("darkMode", JSON.stringify(result.data.settings.darkMode));
+        setStoredValue("editMode", JSON.stringify(result.data.settings.editMode));
+        applyTheme(themeSelect.value);
+        State.notify();
+        showStatusToast(t("importSuccess"));
+      }
+      importFile.value = "";
+    };
+    reader.onerror = () => {
+      showStatusToast(t("importError"));
       importFile.value = "";
     };
     reader.readAsText(file);
@@ -1937,20 +2239,40 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !editModal.classList.contains("hidden")) {
+    if (!editModal.classList.contains("hidden")) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeEditModal();
+        return;
+      }
+      trapFocus(event, editModal);
+    }
+
+    if (event.key === "Escape" && !settingsPanel.classList.contains("hidden")) {
+      event.preventDefault();
+      settingsPanel.classList.add("hidden");
+      settingsBtn.setAttribute("aria-expanded", "false");
+      settingsBtn.setAttribute("aria-label", t("openSettings"));
+      settingsBtn.focus();
+    }
+  });
+
+  editModal.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
       closeEditModal();
     }
   });
 
   const validThemes = ["default", "sunset", "mint", "galaxy", "rose", "ocean"];
-  const savedTheme = localStorage.getItem("theme") || "default";
+  const savedTheme = getStoredValue("theme") || "default";
   themeSelect.value = validThemes.includes(savedTheme) ? savedTheme : "default";
   languageSelect.value = State.language;
   applyTheme(themeSelect.value);
   setDateConstraints();
   formatHeaderDate();
 
-  const savedTab = localStorage.getItem(TAB_KEY) || "tasks";
+  const savedTab = getStoredValue(TAB_KEY) || "tasks";
   switchTab(savedTab);
 
   checkHabitResets();
