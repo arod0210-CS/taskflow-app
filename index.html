@@ -157,7 +157,14 @@
             <button class="view-btn" type="button" data-view="week" id="viewWeekBtn">Week</button>
             <button class="view-btn" type="button" data-view="month" id="viewMonthBtn">Month</button>
           </div>
-          <input type="text" id="searchInput" placeholder="Search tasks..." />
+          <div class="search-field">
+            <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"></circle>
+              <path d="m16.5 16.5 4 4"></path>
+            </svg>
+            <input type="text" id="searchInput" placeholder="Search tasks..." aria-keyshortcuts="Meta+K Control+K" />
+            <span class="search-shortcut" aria-hidden="true">⌘K</span>
+          </div>
         </div>
 
             <div class="task-columns">
@@ -197,7 +204,7 @@
       aria-labelledby="tab-habits"
     >
         <div class="habits-header">
-          <div>
+          <div class="habits-heading-copy">
             <h2 id="habitsTitle" class="habits-heading">Daily Habits</h2>
             <p id="habitsSubtitle" class="habits-subtitle">Your daily routines</p>
           </div>
@@ -207,7 +214,7 @@
           </div>
         </div>
 
-        <div id="reminderBanner" class="reminder-banner hidden">
+        <div id="reminderBanner" class="reminder-banner hidden" role="status" aria-live="polite">
           <span id="reminderBannerText"></span>
           <button id="reminderBannerClose" class="reminder-banner-close" type="button">✕</button>
         </div>
@@ -216,9 +223,9 @@
 
         <div class="add-habit-form" id="addHabitForm">
           <div class="add-habit-fields">
-            <input type="text" id="habitEmojiInput" class="habit-emoji-picker" maxlength="2" placeholder="🌟" />
-            <input type="text" id="habitNameInput" placeholder="New habit name..." />
-            <input type="time" id="habitReminderInput" title="Optional reminder time" />
+            <input type="text" id="habitEmojiInput" class="habit-emoji-picker" maxlength="2" placeholder="🌟" aria-describedby="addHabitHint" />
+            <input type="text" id="habitNameInput" placeholder="New habit name..." aria-describedby="addHabitHint" />
+            <input type="time" id="habitReminderInput" title="Optional reminder time" aria-describedby="addHabitHint" />
             <button id="addHabitBtn" type="button">Add</button>
           </div>
           <p id="addHabitHint" class="add-habit-hint">Reminders only fire while this page is open</p>

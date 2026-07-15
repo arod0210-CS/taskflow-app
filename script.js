@@ -125,6 +125,13 @@ document.addEventListener("DOMContentLoaded", () => {
       addHabitBtn: "Add",
       addHabitHint: "Reminders only fire while this page is open",
       habitEmojiPlaceholder: "🌟",
+      habitEmojiLabel: "Habit emoji",
+      habitReminderLabel: "Optional reminder time",
+      reminderAction: "Reminder",
+      habitMarkDone: "Mark habit as done",
+      habitMarkNotDone: "Mark habit as not done",
+      deleteHabit: "Delete",
+      closeReminder: "Dismiss reminder",
       noHabits: "No habits yet — add one below!",
       reminderSet: "⏰ Reminder set!",
       reminderCleared: "Reminder cleared.",
@@ -247,6 +254,13 @@ document.addEventListener("DOMContentLoaded", () => {
       addHabitBtn: "Agregar",
       addHabitHint: "Los recordatorios solo funcionan con la página abierta",
       habitEmojiPlaceholder: "🌟",
+      habitEmojiLabel: "Emoji del hábito",
+      habitReminderLabel: "Hora de recordatorio opcional",
+      reminderAction: "Recordatorio",
+      habitMarkDone: "Marcar hábito como hecho",
+      habitMarkNotDone: "Marcar hábito como no hecho",
+      deleteHabit: "Eliminar",
+      closeReminder: "Cerrar recordatorio",
       noHabits: "¡Sin hábitos aún — agrega uno abajo!",
       reminderSet: "⏰ ¡Recordatorio establecido!",
       reminderCleared: "Recordatorio eliminado.",
@@ -778,13 +792,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const addHabitHintEl = document.getElementById("addHabitHint");
     const habitNameInputEl = document.getElementById("habitNameInput");
     const habitEmojiInputEl = document.getElementById("habitEmojiInput");
+    const habitReminderInputEl = document.getElementById("habitReminderInput");
     const addHabitBtnEl = document.getElementById("addHabitBtn");
+    const reminderBannerCloseEl = document.getElementById("reminderBannerClose");
     if (habitsTitleEl) habitsTitleEl.textContent = t("habitsTitle");
     if (habitsSubtitleEl) habitsSubtitleEl.textContent = t("habitsSubtitle");
     if (addHabitHintEl) addHabitHintEl.textContent = t("addHabitHint");
     if (habitNameInputEl) habitNameInputEl.placeholder = t("addHabitPlaceholder");
-    if (habitEmojiInputEl) habitEmojiInputEl.placeholder = t("habitEmojiPlaceholder");
+    if (habitNameInputEl) habitNameInputEl.setAttribute("aria-label", t("addHabitPlaceholder"));
+    if (habitEmojiInputEl) {
+      habitEmojiInputEl.placeholder = t("habitEmojiPlaceholder");
+      habitEmojiInputEl.setAttribute("aria-label", t("habitEmojiLabel"));
+    }
+    if (habitReminderInputEl) {
+      habitReminderInputEl.title = t("habitReminderLabel");
+      habitReminderInputEl.setAttribute("aria-label", t("habitReminderLabel"));
+    }
     if (addHabitBtnEl) addHabitBtnEl.textContent = t("addHabitBtn");
+    if (reminderBannerCloseEl) reminderBannerCloseEl.setAttribute("aria-label", t("closeReminder"));
 
     updateEditModeUI();
     formatHeaderDate();
@@ -1052,7 +1077,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const toggle = document.createElement("button");
     toggle.type = "button";
     toggle.className = "habit-toggle" + (doneToday ? " done" : "");
-    toggle.setAttribute("aria-label", doneToday ? "Mark as not done" : "Mark as done");
+    toggle.setAttribute("aria-label", doneToday ? t("habitMarkNotDone") : t("habitMarkDone"));
+    toggle.setAttribute("aria-pressed", String(doneToday));
     toggle.textContent = doneToday ? "✓" : "";
     toggle.addEventListener("click", () => State.toggleHabit(habit.id));
 
@@ -1064,7 +1090,7 @@ document.addEventListener("DOMContentLoaded", () => {
     info.className = "habit-info";
 
     const name = document.createElement("span");
-    name.className = "habit-name";
+    name.className = "habit-name" + (doneToday ? " done-text" : "");
     name.textContent = habit.name;
     info.appendChild(name);
 
@@ -1084,7 +1110,8 @@ document.addEventListener("DOMContentLoaded", () => {
     reminderBtn.title = habit.reminderTime
       ? (State.language === "es" ? `Recordatorio: ${habit.reminderTime}` : `Reminder: ${habit.reminderTime}`)
       : (State.language === "es" ? "Establecer recordatorio" : "Set reminder");
-    reminderBtn.textContent = habit.reminderTime ? `⏰ ${habit.reminderTime}` : "⏰";
+    reminderBtn.setAttribute("aria-label", reminderBtn.title);
+    reminderBtn.textContent = habit.reminderTime ? `⏰ ${habit.reminderTime}` : `⏰ ${t("reminderAction")}`;
     reminderBtn.addEventListener("click", () => handleSetReminder(habit.id, habit.reminderTime));
     meta.appendChild(reminderBtn);
 
@@ -1092,7 +1119,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const deleteBtn = document.createElement("button");
       deleteBtn.type = "button";
       deleteBtn.className = "habit-delete-btn";
-      deleteBtn.textContent = State.language === "es" ? "Eliminar" : "Delete";
+      deleteBtn.textContent = t("deleteHabit");
+      deleteBtn.setAttribute("aria-label", `${t("deleteHabit")}: ${habit.name}`);
       deleteBtn.addEventListener("click", () => State.deleteHabit(habit.id));
       meta.appendChild(deleteBtn);
     }
@@ -1170,7 +1198,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (habits.length === 0) {
       const empty = document.createElement("p");
       empty.className = "empty-state";
-      empty.style.padding = "16px 0";
+      empty.setAttribute("role", "status");
       empty.textContent = t("noHabits");
       habitsList.appendChild(empty);
       return;
@@ -1944,6 +1972,13 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.addEventListener("keydown", (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+      return;
+    }
+
     if (event.key === "Escape" && !editModal.classList.contains("hidden")) {
       closeEditModal();
     }

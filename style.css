@@ -2661,3 +2661,1051 @@ body.dark-mode .habit-delete-btn:hover {
   }
   
 }
+
+/* =========================================
+   PHASE 2.2 — TASKS PAGE POLISH
+   ========================================= */
+
+/* Search and filters */
+.view-bar {
+  gap: 16px;
+  padding-block: 4px;
+}
+
+.view-group {
+  padding: 4px;
+  border: 1px solid var(--separator);
+  border-radius: 999px;
+  background: var(--card-bg);
+  box-shadow: var(--shadow-soft);
+}
+
+.view-btn {
+  min-height: 36px;
+  padding-inline: 16px;
+  border: 1px solid transparent;
+  box-shadow: none;
+  transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+}
+
+.view-btn:hover:not(.active) {
+  background: var(--input-bg);
+  color: var(--text-main);
+}
+
+.view-btn:active {
+  transform: scale(.97);
+}
+
+.view-btn:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.search-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: min(100%, 320px);
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--text-soft);
+  stroke-width: 2;
+  stroke-linecap: round;
+  pointer-events: none;
+  transition: stroke var(--transition-fast);
+}
+
+.search-field #searchInput {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 16px 10px 42px;
+  border: 1px solid var(--separator);
+  border-radius: 14px;
+  box-shadow: var(--shadow-soft);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.search-field:focus-within .search-icon {
+  stroke: var(--accent-color);
+}
+
+.search-field #searchInput:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 16%, transparent);
+}
+
+/* Active task cards */
+.task-list {
+  gap: 12px;
+}
+
+.task-card,
+body.dark-mode .task-card,
+body.dark-mode .task-card[data-priority="high"],
+body.dark-mode .task-card[data-priority="medium"],
+body.dark-mode .task-card[data-priority="low"] {
+  position: relative;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px;
+  overflow: hidden;
+  background: var(--card-bg);
+  border: 1px solid var(--separator);
+  border-left: 4px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  animation: task-card-enter 260ms ease-out both;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast);
+}
+
+.task-card[data-priority="high"],
+body.dark-mode .task-card[data-priority="high"] {
+  border-left-color: #ff3b30;
+}
+
+.task-card[data-priority="medium"],
+body.dark-mode .task-card[data-priority="medium"] {
+  border-left-color: #ff9500;
+}
+
+.task-card[data-priority="low"],
+body.dark-mode .task-card[data-priority="low"] {
+  border-left-color: #34c759;
+}
+
+.task-card:hover,
+body.dark-mode .task-card:hover {
+  transform: translateY(-2px);
+  background: var(--card-bg);
+  border-color: color-mix(in srgb, var(--accent-color) 28%, var(--separator));
+  box-shadow: var(--shadow-hover);
+}
+
+.task-card[data-priority="high"]:hover {
+  border-left-color: #ff3b30;
+}
+
+.task-card[data-priority="medium"]:hover {
+  border-left-color: #ff9500;
+}
+
+.task-card[data-priority="low"]:hover {
+  border-left-color: #34c759;
+}
+
+.task-card:active {
+  transform: translateY(0) scale(.995);
+}
+
+.task-card.overdue,
+body.dark-mode .task-card.overdue {
+  background: linear-gradient(90deg, rgba(255, 59, 48, .08), transparent 42%), var(--card-bg);
+  border-left-color: #ff3b30;
+}
+
+.task-card.due-today,
+body.dark-mode .task-card.due-today {
+  background: linear-gradient(90deg, rgba(255, 149, 0, .09), transparent 42%), var(--card-bg);
+  border-left-color: #ff9500;
+}
+
+.task-card.dragging {
+  transform: scale(.985);
+  opacity: .55;
+  box-shadow: none;
+}
+
+.drag-over {
+  border-top: 2px solid var(--accent-color);
+  box-shadow: 0 -4px 0 color-mix(in srgb, var(--accent-color) 14%, transparent), var(--shadow-soft);
+}
+
+.task-main {
+  gap: 14px;
+}
+
+.toggle-btn {
+  width: 28px;
+  height: 28px;
+  margin-top: 0;
+  background: var(--card-bg);
+  transition: transform var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.toggle-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-color) 10%, transparent);
+}
+
+.toggle-btn:active {
+  transform: scale(.88);
+}
+
+.toggle-btn:focus-visible,
+.task-action-btn:focus-visible,
+.clear-completed-btn:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.toggle-btn.completed {
+  animation: task-check-settle 280ms ease-out both;
+}
+
+.task-content {
+  flex: 1;
+  gap: 8px;
+}
+
+.task-text {
+  color: var(--text-main);
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.task-meta {
+  gap: 8px;
+}
+
+.due-date,
+.priority-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 25px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: .015em;
+}
+
+.due-date {
+  gap: 5px;
+  color: var(--text-soft);
+  background: var(--input-bg);
+}
+
+.due-date::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.overdue .due-date {
+  color: #d92d20;
+  background: rgba(255, 59, 48, .1);
+}
+
+.due-today .due-date {
+  color: #b45309;
+  background: rgba(255, 149, 0, .12);
+}
+
+body.dark-mode .overdue .due-date {
+  color: #ff6961;
+}
+
+body.dark-mode .due-today .due-date {
+  color: #ffb340;
+}
+
+.task-notes-preview {
+  display: -webkit-box;
+  margin: 1px 0 0;
+  padding: 8px 10px;
+  overflow: hidden;
+  color: var(--text-soft);
+  background: var(--input-bg);
+  border-left: 2px solid var(--separator);
+  border-radius: 0 8px 8px 0;
+  font-size: 12px;
+  font-style: normal;
+  line-height: 1.45;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.task-actions {
+  align-self: center;
+  gap: 8px;
+}
+
+.task-action-btn {
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  transition: transform var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.task-action-btn:hover {
+  border-color: currentColor;
+}
+
+.task-action-btn:active,
+.clear-completed-btn:active {
+  transform: scale(.95);
+}
+
+/* Completed cards retain priority context while receding visually. */
+#completedList .task-card {
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: color-mix(in srgb, var(--card-bg) 86%, var(--page-bg));
+  box-shadow: none;
+  opacity: .72;
+  animation: completed-card-enter 240ms ease-out both;
+}
+
+#completedList .task-card:hover {
+  opacity: .9;
+  box-shadow: var(--shadow-soft);
+}
+
+#completedList .task-main {
+  align-items: center;
+  gap: 10px;
+}
+
+#completedList .toggle-btn {
+  width: 23px;
+  height: 23px;
+}
+
+#completedList .task-content {
+  gap: 3px;
+}
+
+#completedList .task-text {
+  font-size: 14px;
+  font-weight: 550;
+}
+
+#completedList .task-meta,
+#completedList .task-notes-preview {
+  display: none;
+}
+
+#completedList .task-action-btn {
+  min-height: 32px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+/* Empty list cards preserve the localized text supplied by script.js. */
+.task-list .empty-state {
+  display: grid;
+  place-items: center;
+  min-height: 150px;
+  padding: 26px 20px;
+  color: var(--text-soft);
+  background: color-mix(in srgb, var(--card-bg) 88%, transparent);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: none;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.task-list .empty-state::before {
+  content: "✓";
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  margin-bottom: 10px;
+  color: var(--accent-color);
+  background: color-mix(in srgb, var(--accent-color) 10%, var(--card-bg));
+  border: 1px solid color-mix(in srgb, var(--accent-color) 20%, var(--separator));
+  border-radius: 14px;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+@keyframes task-card-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes completed-card-enter {
+  from { opacity: 0; transform: translateY(-3px) scale(.99); }
+  to { opacity: .72; transform: translateY(0) scale(1); }
+}
+
+@keyframes task-check-settle {
+  0% { transform: scale(.8); }
+  60% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 900px) {
+  .view-bar {
+    align-items: stretch;
+  }
+
+  .view-group,
+  .search-field {
+    width: 100%;
+  }
+
+  .view-group {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border-radius: 16px;
+  }
+
+  .task-card {
+    flex-direction: column;
+  }
+
+  #completedList .task-card {
+    flex-direction: row;
+  }
+}
+
+@media (max-width: 640px) {
+  .view-group {
+    padding: 3px;
+  }
+
+  .view-btn {
+    min-height: 34px;
+    padding-inline: 6px;
+  }
+
+  .task-card {
+    padding: 15px;
+    border-radius: 14px;
+  }
+
+  .task-main {
+    width: 100%;
+  }
+
+  .task-actions {
+    margin-top: 2px;
+  }
+
+  #completedList .task-card {
+    align-items: flex-start;
+    padding: 10px 12px;
+  }
+
+  #completedList .task-actions {
+    width: auto;
+    margin: 0 0 0 auto;
+    display: flex;
+  }
+
+  .task-list .empty-state {
+    min-height: 126px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task-card,
+  #completedList .task-card,
+  .toggle-btn.completed {
+    animation: none;
+  }
+
+  .task-card,
+  .toggle-btn,
+  .task-action-btn,
+  .view-btn,
+  .search-field #searchInput,
+  .search-icon {
+    transition-duration: .01ms;
+  }
+}
+
+/* =========================================
+   FINAL TASK REFINEMENTS + PHASE 2.3 HABITS
+   ========================================= */
+
+/* Final Tasks refinements */
+#panel-tasks {
+  padding-bottom: var(--space-2xl);
+}
+
+.hero-card-deco {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  font-size: 34px;
+}
+
+.task-columns {
+  padding-bottom: var(--space-lg);
+}
+
+.task-text {
+  font-size: 17px;
+  letter-spacing: -.01em;
+}
+
+.priority-badge {
+  border: 1px solid currentColor;
+  font-weight: 750;
+}
+
+.task-notes-preview {
+  max-width: 58ch;
+}
+
+.search-shortcut {
+  position: absolute;
+  right: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  min-height: 24px;
+  padding-inline: 6px;
+  color: var(--text-soft);
+  background: var(--input-bg);
+  border: 1px solid var(--separator);
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.search-field #searchInput {
+  padding-right: 54px;
+}
+
+@media (min-width: 901px) {
+  .task-card .task-actions {
+    opacity: .28;
+    transform: translateX(4px);
+    transition: opacity var(--transition-fast), transform var(--transition-fast);
+  }
+
+  .task-card:hover .task-actions,
+  .task-card:focus-within .task-actions {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  #completedList .task-card .task-actions {
+    opacity: .4;
+  }
+
+  #completedList .task-card:hover .task-actions,
+  #completedList .task-card:focus-within .task-actions {
+    opacity: 1;
+  }
+}
+
+/* Habits header */
+#panel-habits {
+  padding-bottom: var(--space-2xl);
+}
+
+.habits-header {
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 18px;
+  padding: 24px;
+  background: var(--card-bg);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+}
+
+.habits-heading-copy {
+  min-width: 0;
+}
+
+.habits-heading {
+  margin-bottom: 5px;
+  color: var(--text-main);
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 800;
+  letter-spacing: -.035em;
+  line-height: 1.15;
+}
+
+.habits-subtitle {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.habits-progress-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 44px;
+  padding: 9px 15px;
+  background: color-mix(in srgb, var(--accent-color) 10%, var(--card-bg));
+  border: 1px solid color-mix(in srgb, var(--accent-color) 22%, var(--separator));
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent-color) 10%, transparent);
+  font-size: 14px;
+}
+
+.habits-progress-pill::before {
+  content: "✓";
+  margin-right: 6px;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+#habitsDoneCount,
+#habitsTotalCount {
+  font-size: 16px;
+}
+
+/* Reminder feedback */
+.reminder-banner {
+  position: relative;
+  min-height: 52px;
+  margin-bottom: 16px;
+  padding: 12px 14px 12px 48px;
+  background: color-mix(in srgb, #ff9500 9%, var(--card-bg));
+  border: 1px solid color-mix(in srgb, #ff9500 28%, var(--separator));
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  font-weight: 650;
+}
+
+.reminder-banner::before {
+  content: "⏰";
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 19px;
+}
+
+.reminder-banner-close {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 9px;
+  transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+}
+
+.reminder-banner-close:hover {
+  color: var(--text-main);
+  background: var(--input-bg);
+}
+
+.reminder-banner-close:active {
+  transform: scale(.92);
+}
+
+/* Habit cards */
+.habits-list {
+  gap: 12px;
+  margin-bottom: 18px;
+  background: transparent;
+  border-radius: 0;
+  overflow: visible;
+  box-shadow: none;
+}
+
+.habit-card {
+  position: relative;
+  gap: 14px;
+  min-height: 76px;
+  padding: 15px 17px;
+  background: var(--card-bg);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  animation: habit-card-enter 240ms ease-out both;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+
+.habit-card:last-child {
+  border-bottom: 1px solid var(--separator);
+}
+
+.habit-card:hover {
+  transform: translateY(-1px);
+  background: var(--card-bg);
+  border-color: color-mix(in srgb, var(--accent-color) 25%, var(--separator));
+  box-shadow: var(--shadow-hover);
+}
+
+.habit-card.habit-done,
+body.dark-mode .habit-card.habit-done {
+  background: linear-gradient(90deg, rgba(52, 199, 89, .08), transparent 48%), var(--card-bg);
+  border-color: color-mix(in srgb, #34c759 28%, var(--separator));
+  box-shadow: none;
+}
+
+.habit-card.habit-done:hover {
+  box-shadow: var(--shadow-soft);
+}
+
+.habit-toggle {
+  width: 30px;
+  height: 30px;
+  border-color: var(--border-color);
+  background: var(--card-bg);
+  transition: transform var(--transition-fast), border-color var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.habit-toggle:hover {
+  transform: scale(1.08);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-color) 10%, transparent);
+}
+
+.habit-toggle:active {
+  transform: scale(.88);
+}
+
+.habit-toggle.done,
+body.dark-mode .habit-toggle.done {
+  background: #2fa84f;
+  border-color: #2fa84f;
+  animation: habit-check-settle 280ms ease-out both;
+}
+
+.habit-emoji {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  background: var(--input-bg);
+  border: 1px solid var(--separator);
+  border-radius: 13px;
+  font-size: 22px;
+}
+
+.habit-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+}
+
+.habit-name {
+  color: var(--text-main);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.habit-name.done-text {
+  color: var(--text-soft);
+  text-decoration-thickness: 1.5px;
+}
+
+.habit-streak {
+  align-self: flex-start;
+  margin-top: 0;
+  padding: 3px 8px;
+  color: #a14900;
+  background: rgba(255, 149, 0, .1);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+body.dark-mode .habit-streak {
+  color: #ffb340;
+}
+
+.habit-meta {
+  gap: 8px;
+}
+
+.habit-reminder-btn,
+.habit-delete-btn {
+  min-height: 38px;
+  padding: 8px 11px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-weight: 650;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), background-color var(--transition-fast), opacity var(--transition-fast);
+}
+
+.habit-reminder-btn {
+  color: var(--text-soft);
+  background: var(--input-bg);
+  border-color: var(--separator);
+}
+
+.habit-reminder-btn:hover {
+  color: var(--accent-color);
+  background: color-mix(in srgb, var(--accent-color) 8%, var(--card-bg));
+  border-color: color-mix(in srgb, var(--accent-color) 28%, var(--separator));
+}
+
+.habit-delete-btn {
+  color: #d92d20;
+  background: rgba(255, 59, 48, .07);
+  opacity: .72;
+}
+
+.habit-delete-btn:hover {
+  background: rgba(255, 59, 48, .12);
+  opacity: 1;
+}
+
+.habit-reminder-btn:active,
+.habit-delete-btn:active {
+  transform: scale(.95);
+}
+
+.habit-toggle:focus-visible,
+.habit-reminder-btn:focus-visible,
+.habit-delete-btn:focus-visible,
+.reminder-banner-close:focus-visible,
+#addHabitBtn:focus-visible,
+.add-habit-fields input:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* Add Habit */
+.add-habit-form {
+  margin-bottom: 24px;
+  background: var(--card-bg);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+}
+
+.add-habit-fields {
+  grid-template-columns: 62px minmax(0, 1fr) 190px 100px;
+  min-height: 56px;
+}
+
+.habit-emoji-picker,
+.add-habit-fields input[type="text"],
+.add-habit-fields input[type="time"] {
+  min-height: 56px;
+  color: var(--text-main);
+  background: transparent;
+  border-color: var(--separator);
+  transition: background-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.habit-emoji-picker:focus,
+.add-habit-fields input[type="text"]:focus,
+.add-habit-fields input[type="time"]:focus {
+  background: color-mix(in srgb, var(--accent-color) 5%, var(--card-bg));
+  box-shadow: inset 0 0 0 1px var(--accent-color);
+}
+
+#addHabitBtn {
+  min-height: 56px;
+  color: white;
+  background: var(--accent-color);
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+#addHabitBtn:hover {
+  background: var(--accent-hover);
+}
+
+#addHabitBtn:active {
+  transform: scale(.97);
+}
+
+.add-habit-hint {
+  padding: 10px 16px;
+  font-style: normal;
+  line-height: 1.45;
+}
+
+/* Localized empty Habits state */
+.habits-list .empty-state {
+  display: grid;
+  place-items: center;
+  min-height: 190px;
+  margin: 0;
+  padding: 30px 22px;
+  color: var(--text-soft);
+  background: color-mix(in srgb, var(--card-bg) 90%, transparent);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-lg);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.habits-list .empty-state::before {
+  content: "+";
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  margin-bottom: 11px;
+  color: var(--accent-color);
+  background: color-mix(in srgb, var(--accent-color) 10%, var(--card-bg));
+  border: 1px solid color-mix(in srgb, var(--accent-color) 22%, var(--separator));
+  border-radius: 15px;
+  font-size: 25px;
+  font-weight: 700;
+}
+
+@keyframes habit-card-enter {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes habit-check-settle {
+  0% { transform: scale(.82); }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 900px) {
+  .search-shortcut {
+    display: none;
+  }
+
+  .search-field #searchInput {
+    padding-right: 16px;
+  }
+
+  .habits-header,
+  .habits-list,
+  .add-habit-form,
+  .reminder-banner {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  .habits-header {
+    margin-top: 12px;
+  }
+
+  .add-habit-fields {
+    grid-template-columns: 58px minmax(0, 1fr) 160px 88px;
+  }
+}
+
+@media (max-width: 640px) {
+  .task-action-btn {
+    min-height: 44px;
+  }
+
+  #completedList .task-action-btn {
+    min-height: 42px;
+  }
+
+  .habits-header,
+  .habits-list,
+  .add-habit-form,
+  .reminder-banner {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+
+  .habits-header {
+    flex-wrap: wrap;
+    padding: 18px;
+    border-radius: 16px;
+  }
+
+  .habits-heading-copy {
+    flex: 1 1 190px;
+  }
+
+  .habits-heading {
+    font-size: 23px;
+  }
+
+  .habits-progress-pill {
+    min-height: 38px;
+    padding: 7px 12px;
+  }
+
+  .habit-card {
+    display: grid;
+    grid-template-columns: 32px 42px minmax(0, 1fr);
+    grid-template-areas:
+      "toggle emoji info"
+      ". meta meta";
+    gap: 10px 12px;
+    padding: 14px;
+  }
+
+  .habit-toggle { grid-area: toggle; }
+  .habit-emoji { grid-area: emoji; }
+  .habit-info { grid-area: info; }
+
+  .habit-meta {
+    grid-area: meta;
+    justify-content: flex-end;
+  }
+
+  .habit-reminder-btn,
+  .habit-delete-btn {
+    min-height: 42px;
+    padding: 9px 12px;
+  }
+
+  .add-habit-fields {
+    grid-template-columns: 56px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "emoji name add"
+      "time time time";
+  }
+
+  .habit-emoji-picker { grid-area: emoji; }
+  #habitNameInput { grid-area: name; }
+
+  .add-habit-fields input[type="time"] {
+    display: block;
+    grid-area: time;
+    width: 100%;
+    border-top: 1px solid var(--separator);
+    border-right: none;
+  }
+
+  #addHabitBtn {
+    grid-area: add;
+    min-width: 76px;
+  }
+
+  .habits-list .empty-state {
+    min-height: 160px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .habit-card,
+  .habit-toggle.done {
+    animation: none;
+  }
+
+  .habit-card,
+  .habit-toggle,
+  .habit-reminder-btn,
+  .habit-delete-btn,
+  .reminder-banner-close,
+  #addHabitBtn,
+  .add-habit-fields input,
+  .task-actions {
+    transition-duration: .01ms;
+  }
+}
