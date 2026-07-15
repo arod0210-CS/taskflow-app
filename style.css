@@ -2402,6 +2402,75 @@ body.dark-mode .habit-delete-btn:hover {
    ========================================= */
 
 @media (min-width: 901px) {
+  /* ---------- Compact Desktop Hero ---------- */
+
+.hero-card {
+  min-height: 132px;
+  padding: 24px 28px;
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(
+      circle at 85% 20%,
+      rgba(255, 255, 255, 0.24),
+      transparent 26%
+    ),
+    linear-gradient(
+      135deg,
+      var(--accent-color),
+      #c026d3
+    );
+}
+
+.hero-card::before {
+  content: "";
+  position: absolute;
+  width: 210px;
+  height: 210px;
+  right: -70px;
+  bottom: -120px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  z-index: -1;
+}
+
+.hero-card-content {
+  max-width: 680px;
+}
+
+.hero-card-label {
+  margin-bottom: 8px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+
+.hero-card-title {
+  margin: 0;
+  font-size: clamp(28px, 3vw, 38px);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+.hero-card-sub {
+  margin-top: 8px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.hero-card-deco {
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  font-size: 42px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
   .container {
     width: min(1180px, calc(100% - 48px));
     padding-block: 24px 48px;
@@ -2488,6 +2557,25 @@ body.dark-mode .habit-delete-btn:hover {
     background: var(--accent-color);
     border-color: var(--accent-color);
   }
+  .task-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.task-columns .section {
+  min-width: 0;
+  margin-top: 24px;
+}
+
+.task-columns .task-list {
+  margin-inline: 0;
+}
+
+.task-columns .section-header {
+  padding-inline: 4px;
+}
 
   .task-input,
   .notes-expander,
@@ -2511,6 +2599,17 @@ body.dark-mode .habit-delete-btn:hover {
     align-items: stretch;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   }
+  .task-input input,
+.task-input select {
+    border-bottom: none;
+    border-right: 1px solid var(--separator);
+    padding: 16px 18px;
+}
+#addTaskBtn {
+    border-top: none;
+    background: var(--accent-color);
+    color: white;
+}
 
   .task-input input,
   .task-input select {

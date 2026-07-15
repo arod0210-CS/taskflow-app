@@ -160,6 +160,8 @@
           <input type="text" id="searchInput" placeholder="Search tasks..." />
         </div>
 
+            <div class="task-columns">
+
         <div class="section">
           <div class="section-header">
             <h2 id="todoHeading">To Do</h2>
@@ -170,16 +172,30 @@
         <div class="section">
           <div class="section-header">
             <h2 id="completedHeading">Completed</h2>
-            <button id="clearCompletedBtn" class="clear-completed-btn" type="button">Clear Completed</button>
+            <button
+              id="clearCompletedBtn"
+              class="clear-completed-btn"
+              type="button"
+            >
+              Clear Completed
+            </button>
           </div>
           <ul id="completedList" class="task-list"></ul>
         </div>
 
       </div>
+      <!-- closes task-columns -->
 
-      <!-- ===== HABITS PANEL ===== -->
-      <div class="tab-panel" id="panel-habits" role="tabpanel" aria-labelledby="tab-habits">
+    </div>
+    <!-- closes panel-tasks -->
 
+    <!-- ===== HABITS PANEL ===== -->
+    <div
+      class="tab-panel"
+      id="panel-habits"
+      role="tabpanel"
+      aria-labelledby="tab-habits"
+    >
         <div class="habits-header">
           <div>
             <h2 id="habitsTitle" class="habits-heading">Daily Habits</h2>
