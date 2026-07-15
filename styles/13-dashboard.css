@@ -1,0 +1,472 @@
+/* =========================================
+   PHASE 4.1 — PRODUCTIVITY DASHBOARD
+   ========================================= */
+
+#panel-dashboard {
+  padding-bottom: var(--space-2xl);
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  padding: 28px;
+  color: var(--text-main);
+  background: var(--card-bg);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
+}
+
+.dashboard-header h2 {
+  margin: 2px 0 6px;
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.05;
+  letter-spacing: -.045em;
+}
+
+.dashboard-header p {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+.dashboard-eyebrow,
+.dashboard-widget-kicker {
+  color: var(--accent-color) !important;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.dashboard-date {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  color: var(--text-soft);
+  background: var(--input-bg);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.dashboard-overview {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: var(--space-lg);
+}
+
+.dashboard-metric {
+  position: relative;
+  min-width: 0;
+  min-height: 128px;
+  padding: 18px;
+  overflow: hidden;
+  color: var(--text-main);
+  background: var(--card-bg);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+}
+
+.dashboard-metric-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-bottom: 14px;
+  color: var(--accent-color);
+  background: var(--input-bg);
+  border-radius: 10px;
+  font-weight: 900;
+}
+
+.dashboard-metric-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.dashboard-metric-copy strong {
+  overflow: hidden;
+  font-size: 20px;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-metric-copy span {
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.dashboard-metric-progress {
+  position: absolute;
+  right: 18px;
+  bottom: 12px;
+  left: 18px;
+  height: 4px;
+  overflow: hidden;
+  background: var(--separator);
+  border-radius: 999px;
+}
+
+.dashboard-metric-progress span {
+  display: block;
+  height: 100%;
+  background: var(--accent-color);
+  border-radius: inherit;
+  transition: width var(--transition-normal);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-lg);
+}
+
+.dashboard-widget {
+  min-width: 0;
+  padding: 22px;
+  color: var(--text-main);
+  background: var(--card-bg);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+}
+
+.dashboard-widget-wide {
+  grid-column: span 2;
+}
+
+.dashboard-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.dashboard-widget-header h3,
+.dashboard-widget-header p {
+  margin: 0;
+}
+
+.dashboard-widget-header h3 {
+  margin-top: 2px;
+  font-size: 19px;
+  letter-spacing: -.02em;
+}
+
+.dashboard-text-action {
+  min-height: 38px;
+  padding: 8px 11px;
+  color: var(--accent-color);
+  background: var(--input-bg);
+  border: 1px solid var(--separator);
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.dashboard-list {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dashboard-task-row,
+.dashboard-focus-row,
+.dashboard-habit-row {
+  min-width: 0;
+  background: var(--input-bg);
+  border: 1px solid var(--separator);
+  border-radius: 12px;
+}
+
+.dashboard-task-link {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  min-height: 58px;
+  padding: 11px 13px;
+  color: var(--text-main);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: inherit;
+  cursor: pointer;
+}
+
+.dashboard-task-link strong,
+.dashboard-focus-row strong,
+.dashboard-habit-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-task-meta,
+.dashboard-habit-streak,
+.dashboard-organization {
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.dashboard-organization {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-focus-row,
+.dashboard-habit-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 10px 11px 10px 13px;
+}
+
+.dashboard-focus-row > div {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-reason {
+  color: var(--accent-color);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.dashboard-complete-btn {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  color: var(--accent-color);
+  background: var(--card-solid);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.dashboard-habit-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 700;
+}
+
+.dashboard-widget-summary {
+  margin: -7px 0 13px;
+  color: var(--text-soft);
+  font-size: 13px;
+}
+
+.dashboard-empty {
+  display: grid;
+  min-height: 92px;
+  place-items: center;
+  padding: 18px;
+  color: var(--text-soft);
+  text-align: center;
+  background: var(--input-bg);
+  border: 1px dashed var(--border-color);
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.dashboard-activity {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(36px, 1fr));
+  gap: 10px;
+  min-height: 180px;
+}
+
+.dashboard-activity-day {
+  display: grid;
+  grid-template-rows: 22px 1fr 22px;
+  gap: 5px;
+  min-width: 0;
+  text-align: center;
+}
+
+.dashboard-activity-count,
+.dashboard-activity-label {
+  color: var(--text-soft);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.dashboard-activity-track {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 120px;
+  overflow: hidden;
+  background: var(--input-bg);
+  border-radius: 9px;
+}
+
+.dashboard-activity-fill {
+  display: block;
+  width: 100%;
+  min-height: 4px;
+  background: var(--accent-color);
+  border-radius: 7px 7px 0 0;
+  opacity: .78;
+  transition: height var(--transition-normal);
+}
+
+.dashboard-quick-widget {
+  grid-column: span 2;
+}
+
+.dashboard-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.dashboard-quick-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 10px 14px;
+  color: var(--text-main);
+  background: var(--input-bg);
+  border: 1px solid var(--separator);
+  border-radius: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.dashboard-task-link:hover,
+.dashboard-text-action:hover,
+.dashboard-complete-btn:hover,
+.dashboard-quick-actions button:hover {
+  border-color: var(--accent-color);
+  transform: translateY(-1px);
+}
+
+.dashboard-task-link:focus-visible,
+.dashboard-text-action:focus-visible,
+.dashboard-complete-btn:focus-visible,
+.dashboard-quick-actions button:focus-visible {
+  outline: 3px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-overview {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .dashboard-header {
+    padding: 22px;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-widget-wide,
+  .dashboard-quick-widget {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+    padding: 19px;
+    border-radius: var(--radius-lg);
+  }
+
+  .dashboard-date {
+    align-self: stretch;
+    text-align: center;
+  }
+
+  .dashboard-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .dashboard-metric {
+    min-height: 116px;
+    padding: 14px;
+  }
+
+  .dashboard-metric-progress {
+    right: 14px;
+    left: 14px;
+  }
+
+  .dashboard-grid {
+    gap: 14px;
+  }
+
+  .dashboard-widget {
+    padding: 17px;
+    border-radius: var(--radius-md);
+  }
+
+  .dashboard-activity {
+    gap: 5px;
+  }
+
+  .dashboard-activity-track {
+    min-height: 92px;
+  }
+
+  .dashboard-quick-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 360px) {
+  .dashboard-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-metric {
+    min-height: 96px;
+  }
+
+  .dashboard-activity {
+    gap: 3px;
+    grid-template-columns: repeat(7, minmax(30px, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-metric-progress span,
+  .dashboard-activity-fill,
+  .dashboard-task-link,
+  .dashboard-text-action,
+  .dashboard-complete-btn,
+  .dashboard-quick-actions button {
+    transition-duration: .01ms;
+  }
+}

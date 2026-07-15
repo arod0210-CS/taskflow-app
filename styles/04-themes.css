@@ -1,0 +1,142 @@
+/* ===== THEME VARIANTS ===== */
+body.theme-sunset {
+  --accent-color: #ff6b35;
+  --accent-hover: #e85520;
+  --page-bg: #fff4ef;
+  --card-bg: #fffbf9;
+  --card-solid: #fffbf9;
+  --input-bg: #fff0e8;
+  --separator: #ffd9c8;
+  --btn-neutral-bg: #ffe8db;
+  --btn-neutral-fg: #4a1500;
+}
+
+body.theme-mint {
+  --accent-color: #00b894;
+  --accent-hover: #00957a;
+  --page-bg: #f0fdf8;
+  --card-bg: #f8fffc;
+  --card-solid: #f8fffc;
+  --input-bg: #e0faf3;
+  --separator: #b8f0e0;
+  --btn-neutral-bg: #d4f5ec;
+  --btn-neutral-fg: #00382d;
+}
+
+body.theme-galaxy {
+  --accent-color: #7c3aed;
+  --accent-hover: #6d28d9;
+  --page-bg: #f5f3ff;
+  --card-bg: #fdfcff;
+  --card-solid: #fdfcff;
+  --input-bg: #ede9fe;
+  --separator: #ddd6fe;
+  --btn-neutral-bg: #e9e4fc;
+  --btn-neutral-fg: #2e1065;
+}
+
+body.theme-rose {
+  --accent-color: #ff2d55;
+  --accent-hover: #d90032;
+  --page-bg: #fff0f4;
+  --card-bg: #fffbfc;
+  --card-solid: #fffbfc;
+  --input-bg: #ffe4ec;
+  --separator: #ffbdd0;
+  --btn-neutral-bg: #ffd6e4;
+  --btn-neutral-fg: #4a0018;
+}
+
+body.theme-ocean {
+  --accent-color: #0096c7;
+  --accent-hover: #007aad;
+  --page-bg: #f0f8ff;
+  --card-bg: #f8fcff;
+  --card-solid: #f8fcff;
+  --input-bg: #ddf0fa;
+  --separator: #b8e0f5;
+  --btn-neutral-bg: #d0eaf8;
+  --btn-neutral-fg: #002d3d;
+}
+
+/* ===== DARK MODE — Deep Purple Dark ===== */
+body.dark-mode {
+  --page-bg: #0d0a1a;
+  --card-bg: #1e1a2e;
+  --card-solid: #1e1a2e;
+  --text-main: #f0ecff;
+  --text-soft: #8b7db8;
+  --border-color: #3a3050;
+  --separator: #2c2840;
+  --input-bg: #2c2840;
+  --btn-neutral-bg: #2c2840;
+  --btn-neutral-fg: #f0ecff;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .date-box {
+  color: var(--text-soft);
+}
+
+body.dark-mode .edit-btn {
+  background: rgba(124, 58, 237, 0.20);
+  color: #a78bfa;
+}
+
+body.dark-mode .delete-btn {
+  background: rgba(255, 69, 58, 0.15);
+  color: #ff453a;
+}
+
+body.dark-mode .clear-completed-btn {
+  background: rgba(255, 69, 58, 0.15);
+  color: #ff453a;
+}
+
+body.dark-mode .task-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+body.dark-mode .priority-high {
+  background: rgba(255, 69, 58, 0.15);
+  color: #ff453a;
+}
+
+body.dark-mode .priority-medium {
+  background: rgba(255, 159, 10, 0.15);
+  color: #ff9f0a;
+}
+
+body.dark-mode .priority-low {
+  background: rgba(48, 209, 88, 0.15);
+  color: #30d158;
+}
+
+body.dark-mode #addTaskBtn:hover {
+  background: rgba(124, 58, 237, 0.12);
+}
+
+body.dark-mode .view-btn.active {
+  background: var(--accent-color);
+}
+
+body.dark-mode .task-card[data-priority="high"] {
+  background: linear-gradient(135deg, #2a1210 0%, #1a0c08 100%);
+}
+
+body.dark-mode .task-card[data-priority="medium"] {
+  background: linear-gradient(135deg, #24200a 0%, #1a1800 100%);
+}
+
+body.dark-mode .task-card[data-priority="low"] {
+  background: linear-gradient(135deg, #0a2014 0%, #06160c 100%);
+}
+
+body.dark-mode .task-card.overdue {
+  background: linear-gradient(135deg, #2a0808 0%, #1a0404 100%);
+}
+
+body.dark-mode .task-card.due-today {
+  background: linear-gradient(135deg, #24200a 0%, #1a1800 100%);
+}
+

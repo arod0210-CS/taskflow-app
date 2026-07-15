@@ -1,20 +1,36 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const STORAGE_KEY = "taskflow-tasks-v3";
-  const PLAYER_KEY = "taskflow-player-v1";
-  const LANG_KEY = "taskflow-language-v1";
-  const HABITS_KEY = "taskflow-habits-v1";
-  const TAB_KEY = "taskflow-active-tab-v1";
-  const THEME_CLASSES = ["theme-sunset", "theme-mint", "theme-galaxy", "theme-rose", "theme-ocean"];
+import {
+  HABITS_KEY,
+  LANG_KEY,
+  PLAYER_KEY,
+  PROJECTS_KEY,
+  STORAGE_KEY,
+  TAB_KEY,
+  THEME_CLASSES
+} from "./constants.js";
+import {
+  defaultPlayer,
+  normalizePriority,
+  sanitizeCategory,
+  sanitizeHabits,
+  sanitizePlayer,
+  sanitizeTasks
+} from "./data.js";
+import {
+  getTodayString,
+  getYesterdayString,
+  isInCurrentMonth,
+  isInCurrentWeek,
+  parseDateOnly
+} from "./dates.js";
+import { safeParse } from "./storage.js";
+import { createDashboard } from "./dashboard.js";
+import {
+  createProjectsUI,
+  sanitizeProjects,
+  sanitizeTaskProjectReferences
+} from "./projects.js";
 
-  const DEFAULT_HABITS = [
-    { emoji: "🚿", name: "Shower" },
-    { emoji: "🦷", name: "Brush Teeth" },
-    { emoji: "🚶", name: "Walk" },
-    { emoji: "💧", name: "Drink Water" },
-    { emoji: "💊", name: "Take Vitamins" },
-    { emoji: "🧘", name: "Stretch" },
-    { emoji: "😴", name: "Wind Down" }
-  ];
+export function startApp() {
 
   const translations = {
     en: {
@@ -126,6 +142,61 @@ document.addEventListener("DOMContentLoaded", () => {
       tabTasks: "Tasks",
       tabHabits: "Habits",
       tabStats: "Stats",
+      tabDashboard: "Dashboard",
+      dashboardEyebrow: "At a glance",
+      dashboardTitle: "Dashboard",
+      dashboardSubtitle: "Your priorities and progress for today.",
+      dashboardOverview: "Today overview",
+      dashboardRemainingToday: "Remaining today",
+      dashboardCompletedToday: "Completed today",
+      dashboardHabitsMetric: "Habits today",
+      dashboardScheduleKicker: "Schedule",
+      dashboardUpcoming: "Upcoming Deadlines",
+      dashboardPrioritiesKicker: "Priorities",
+      dashboardFocus: "Today’s Focus",
+      dashboardRoutinesKicker: "Routines",
+      dashboardHabitsTitle: "Habits Today",
+      dashboardViewHabits: "View Habits",
+      dashboardActivityKicker: "Last seven days",
+      dashboardActivity: "Weekly Activity",
+      dashboardShortcutsKicker: "Shortcuts",
+      dashboardQuickActions: "Quick Actions",
+      dashboardAddHabit: "Add Habit",
+      dashboardViewStats: "View Stats",
+      dashboardNoDeadlines: "No upcoming deadlines.",
+      dashboardNoFocus: "Nothing needs your attention right now.",
+      dashboardHabitSummary: "{done} of {total} habits completed today",
+      dashboardNoHabits: "No habits yet.",
+      dashboardAllHabitsDone: "All habits are complete for today.",
+      dashboardOverdue: "Overdue",
+      dashboardDueToday: "Today",
+      dashboardHighPriority: "High Priority",
+      dashboardNext: "Next",
+      projects: "Projects",
+      project: "Project",
+      category: "Category",
+      projectEmoji: "Project emoji",
+      projectName: "Project name",
+      addProject: "Add Project",
+      noProjects: "No projects yet.",
+      renameProject: "Rename",
+      deleteProject: "Delete project",
+      deleteProjectConfirm: "Delete {name}? Its tasks will become unassigned.",
+      projectTaskCount: "{count} tasks",
+      noProject: "No Project",
+      noCategory: "No Category",
+      allProjects: "All Projects",
+      unassigned: "Unassigned",
+      allCategories: "All Categories",
+      projectFilter: "Project filter",
+      categoryFilter: "Category filter",
+      taskOrganization: "Task organization",
+      organizationFilters: "Organization filters",
+      categoryWork: "Work",
+      categorySchool: "School",
+      categoryPersonal: "Personal",
+      categoryHealth: "Health",
+      categoryOther: "Other",
       habitsTitle: "Daily Habits",
       habitsSubtitle: "Your daily routines",
       habitsDoneLabel: " done",
@@ -263,6 +334,61 @@ document.addEventListener("DOMContentLoaded", () => {
       tabTasks: "Tareas",
       tabHabits: "Hábitos",
       tabStats: "Stats",
+      tabDashboard: "Resumen",
+      dashboardEyebrow: "De un vistazo",
+      dashboardTitle: "Resumen",
+      dashboardSubtitle: "Tus prioridades y progreso de hoy.",
+      dashboardOverview: "Resumen de hoy",
+      dashboardRemainingToday: "Pendientes hoy",
+      dashboardCompletedToday: "Completadas hoy",
+      dashboardHabitsMetric: "Hábitos de hoy",
+      dashboardScheduleKicker: "Agenda",
+      dashboardUpcoming: "Próximas fechas límite",
+      dashboardPrioritiesKicker: "Prioridades",
+      dashboardFocus: "Enfoque de hoy",
+      dashboardRoutinesKicker: "Rutinas",
+      dashboardHabitsTitle: "Hábitos de hoy",
+      dashboardViewHabits: "Ver hábitos",
+      dashboardActivityKicker: "Últimos siete días",
+      dashboardActivity: "Actividad semanal",
+      dashboardShortcutsKicker: "Atajos",
+      dashboardQuickActions: "Acciones rápidas",
+      dashboardAddHabit: "Agregar hábito",
+      dashboardViewStats: "Ver estadísticas",
+      dashboardNoDeadlines: "No hay próximas fechas límite.",
+      dashboardNoFocus: "Nada requiere tu atención ahora.",
+      dashboardHabitSummary: "{done} de {total} hábitos completados hoy",
+      dashboardNoHabits: "Aún no hay hábitos.",
+      dashboardAllHabitsDone: "Todos los hábitos están completos hoy.",
+      dashboardOverdue: "Atrasada",
+      dashboardDueToday: "Hoy",
+      dashboardHighPriority: "Prioridad alta",
+      dashboardNext: "Siguiente",
+      projects: "Proyectos",
+      project: "Proyecto",
+      category: "Categoría",
+      projectEmoji: "Emoji del proyecto",
+      projectName: "Nombre del proyecto",
+      addProject: "Agregar proyecto",
+      noProjects: "Aún no hay proyectos.",
+      renameProject: "Renombrar",
+      deleteProject: "Eliminar proyecto",
+      deleteProjectConfirm: "¿Eliminar {name}? Sus tareas quedarán sin asignar.",
+      projectTaskCount: "{count} tareas",
+      noProject: "Sin proyecto",
+      noCategory: "Sin categoría",
+      allProjects: "Todos los proyectos",
+      unassigned: "Sin asignar",
+      allCategories: "Todas las categorías",
+      projectFilter: "Filtro de proyecto",
+      categoryFilter: "Filtro de categoría",
+      taskOrganization: "Organización de tareas",
+      organizationFilters: "Filtros de organización",
+      categoryWork: "Trabajo",
+      categorySchool: "Escuela",
+      categoryPersonal: "Personal",
+      categoryHealth: "Salud",
+      categoryOther: "Otro",
       habitsTitle: "Hábitos diarios",
       habitsSubtitle: "Tus rutinas diarias",
       habitsDoneLabel: " hechos",
@@ -296,6 +422,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const taskInput = document.getElementById("taskInput");
   const dueDateInput = document.getElementById("dueDateInput");
   const priorityInput = document.getElementById("priorityInput");
+  const taskProjectInput = document.getElementById("taskProjectInput");
+  const taskCategoryInput = document.getElementById("taskCategoryInput");
   const addTaskBtn = document.getElementById("addTaskBtn");
   const resetBtn = document.getElementById("resetBtn");
   const searchInput = document.getElementById("searchInput");
@@ -324,6 +452,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const editTextInput = document.getElementById("editTextInput");
   const editDateInput = document.getElementById("editDateInput");
   const editPriorityInput = document.getElementById("editPriorityInput");
+  const editProjectInput = document.getElementById("editProjectInput");
+  const editCategoryInput = document.getElementById("editCategoryInput");
   const editSaveBtn = document.getElementById("editSaveBtn");
   const editCancelBtn = document.getElementById("editCancelBtn");
   const editNotesInput = document.getElementById("editNotesInput");
@@ -354,23 +484,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const quoteContent = document.querySelector(".quote-content");
   const quoteText = document.getElementById("quoteText");
   const quoteAuthor = document.getElementById("quoteAuthor");
+  let dashboard = null;
+  let projectsUI = null;
 
-  function safeParse(value, fallback) {
-    if (value === null || value === undefined || value === "") return fallback;
-    try {
-      const parsed = JSON.parse(value);
-      return parsed === null || parsed === undefined ? fallback : parsed;
-    } catch {
-      return fallback;
-    }
-  }
+  const storedProjects = sanitizeProjects(safeParse(localStorage.getItem(PROJECTS_KEY), []));
+  const storedTasks = sanitizeTaskProjectReferences(
+    sanitizeTasks(safeParse(localStorage.getItem(STORAGE_KEY), [])),
+    storedProjects
+  );
 
   const State = {
-    tasks: sanitizeTasks(safeParse(localStorage.getItem(STORAGE_KEY), [])),
+    tasks: storedTasks,
+    projects: storedProjects,
     player: sanitizePlayer(safeParse(localStorage.getItem(PLAYER_KEY), defaultPlayer())),
     habits: sanitizeHabits(safeParse(localStorage.getItem(HABITS_KEY), null)),
     view: "all",
     searchQuery: "",
+    projectFilter: "all",
+    categoryFilter: "all",
     editMode: safeParse(localStorage.getItem("editMode"), false),
     editingTaskId: null,
     language: localStorage.getItem(LANG_KEY) || "en",
@@ -383,6 +514,7 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem(PLAYER_KEY, JSON.stringify(this.player));
       localStorage.setItem(HABITS_KEY, JSON.stringify(this.habits));
       localStorage.setItem(LANG_KEY, this.language);
+      localStorage.setItem(PROJECTS_KEY, JSON.stringify(this.projects));
       this.listeners.forEach((listener) => listener(this));
     },
     addTask(task) {
@@ -394,31 +526,39 @@ document.addEventListener("DOMContentLoaded", () => {
       this.notify();
     },
     toggleTask(id) {
-  const task = this.tasks.find((item) => item.id === id);
-  if (!task) return;
+      const task = this.tasks.find((item) => item.id === id);
+      if (!task) return;
 
-  if (task.completed) {
-    task.completed = false;
-    task.completedAt = null;
-  } else {
-    task.completed = true;
-    task.completedAt = new Date().toISOString();
+      if (task.completed) {
+        task.completed = false;
+        task.completedAt = null;
+      } else {
+        task.completed = true;
+        task.completedAt = new Date().toISOString();
 
-    if (!task.rewardGranted) {
-      rewardForCompletion(task);
-      task.rewardGranted = true;
-    }
-  }
+        if (!task.rewardGranted) {
+          rewardForCompletion(task);
+          task.rewardGranted = true;
+        }
+      }
 
-  this.notify();
-},
+      this.notify();
+    },
     updateTask(id, updates) {
       this.tasks = this.tasks.map((task) =>
         task.id === id
           ? {
               ...task,
               ...updates,
-              priority: normalizePriority(updates.priority ?? task.priority)
+              priority: normalizePriority(updates.priority ?? task.priority),
+              projectId: updates.projectId === undefined
+                ? task.projectId
+                : this.projects.some((project) => project.id === updates.projectId)
+                  ? updates.projectId
+                  : null,
+              category: updates.category === undefined
+                ? task.category
+                : sanitizeCategory(updates.category)
             }
           : task
       );
@@ -444,6 +584,16 @@ document.addEventListener("DOMContentLoaded", () => {
       this.searchQuery = query.trim().toLowerCase();
       this.notify();
     },
+    setProjectFilter(projectId) {
+      this.projectFilter = projectId === "unassigned" || this.projects.some((project) => project.id === projectId)
+        ? projectId
+        : "all";
+      this.notify();
+    },
+    setCategoryFilter(category) {
+      this.categoryFilter = sanitizeCategory(category) || "all";
+      this.notify();
+    },
     toggleEditMode() {
       this.editMode = !this.editMode;
       localStorage.setItem("editMode", JSON.stringify(this.editMode));
@@ -457,6 +607,9 @@ document.addEventListener("DOMContentLoaded", () => {
       this.tasks = [];
       this.player = defaultPlayer();
       this.habits = sanitizeHabits(null);
+      this.projects = [];
+      this.projectFilter = "all";
+      this.categoryFilter = "all";
       this.notify();
     },
     clearCompleted() {
@@ -504,6 +657,23 @@ document.addEventListener("DOMContentLoaded", () => {
       const habit = this.habits.find((h) => h.id === id);
       if (!habit) return;
       habit.reminderTime = time || null;
+      this.notify();
+    },
+    addProject(project) {
+      this.projects = sanitizeProjects([...this.projects, project]);
+      this.notify();
+    },
+    renameProject(id, name) {
+      const project = this.projects.find((item) => item.id === id);
+      if (!project) return;
+      project.name = String(name).trim();
+      if (!project.name) return;
+      this.notify();
+    },
+    deleteProject(id) {
+      this.projects = this.projects.filter((project) => project.id !== id);
+      this.tasks = this.tasks.map((task) => task.projectId === id ? { ...task, projectId: null } : task);
+      if (this.projectFilter === id) this.projectFilter = "all";
       this.notify();
     }
   };
@@ -580,119 +750,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return translations[State.language][key];
   }
 
-  function defaultPlayer() {
-    return {
-      xp: 0,
-      level: 1,
-      coins: 0,
-      streak: 0,
-      lastCompletedDate: null,
-      completedToday: 0,
-      completedWeek: 0,
-      totalCompleted: 0,
-      challengeRewarded: [],
-      challengeRewardedDate: null,
-      badges: [],
-      usedBothLanguages: false,
-      usedDarkMode: false,
-      completedByDay: {}
-    };
-  }
-
-  function normalizePriority(priority) {
-    return ["high", "medium", "low"].includes(priority) ? priority : "medium";
-  }
-
- function sanitizeTasks(rawTasks) {
-  if (!Array.isArray(rawTasks)) return [];
-
-  return rawTasks
-    .map((task, index) => ({
-      id: String(task.id ?? `${Date.now()}-${index}`),
-      text: String(task.text ?? "").trim(),
-      completed: Boolean(task.completed),
-      completedAt: task.completedAt || null,
-      dueDate: task.dueDate || null,
-      priority: normalizePriority(task.priority),
-      createdAt: task.createdAt || new Date().toISOString(),
-      notes: String(task.notes ?? "").trim(),
-      rewardGranted: Boolean(task.rewardGranted)
-    }))
-    .filter((task) => task.text !== "");
-}
-
-  function sanitizePlayer(player) {
-    return {
-      ...defaultPlayer(),
-      ...player
-    };
-  }
-
-  function sanitizeHabits(rawHabits) {
-    if (!Array.isArray(rawHabits)) {
-      return DEFAULT_HABITS.map((h, i) => ({
-        id: `default-${i}`,
-        name: h.name,
-        emoji: h.emoji,
-        reminderTime: null,
-        completedDates: [],
-        streak: 0,
-        lastCompletedDate: null
-      }));
-    }
-    return rawHabits
-      .map((h, i) => ({
-        id: String(h.id ?? `habit-${Date.now()}-${i}`),
-        name: String(h.name ?? "").trim(),
-        emoji: String(h.emoji ?? "🌟").trim() || "🌟",
-        reminderTime: h.reminderTime || null,
-        completedDates: Array.isArray(h.completedDates) ? h.completedDates : [],
-        streak: Number(h.streak ?? 0),
-        lastCompletedDate: h.lastCompletedDate || null
-      }))
-      .filter((h) => h.name !== "");
-  }
-
-  function getTodayString() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  }
-
-  function getYesterdayString() {
-    const d = new Date();
-    d.setDate(d.getDate() - 1);
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  }
-
-  function startOfToday() {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  }
-
-  function parseDateOnly(dateString) {
-    return new Date(`${dateString}T00:00:00`);
-  }
-
-  function isInCurrentWeek(dateString) {
-    const today = startOfToday();
-    const weekEnd = new Date(today);
-    weekEnd.setDate(weekEnd.getDate() + 6);
-    const due = parseDateOnly(dateString);
-    return due >= today && due <= weekEnd;
-  }
-
-  function isInCurrentMonth(dateString) {
-    const today = startOfToday();
-    const due = parseDateOnly(dateString);
-    return due.getFullYear() === today.getFullYear() && due.getMonth() === today.getMonth();
-  }
-
   function setDateConstraints() {
     const today = getTodayString();
     dueDateInput.min = today;
@@ -744,6 +801,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("dataHeaderText").textContent = t("dataManagement");
     exportBtn.textContent = t("exportData");
     document.getElementById("importBtnText").textContent = t("importData");
+    document.getElementById("projectsHeaderText").textContent = t("projects");
+    document.getElementById("projectEmojiInput").setAttribute("aria-label", t("projectEmoji"));
+    document.getElementById("projectNameInput").placeholder = t("projectName");
+    document.getElementById("projectNameInput").setAttribute("aria-label", t("projectName"));
+    document.getElementById("addProjectBtn").textContent = t("addProject");
 
     document.getElementById("tasksLeftLabel").textContent = t("tasksLeft");
     document.getElementById("tasksCompletedLabel").textContent = t("completed");
@@ -768,6 +830,16 @@ document.addEventListener("DOMContentLoaded", () => {
     taskInput.setAttribute("aria-label", t("task"));
     dueDateInput.setAttribute("aria-label", t("dueDate"));
     priorityInput.setAttribute("aria-label", t("priority"));
+    taskProjectInput.setAttribute("aria-label", t("project"));
+    taskCategoryInput.setAttribute("aria-label", t("category"));
+    document.getElementById("taskProjectLabel").textContent = t("project");
+    document.getElementById("taskCategoryLabel").textContent = t("category");
+    document.querySelector(".task-organization-row").setAttribute("aria-label", t("taskOrganization"));
+    document.getElementById("projectFilterLabel").textContent = t("project");
+    document.getElementById("categoryFilterLabel").textContent = t("category");
+    document.getElementById("projectFilterInput").setAttribute("aria-label", t("projectFilter"));
+    document.getElementById("categoryFilterInput").setAttribute("aria-label", t("categoryFilter"));
+    document.querySelector(".organization-filters").setAttribute("aria-label", t("organizationFilters"));
     searchInput.placeholder = t("searchPlaceholder");
     searchInput.setAttribute("aria-label", t("searchPlaceholder"));
     editTextInput.placeholder = t("taskDescriptionPlaceholder");
@@ -788,6 +860,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("editTaskLabel").textContent = t("task");
     document.getElementById("editDueDateLabel").textContent = t("dueDate");
     document.getElementById("editPriorityLabel").textContent = t("priority");
+    document.getElementById("editProjectLabel").textContent = t("project");
+    document.getElementById("editCategoryLabel").textContent = t("category");
+    editProjectInput.setAttribute("aria-label", t("project"));
+    editCategoryInput.setAttribute("aria-label", t("category"));
     editCancelBtn.textContent = t("cancel");
     editSaveBtn.textContent = t("save");
     document.getElementById("editNotesLabel").textContent = t("notesLabel");
@@ -807,9 +883,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const tabTasksLabel = document.getElementById("tabTasksLabel");
     const tabHabitsLabel = document.getElementById("tabHabitsLabel");
     const tabStatsLabel = document.getElementById("tabStatsLabel");
+    const tabDashboardLabel = document.getElementById("tabDashboardLabel");
     if (tabTasksLabel) tabTasksLabel.textContent = t("tabTasks");
     if (tabHabitsLabel) tabHabitsLabel.textContent = t("tabHabits");
     if (tabStatsLabel) tabStatsLabel.textContent = t("tabStats");
+    if (tabDashboardLabel) tabDashboardLabel.textContent = t("tabDashboard");
+
+    document.getElementById("dashboardEyebrow").textContent = t("dashboardEyebrow");
+    document.getElementById("dashboardTitle").textContent = t("dashboardTitle");
+    document.getElementById("dashboardSubtitle").textContent = t("dashboardSubtitle");
+    document.getElementById("dashboardOverview").setAttribute("aria-label", t("dashboardOverview"));
+    document.getElementById("dashboardUpcomingKicker").textContent = t("dashboardScheduleKicker");
+    document.getElementById("dashboardUpcomingTitle").textContent = t("dashboardUpcoming");
+    document.getElementById("dashboardFocusKicker").textContent = t("dashboardPrioritiesKicker");
+    document.getElementById("dashboardFocusTitle").textContent = t("dashboardFocus");
+    document.getElementById("dashboardHabitsKicker").textContent = t("dashboardRoutinesKicker");
+    document.getElementById("dashboardHabitsTitle").textContent = t("dashboardHabitsTitle");
+    document.getElementById("dashboardOpenHabits").textContent = t("dashboardViewHabits");
+    document.getElementById("dashboardActivityKicker").textContent = t("dashboardActivityKicker");
+    document.getElementById("dashboardActivityTitle").textContent = t("dashboardActivity");
+    document.getElementById("dashboardQuickKicker").textContent = t("dashboardShortcutsKicker");
+    document.getElementById("dashboardQuickTitle").textContent = t("dashboardQuickActions");
+    document.getElementById("dashboardAddTaskLabel").textContent = t("addTask");
+    document.getElementById("dashboardAddHabitLabel").textContent = t("dashboardAddHabit");
+    document.getElementById("dashboardViewStatsLabel").textContent = t("dashboardViewStats");
 
     const habitsTitleEl = document.getElementById("habitsTitle");
     const habitsSubtitleEl = document.getElementById("habitsSubtitle");
@@ -1493,6 +1590,8 @@ document.addEventListener("DOMContentLoaded", () => {
     editTextInput.value = task.text;
     editDateInput.value = task.dueDate || "";
     editPriorityInput.value = normalizePriority(task.priority);
+    editProjectInput.value = task.projectId || "";
+    editCategoryInput.value = task.category || "";
     editNotesInput.value = task.notes || "";
 
     editModal.classList.remove("hidden");
@@ -1523,6 +1622,8 @@ document.addEventListener("DOMContentLoaded", () => {
       text: newText,
       dueDate: editDateInput.value || null,
       priority: editPriorityInput.value,
+      projectId: editProjectInput.value || null,
+      category: editCategoryInput.value || null,
       notes: editNotesInput.value.trim()
     });
 
@@ -1533,6 +1634,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (priority === "high") return t("highBadge");
     if (priority === "low") return t("lowBadge");
     return t("mediumBadge");
+  }
+
+  function getCategoryLabel(category) {
+    if (!category) return "";
+    return t(`category${category[0].toUpperCase()}${category.slice(1)}`);
   }
 
   function buildTaskElement(task) {
@@ -1582,6 +1688,21 @@ document.addEventListener("DOMContentLoaded", () => {
     prioritySpan.textContent = getPriorityLabel(normalizePriority(task.priority));
     meta.appendChild(prioritySpan);
 
+    const project = State.projects.find((item) => item.id === task.projectId);
+    if (project) {
+      const projectSpan = document.createElement("span");
+      projectSpan.className = "task-organization-chip task-project-chip";
+      projectSpan.textContent = `${project.emoji} ${project.name}`;
+      meta.appendChild(projectSpan);
+    }
+
+    if (task.category) {
+      const categorySpan = document.createElement("span");
+      categorySpan.className = "task-organization-chip task-category-chip";
+      categorySpan.textContent = getCategoryLabel(task.category);
+      meta.appendChild(categorySpan);
+    }
+
     content.appendChild(textSpan);
     content.appendChild(meta);
 
@@ -1624,9 +1745,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function filterTasks(state) {
     return state.tasks.filter((task) => {
-      if (state.searchQuery && !task.text.toLowerCase().includes(state.searchQuery)) {
+      const project = state.projects.find((item) => item.id === task.projectId);
+      const searchableText = [
+        task.text,
+        project?.name || "",
+        task.category ? getCategoryLabel(task.category) : ""
+      ].join(" ").toLowerCase();
+
+      if (state.searchQuery && !searchableText.includes(state.searchQuery)) {
         return false;
       }
+
+      if (state.projectFilter === "unassigned" && task.projectId !== null) return false;
+      if (state.projectFilter !== "all" && state.projectFilter !== "unassigned" && task.projectId !== state.projectFilter) return false;
+      if (state.categoryFilter !== "all" && task.category !== state.categoryFilter) return false;
 
       if (state.view === "today") {
         return task.dueDate === getTodayString();
@@ -1684,14 +1816,6 @@ document.addEventListener("DOMContentLoaded", () => {
       completedList.appendChild(createEmptyState(t("emptyView")));
     }
 
-    const labels = {
-      all: t("allLabel"),
-      today: t("todayLabel"),
-      week: t("weekLabel"),
-      month: t("monthLabel")
-    };
-    const label = labels[state.view] || t("allLabel");
-
     todoHeading.textContent = `${t("todo")} (${todoTasks.length})`;
     completedHeading.textContent = `${t("completedHeading")} (${doneTasks.length})`;
 
@@ -1718,6 +1842,8 @@ document.addEventListener("DOMContentLoaded", () => {
     renderAnalytics();
     renderHabits();
     updateQuote(true);
+    projectsUI?.render(state);
+    dashboard?.render(state);
   }
 
   let searchTimeout;
@@ -1754,20 +1880,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     State.addTask({
-  id: crypto.randomUUID(),
-  text,
-  completed: false,
-  completedAt: null,
-  dueDate: dueDateInput.value || null,
-  priority: priorityInput.value || "medium",
-  createdAt: new Date().toISOString(),
-  notes: notesInput.value.trim(),
-  rewardGranted: false
-});
+      id: crypto.randomUUID(),
+      text,
+      completed: false,
+      completedAt: null,
+      dueDate: dueDateInput.value || null,
+      priority: priorityInput.value || "medium",
+      createdAt: new Date().toISOString(),
+      notes: notesInput.value.trim(),
+      rewardGranted: false,
+      projectId: taskProjectInput.value || null,
+      category: taskCategoryInput.value || null
+    });
 
     taskInput.value = "";
     dueDateInput.value = "";
     priorityInput.value = "medium";
+    taskProjectInput.value = "";
+    taskCategoryInput.value = "";
     notesInput.value = "";
     notesArea.classList.add("hidden");
     notesToggle.setAttribute("aria-expanded", "false");
@@ -2013,7 +2143,8 @@ document.addEventListener("DOMContentLoaded", () => {
       tasks: State.tasks,
       player: State.player,
       habits: State.habits,
-      language: State.language
+      language: State.language,
+      projects: State.projects
     };
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
     const downloadAnchor = document.createElement("a");
@@ -2032,14 +2163,20 @@ document.addEventListener("DOMContentLoaded", () => {
         const imported = JSON.parse(loadEvent.target.result);
 
         if (Array.isArray(imported)) {
-          State.tasks = sanitizeTasks(imported);
+          State.tasks = sanitizeTaskProjectReferences(sanitizeTasks(imported), State.projects);
         } else {
-          State.tasks = sanitizeTasks(imported.tasks || []);
+          if (Array.isArray(imported.projects)) {
+            State.projects = sanitizeProjects(imported.projects);
+          }
+          State.tasks = sanitizeTaskProjectReferences(sanitizeTasks(imported.tasks || []), State.projects);
           State.player = sanitizePlayer(imported.player || defaultPlayer());
           if (imported.habits) State.habits = sanitizeHabits(imported.habits);
           if (imported.language && translations[imported.language]) {
             State.language = imported.language;
             languageSelect.value = imported.language;
+          }
+          if (State.projectFilter !== "all" && State.projectFilter !== "unassigned" && !State.projects.some((project) => project.id === State.projectFilter)) {
+            State.projectFilter = "all";
           }
         }
 
@@ -2114,7 +2251,25 @@ document.addEventListener("DOMContentLoaded", () => {
   checkHabitResets();
   setInterval(checkHabitReminders, 60000);
 
+  dashboard = createDashboard({
+    t,
+    switchTab,
+    sortTasks,
+    toggleTask: (id) => State.toggleTask(id),
+    toggleHabit: (id) => State.toggleHabit(id),
+    xpNeededForLevel
+  });
+
+  projectsUI = createProjectsUI({
+    t,
+    addProject: (project) => State.addProject(project),
+    renameProject: (id, name) => State.renameProject(id, name),
+    deleteProject: (id) => State.deleteProject(id),
+    setProjectFilter: (projectId) => State.setProjectFilter(projectId),
+    setCategoryFilter: (category) => State.setCategoryFilter(category)
+  });
+
   State.subscribe(render);
   render(State);
   setInterval(() => updateQuote(false), 15000);
-});
+}

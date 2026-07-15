@@ -4,7 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TaskFlow</title>
-  <link rel="stylesheet" href="style.css" />
+  <!-- Styles are loaded in cascade order; keep this sequence stable. -->
+  <link rel="stylesheet" href="styles/01-tokens.css" />
+  <link rel="stylesheet" href="styles/02-base.css" />
+  <link rel="stylesheet" href="styles/03-components.css" />
+  <link rel="stylesheet" href="styles/04-themes.css" />
+  <link rel="stylesheet" href="styles/05-features.css" />
+  <link rel="stylesheet" href="styles/06-responsive.css" />
+  <link rel="stylesheet" href="styles/07-desktop.css" />
+  <link rel="stylesheet" href="styles/08-tasks.css" />
+  <link rel="stylesheet" href="styles/09-stats.css" />
+  <link rel="stylesheet" href="styles/10-task-refinements.css" />
+  <link rel="stylesheet" href="styles/11-habits.css" />
+  <link rel="stylesheet" href="styles/12-polish.css" />
+  <link rel="stylesheet" href="styles/13-dashboard.css" />
+  <link rel="stylesheet" href="styles/14-projects.css" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#7c3aed" />
@@ -78,6 +92,16 @@
               </label>
             </div>
 
+            <div class="menu-section projects-settings-section">
+              <h3 id="projectsHeaderText">Projects</h3>
+              <div class="project-create-form">
+                <input id="projectEmojiInput" type="text" maxlength="2" placeholder="📁" aria-label="Project emoji" />
+                <input id="projectNameInput" type="text" placeholder="Project name" aria-label="Project name" />
+                <button id="addProjectBtn" type="button">Add Project</button>
+              </div>
+              <div id="projectsList" class="projects-list"></div>
+            </div>
+
             <div class="menu-section danger-zone-section">
               <h3 id="dangerZoneHeaderText">Danger Zone</h3>
               <button id="resetBtn" class="setting-action-btn danger-action" type="button">Reset</button>
@@ -92,6 +116,10 @@
 
       <!-- ===== TAB NAVIGATION ===== -->
       <nav class="tab-nav" role="tablist" aria-label="Main navigation">
+        <button class="tab-btn" role="tab" data-tab="dashboard" id="tab-dashboard" aria-selected="false" aria-controls="panel-dashboard">
+          <span class="tab-icon" aria-hidden="true">⌂</span>
+          <span class="tab-label" id="tabDashboardLabel">Dashboard</span>
+        </button>
         <button class="tab-btn active" role="tab" data-tab="tasks" id="tab-tasks" aria-selected="true" aria-controls="panel-tasks">
           <span class="tab-icon" aria-hidden="true">📋</span>
           <span class="tab-label" id="tabTasksLabel">Tasks</span>
@@ -105,6 +133,78 @@
           <span class="tab-label" id="tabStatsLabel">Stats</span>
         </button>
       </nav>
+
+      <!-- ===== DASHBOARD PANEL ===== -->
+      <div class="tab-panel" id="panel-dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
+        <header class="dashboard-header">
+          <div>
+            <p class="dashboard-eyebrow" id="dashboardEyebrow">At a glance</p>
+            <h2 id="dashboardTitle">Dashboard</h2>
+            <p id="dashboardSubtitle">Your priorities and progress for today.</p>
+          </div>
+          <span class="dashboard-date" id="dashboardDate"></span>
+        </header>
+
+        <section class="dashboard-overview" id="dashboardOverview" aria-label="Today overview"></section>
+
+        <div class="dashboard-grid">
+          <section class="dashboard-widget dashboard-widget-wide" aria-labelledby="dashboardUpcomingTitle">
+            <div class="dashboard-widget-header">
+              <div>
+                <p class="dashboard-widget-kicker" id="dashboardUpcomingKicker">Schedule</p>
+                <h3 id="dashboardUpcomingTitle">Upcoming Deadlines</h3>
+              </div>
+            </div>
+            <ul class="dashboard-list" id="dashboardUpcomingList"></ul>
+          </section>
+
+          <section class="dashboard-widget" aria-labelledby="dashboardFocusTitle">
+            <div class="dashboard-widget-header">
+              <div>
+                <p class="dashboard-widget-kicker" id="dashboardFocusKicker">Priorities</p>
+                <h3 id="dashboardFocusTitle">Today’s Focus</h3>
+              </div>
+            </div>
+            <ul class="dashboard-list dashboard-focus-list" id="dashboardFocusList"></ul>
+          </section>
+
+          <section class="dashboard-widget" aria-labelledby="dashboardHabitsTitle">
+            <div class="dashboard-widget-header">
+              <div>
+                <p class="dashboard-widget-kicker" id="dashboardHabitsKicker">Routines</p>
+                <h3 id="dashboardHabitsTitle">Habits Today</h3>
+              </div>
+              <button class="dashboard-text-action" id="dashboardOpenHabits" type="button">View Habits</button>
+            </div>
+            <p class="dashboard-widget-summary" id="dashboardHabitSummary" role="status" aria-live="polite"></p>
+            <ul class="dashboard-list dashboard-habit-list" id="dashboardHabitList"></ul>
+          </section>
+
+          <section class="dashboard-widget dashboard-widget-wide" aria-labelledby="dashboardActivityTitle">
+            <div class="dashboard-widget-header">
+              <div>
+                <p class="dashboard-widget-kicker" id="dashboardActivityKicker">Last seven days</p>
+                <h3 id="dashboardActivityTitle">Weekly Activity</h3>
+              </div>
+            </div>
+            <div class="dashboard-activity" id="dashboardActivity" role="group"></div>
+          </section>
+
+          <section class="dashboard-widget dashboard-quick-widget" aria-labelledby="dashboardQuickTitle">
+            <div class="dashboard-widget-header">
+              <div>
+                <p class="dashboard-widget-kicker" id="dashboardQuickKicker">Shortcuts</p>
+                <h3 id="dashboardQuickTitle">Quick Actions</h3>
+              </div>
+            </div>
+            <div class="dashboard-quick-actions">
+              <button id="dashboardAddTask" type="button"><span aria-hidden="true">＋</span><span id="dashboardAddTaskLabel">Add Task</span></button>
+              <button id="dashboardAddHabit" type="button"><span aria-hidden="true">✓</span><span id="dashboardAddHabitLabel">Add Habit</span></button>
+              <button id="dashboardViewStats" type="button"><span aria-hidden="true">↗</span><span id="dashboardViewStatsLabel">View Stats</span></button>
+            </div>
+          </section>
+        </div>
+      </div>
 
       <!-- ===== TASKS PANEL ===== -->
       <div class="tab-panel active" id="panel-tasks" role="tabpanel" aria-labelledby="tab-tasks">
@@ -140,6 +240,20 @@
           </select>
           <button id="addTaskBtn" type="button">Add Task</button>
         </div>
+        <div class="task-organization-row" aria-label="Task organization">
+          <label>
+            <span id="taskProjectLabel">Project</span>
+            <select id="taskProjectInput" aria-label="Project">
+              <option value="">No Project</option>
+            </select>
+          </label>
+          <label>
+            <span id="taskCategoryLabel">Category</span>
+            <select id="taskCategoryInput" aria-label="Category">
+              <option value="">No Category</option>
+            </select>
+          </label>
+        </div>
         <div class="notes-expander">
           <button id="notesToggle" class="notes-toggle-btn" type="button" aria-expanded="false" aria-controls="notesArea">
             <span id="notesToggleLabel">+ Add Notes</span>
@@ -165,6 +279,22 @@
             <input type="text" id="searchInput" placeholder="Search tasks..." aria-label="Search tasks" aria-keyshortcuts="Meta+K Control+K" />
             <span class="search-shortcut" aria-hidden="true">⌘K</span>
           </div>
+        </div>
+
+        <div class="organization-filters" aria-label="Organization filters">
+          <label>
+            <span id="projectFilterLabel">Project</span>
+            <select id="projectFilterInput" aria-label="Project filter">
+              <option value="all">All Projects</option>
+              <option value="unassigned">Unassigned</option>
+            </select>
+          </label>
+          <label>
+            <span id="categoryFilterLabel">Category</span>
+            <select id="categoryFilterInput" aria-label="Category filter">
+              <option value="all">All Categories</option>
+            </select>
+          </label>
         </div>
 
             <div class="task-columns">
@@ -404,6 +534,22 @@
         </select>
       </div>
 
+      <div class="modal-organization-grid">
+        <div class="modal-field">
+          <label for="editProjectInput" id="editProjectLabel">Project</label>
+          <select id="editProjectInput">
+            <option value="">No Project</option>
+          </select>
+        </div>
+
+        <div class="modal-field">
+          <label for="editCategoryInput" id="editCategoryLabel">Category</label>
+          <select id="editCategoryInput">
+            <option value="">No Category</option>
+          </select>
+        </div>
+      </div>
+
       <div class="modal-field">
         <label for="editNotesInput" id="editNotesLabel">Notes</label>
         <textarea id="editNotesInput" rows="3" placeholder="Optional notes..."></textarea>
@@ -421,6 +567,6 @@
     <span id="levelUpText"></span>
   </div>
 
-  <script src="script.js"></script>
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>

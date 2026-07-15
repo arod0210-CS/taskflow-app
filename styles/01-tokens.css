@@ -1,0 +1,50 @@
+:root {
+  --accent-color: #7c3aed;
+  --accent-hover: #6d28d9;
+  --page-bg: #ede9ff;
+  --card-bg: #ffffff;
+  --card-solid: #ffffff;
+  --text-main: #1a1040;
+  --text-soft: #8b7db8;
+  --border-color: #d4cef0;
+  --separator: #e8e3f8;
+  --input-bg: #f0ecff;
+  --shadow: 0 4px 20px rgba(124, 58, 237, 0.10), 0 1px 4px rgba(0, 0, 0, 0.06);
+  --btn-neutral-bg: #e8e3f8;
+  --btn-neutral-fg: #1a1040;
+  --app-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  /* ---------- Layout ---------- */
+
+  --container-width: 1200px;
+
+  --space-xs: .25rem;
+  --space-sm: .5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+
+  /* ---------- Radius ---------- */
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 30px;
+
+  /* ---------- Animation ---------- */
+
+  --transition-fast: .18s ease;
+  --transition-normal: .30s ease;
+  --transition-slow: .45s ease;
+
+  /* ---------- Shadows ---------- */
+
+  --shadow-soft:
+    0 6px 18px rgba(0, 0, 0, .08);
+
+  --shadow-hover:
+    0 16px 40px rgba(0, 0, 0, .12);
+
+  --shadow-card:
+    0 8px 30px rgba(0, 0, 0, .10);
+}
