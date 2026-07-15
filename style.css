@@ -3136,6 +3136,739 @@ body.dark-mode .due-today .due-date {
 }
 
 /* =========================================
+   PHASE 2.4 — STATS PRODUCTIVITY DASHBOARD
+   ========================================= */
+
+#panel-stats {
+  padding-bottom: var(--space-2xl);
+}
+
+/* Overview metrics */
+#panel-stats > .stats-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, .75fr);
+  gap: 16px;
+  margin: 0 0 20px;
+  padding: 22px;
+  background: var(--card-bg);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+}
+
+#panel-stats .stats-row {
+  gap: 14px;
+  margin: 0;
+}
+
+#panel-stats .stat {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 132px;
+  padding: 20px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--accent-color) 7%, var(--card-bg));
+  border: 1px solid color-mix(in srgb, var(--accent-color) 16%, var(--separator));
+  border-radius: var(--radius-md);
+}
+
+#panel-stats .stat::after {
+  position: absolute;
+  right: 15px;
+  bottom: 8px;
+  color: color-mix(in srgb, var(--accent-color) 15%, transparent);
+  font-size: 54px;
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
+}
+
+#panel-stats .stat:first-child::after {
+  content: "→";
+}
+
+#panel-stats .stat:last-child::after {
+  content: "✓";
+}
+
+#panel-stats .stat-label {
+  position: relative;
+  z-index: 1;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: .09em;
+}
+
+#panel-stats .stat-number {
+  position: relative;
+  z-index: 1;
+  margin-top: 8px;
+  color: var(--text-main);
+  font-size: clamp(36px, 5vw, 48px);
+  font-weight: 850;
+  letter-spacing: -.045em;
+  line-height: 1;
+}
+
+#panel-stats .progress-section {
+  justify-content: center;
+  gap: 15px;
+  min-height: 132px;
+  padding: 20px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent-color) 12%, var(--card-bg)), var(--card-bg));
+  border: 1px solid color-mix(in srgb, var(--accent-color) 20%, var(--separator));
+  border-radius: var(--radius-md);
+}
+
+#panel-stats .progress-section .progress-text {
+  align-items: center;
+  color: var(--text-main);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+#progressPercent {
+  display: inline-grid;
+  place-items: center;
+  min-width: 60px;
+  min-height: 36px;
+  padding: 6px 10px;
+  color: var(--accent-color);
+  background: var(--card-bg);
+  border: 1px solid color-mix(in srgb, var(--accent-color) 24%, var(--separator));
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 850;
+  box-shadow: var(--shadow-soft);
+}
+
+#panel-stats .progress-bar {
+  height: 12px;
+  margin-top: 0;
+  background: var(--btn-neutral-bg);
+  border: 1px solid var(--separator);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .06);
+}
+
+#panel-stats .progress-fill {
+  position: relative;
+  background: linear-gradient(90deg, var(--accent-color), color-mix(in srgb, var(--accent-color) 72%, #ffffff));
+}
+
+#panel-stats .progress-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .28), transparent);
+  transform: translateX(-100%);
+  animation: stats-progress-sheen 2.8s ease-in-out infinite;
+}
+
+/* Level and challenge row */
+#panel-stats .gamify-grid {
+  gap: 20px;
+  margin: 0 0 20px;
+  align-items: start;
+}
+
+#panel-stats .level-card,
+#panel-stats .challenge-card {
+  margin: 0;
+  padding: 20px;
+  background: var(--card-bg);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+#panel-stats .level-card {
+  border-top: 4px solid var(--accent-color);
+}
+
+#panel-stats .challenge-card {
+  border-top: 4px solid color-mix(in srgb, var(--accent-color) 58%, #ff9500);
+}
+
+#panel-stats .level-card:hover,
+#panel-stats .challenge-card:hover {
+  border-right-color: color-mix(in srgb, var(--accent-color) 22%, var(--separator));
+  border-bottom-color: color-mix(in srgb, var(--accent-color) 22%, var(--separator));
+  border-left-color: color-mix(in srgb, var(--accent-color) 22%, var(--separator));
+  box-shadow: var(--shadow-hover);
+}
+
+#panel-stats .level-card.collapsed,
+#panel-stats .challenge-card.collapsed {
+  min-height: 140px;
+}
+
+#panel-stats .level-toggle,
+#panel-stats .challenge-toggle {
+  min-height: 58px;
+  padding: 4px;
+  border-radius: 12px;
+}
+
+#panel-stats .level-toggle:focus-visible,
+#panel-stats .challenge-toggle:focus-visible,
+#panel-stats .badges-toggle:focus-visible,
+#panel-stats .analytics-toggle:focus-visible,
+#panel-stats .badge-card:focus-visible,
+#panel-stats .analytics-bar-group:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 3px;
+}
+
+#panel-stats .level-rank {
+  margin-top: 6px;
+  color: var(--text-main);
+  font-size: clamp(22px, 2.8vw, 28px);
+  font-weight: 800;
+  letter-spacing: -.025em;
+}
+
+#panel-stats .challenge-toggle-left h3 {
+  margin-top: 6px;
+  color: var(--text-main);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+}
+
+#panel-stats .mini-info-pill,
+#panel-stats .challenge-count {
+  min-height: 36px;
+  background: color-mix(in srgb, var(--accent-color) 9%, var(--card-bg));
+  border: 1px solid color-mix(in srgb, var(--accent-color) 18%, var(--separator));
+}
+
+#panel-stats .level-toggle-arrow {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--input-bg);
+  font-size: 17px;
+}
+
+#panel-stats .collapsed-xp-preview {
+  margin-top: 15px;
+}
+
+#panel-stats .xp-bar {
+  height: 10px;
+}
+
+#panel-stats .level-body,
+#panel-stats .challenge-body {
+  margin-top: 20px;
+}
+
+#panel-stats .level-top {
+  align-items: center;
+  margin-bottom: 18px;
+  padding: 14px;
+  background: var(--input-bg);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-md);
+}
+
+#panel-stats .level-summary-text .level-rank {
+  font-size: 18px;
+}
+
+#panel-stats .level-badge {
+  min-width: 82px;
+  padding: 11px 14px;
+  background: color-mix(in srgb, var(--accent-color) 10%, var(--card-bg));
+  border: 1px solid color-mix(in srgb, var(--accent-color) 20%, var(--separator));
+}
+
+#panel-stats .level-number {
+  font-size: 28px;
+  font-weight: 850;
+}
+
+#panel-stats .xp-section {
+  gap: 10px;
+  padding: 15px;
+  background: color-mix(in srgb, var(--accent-color) 5%, var(--card-bg));
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-md);
+}
+
+#panel-stats .player-stats-row {
+  gap: 10px;
+  margin-top: 14px;
+}
+
+#panel-stats .player-stat-pill {
+  min-height: 78px;
+  padding: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--separator);
+  border-radius: 14px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .04);
+}
+
+#panel-stats .player-stat-emoji {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  background: var(--input-bg);
+  border-radius: 10px;
+  font-size: 17px;
+}
+
+#panel-stats .player-stat-pill strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-main);
+  font-size: 17px;
+  font-weight: 800;
+}
+
+#panel-stats .reward-rules {
+  gap: 5px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--separator);
+}
+
+#panel-stats .reward-rules span {
+  padding: 4px 8px;
+  background: transparent;
+  border: 1px solid var(--separator);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Daily challenges */
+#panel-stats .challenge-list {
+  gap: 10px;
+}
+
+#panel-stats .challenge-item {
+  position: relative;
+  padding: 14px;
+  background: var(--input-bg);
+  border: 1px solid var(--separator);
+  border-radius: 14px;
+}
+
+#panel-stats .challenge-title {
+  padding-right: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+#panel-stats .challenge-progress {
+  min-width: 38px;
+  padding: 4px 7px;
+  text-align: center;
+  background: var(--card-bg);
+  border: 1px solid var(--separator);
+  border-radius: 999px;
+}
+
+#panel-stats .challenge-meta {
+  margin-top: 7px;
+  line-height: 1.4;
+}
+
+#panel-stats .challenge-progress-bar {
+  height: 8px;
+  border: 1px solid var(--separator);
+}
+
+#panel-stats .challenge-complete {
+  padding-right: 48px;
+  background: linear-gradient(90deg, rgba(52, 199, 89, .1), transparent 70%), var(--input-bg);
+  border-color: color-mix(in srgb, #34c759 32%, var(--separator));
+}
+
+#panel-stats .challenge-complete::before {
+  content: "✓";
+  position: absolute;
+  top: 13px;
+  right: 13px;
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  color: white;
+  background: #2fa84f;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+#panel-stats .challenge-complete .challenge-progress-fill {
+  background: #2fa84f;
+}
+
+/* Achievements and analytics */
+.stats-insights-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+#panel-stats .badges-section,
+#panel-stats .analytics-section {
+  margin: 0;
+  padding: 20px;
+  background: var(--card-bg);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+}
+
+#panel-stats .badges-toggle,
+#panel-stats .analytics-toggle {
+  min-height: 48px;
+  padding: 4px;
+  border-radius: 12px;
+  color: var(--text-main);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -.015em;
+}
+
+.section-toggle-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#panel-stats .badges-body,
+#panel-stats .analytics-body {
+  margin-top: 18px;
+  padding-top: 17px;
+  border-top: 1px solid var(--separator);
+}
+
+#panel-stats .badges-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+#panel-stats .badge-card {
+  position: relative;
+  min-height: 130px;
+  gap: 8px;
+  padding: 14px 8px 12px;
+  background: color-mix(in srgb, var(--accent-color) 7%, var(--card-bg));
+  border: 1px solid color-mix(in srgb, var(--accent-color) 16%, var(--separator));
+  border-radius: 14px;
+  cursor: help;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast);
+}
+
+#panel-stats .badge-card:hover,
+#panel-stats .badge-card:focus-visible {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent-color) 38%, var(--separator));
+  box-shadow: var(--shadow-soft);
+}
+
+#panel-stats .badge-card.badge-locked {
+  opacity: .7;
+  filter: grayscale(.65);
+  background: color-mix(in srgb, var(--input-bg) 82%, var(--card-bg));
+}
+
+#panel-stats .badge-card.badge-locked::after {
+  content: "🔒";
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  display: grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  background: var(--card-bg);
+  border: 1px solid var(--separator);
+  border-radius: 8px;
+  font-size: 11px;
+  filter: grayscale(0);
+}
+
+#panel-stats .badge-emoji {
+  font-size: 28px;
+}
+
+#panel-stats .badge-name {
+  color: var(--text-main);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.25;
+}
+
+.badge-status {
+  margin-top: auto;
+  padding: 3px 7px;
+  color: var(--accent-color);
+  background: var(--card-bg);
+  border: 1px solid color-mix(in srgb, var(--accent-color) 18%, var(--separator));
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.badge-locked .badge-status {
+  color: var(--text-soft);
+  border-color: var(--separator);
+}
+
+#panel-stats .analytics-chart {
+  gap: 9px;
+  height: 210px;
+  padding: 12px 6px 0;
+}
+
+#panel-stats .analytics-bar-group {
+  gap: 7px;
+  min-width: 0;
+  padding: 5px 2px;
+  border-radius: 10px;
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+#panel-stats .analytics-bar-group:hover,
+#panel-stats .analytics-bar-group:focus-visible {
+  transform: translateY(-2px);
+  background: color-mix(in srgb, var(--accent-color) 6%, var(--card-bg));
+}
+
+#panel-stats .analytics-bar-track {
+  width: min(100%, 42px);
+  height: 145px;
+  background: var(--input-bg);
+  border: 1px solid var(--separator);
+  border-radius: 10px 10px 4px 4px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .05);
+}
+
+#panel-stats .analytics-bar-fill {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-color) 72%, #ffffff), var(--accent-color));
+  border-radius: 8px 8px 3px 3px;
+  min-height: 3px;
+}
+
+#panel-stats .analytics-bar-group.is-zero .analytics-bar-fill {
+  height: 3px !important;
+  background: var(--border-color);
+}
+
+#panel-stats .analytics-bar-count {
+  min-height: 18px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+#panel-stats .analytics-bar-group.is-zero .analytics-bar-count {
+  color: var(--text-soft);
+}
+
+#panel-stats .analytics-bar-label {
+  font-size: 11px;
+  font-weight: 750;
+}
+
+@keyframes stats-progress-sheen {
+  0%, 55% { transform: translateX(-100%); }
+  85%, 100% { transform: translateX(100%); }
+}
+
+@media (max-width: 900px) {
+  #panel-stats > .stats-card {
+    grid-template-columns: 1fr;
+    margin: 12px 16px 18px;
+  }
+
+  #panel-stats .gamify-grid,
+  .stats-insights-grid {
+    grid-template-columns: 1fr;
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  #panel-stats .gamify-grid {
+    display: grid;
+  }
+
+  #panel-stats .level-card,
+  #panel-stats .challenge-card,
+  #panel-stats .badges-section,
+  #panel-stats .analytics-section {
+    margin: 0;
+  }
+
+  #panel-stats .badges-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  #panel-stats > .stats-card {
+    gap: 12px;
+    margin: 10px 12px 16px;
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  #panel-stats .stats-row {
+    gap: 10px;
+  }
+
+  #panel-stats .stat {
+    min-height: 112px;
+    padding: 16px;
+  }
+
+  #panel-stats .stat-number {
+    font-size: 36px;
+  }
+
+  #panel-stats .stat::after {
+    font-size: 42px;
+  }
+
+  #panel-stats .progress-section {
+    min-height: 112px;
+    padding: 16px;
+  }
+
+  #panel-stats .gamify-grid,
+  .stats-insights-grid {
+    gap: 14px;
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+
+  #panel-stats .level-card,
+  #panel-stats .challenge-card,
+  #panel-stats .badges-section,
+  #panel-stats .analytics-section {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  #panel-stats .level-toggle,
+  #panel-stats .challenge-toggle {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  #panel-stats .level-toggle-right,
+  #panel-stats .challenge-toggle-right {
+    gap: 5px;
+  }
+
+  #panel-stats .mini-info-pill {
+    min-height: 32px;
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+
+  #panel-stats .level-rank {
+    font-size: 21px;
+  }
+
+  #panel-stats .challenge-toggle-left h3 {
+    font-size: 17px;
+  }
+
+  #panel-stats .player-stats-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  #panel-stats .player-stat-pill {
+    min-height: 92px;
+    padding: 10px 8px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  #panel-stats .player-stat-pill strong {
+    font-size: 15px;
+  }
+
+  #panel-stats .reward-rules {
+    flex-direction: column;
+  }
+
+  #panel-stats .reward-rules span {
+    width: 100%;
+  }
+
+  #panel-stats .challenge-complete {
+    padding-right: 44px;
+  }
+
+  #panel-stats .badges-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  #panel-stats .badge-card {
+    min-height: 124px;
+  }
+
+  #panel-stats .badge-name {
+    font-size: 12px;
+  }
+
+  #panel-stats .analytics-chart {
+    gap: 4px;
+    height: 190px;
+    padding-inline: 0;
+  }
+
+  #panel-stats .analytics-bar-track {
+    width: min(100%, 34px);
+    height: 125px;
+  }
+
+  #panel-stats .analytics-bar-group {
+    padding-inline: 1px;
+  }
+
+  #panel-stats .analytics-bar-label {
+    font-size: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #panel-stats .progress-fill::after {
+    animation: none;
+  }
+
+  #panel-stats .progress-fill,
+  #panel-stats .challenge-progress-fill,
+  #panel-stats .analytics-bar-fill,
+  #panel-stats .level-card,
+  #panel-stats .challenge-card,
+  #panel-stats .badge-card,
+  #panel-stats .analytics-bar-group,
+  #panel-stats .level-toggle-arrow {
+    transition-duration: .01ms;
+  }
+}
+
+/* =========================================
    FINAL TASK REFINEMENTS + PHASE 2.3 HABITS
    ========================================= */
 

@@ -99,6 +99,10 @@ document.addEventListener("DOMContentLoaded", () => {
       optionalNotesPlaceholder: "Optional notes...",
       achievements: "Achievements",
       weeklyProgress: "Weekly Progress",
+      earnedStatus: "Earned",
+      lockedStatus: "Locked",
+      challengeCompleteStatus: "Complete",
+      challengeInProgressStatus: "In progress",
       badgeFirstTask: "First Step",
       badgeFirstTaskDesc: "Complete your first task",
       badgeEarlyBird: "Early Bird",
@@ -228,6 +232,10 @@ document.addEventListener("DOMContentLoaded", () => {
       optionalNotesPlaceholder: "Notas opcionales...",
       achievements: "Logros",
       weeklyProgress: "Progreso semanal",
+      earnedStatus: "Conseguido",
+      lockedStatus: "Bloqueado",
+      challengeCompleteStatus: "Completado",
+      challengeInProgressStatus: "En progreso",
       badgeFirstTask: "Primer paso",
       badgeFirstTaskDesc: "Completa tu primera tarea",
       badgeEarlyBird: "Madrugador",
@@ -914,6 +922,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const card = document.createElement("div");
       card.className = "badge-card" + (isEarned ? "" : " badge-locked");
       card.title = t(def.descKey);
+      card.tabIndex = 0;
+      card.setAttribute("role", "group");
+      card.setAttribute(
+        "aria-label",
+        `${t(def.nameKey)}. ${isEarned ? t("earnedStatus") : t("lockedStatus")}. ${t(def.descKey)}`
+      );
 
       const emoji = document.createElement("span");
       emoji.className = "badge-emoji";
@@ -923,8 +937,13 @@ document.addEventListener("DOMContentLoaded", () => {
       name.className = "badge-name";
       name.textContent = t(def.nameKey);
 
+      const status = document.createElement("span");
+      status.className = "badge-status";
+      status.textContent = isEarned ? t("earnedStatus") : t("lockedStatus");
+
       card.appendChild(emoji);
       card.appendChild(name);
+      card.appendChild(status);
       badgesList.appendChild(card);
     });
   }
@@ -933,6 +952,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const chart = document.getElementById("analyticsChart");
     if (!chart) return;
     chart.innerHTML = "";
+    chart.setAttribute("role", "group");
+    chart.setAttribute("aria-label", t("weeklyProgress"));
 
     const days = [];
     for (let i = 6; i >= 0; i--) {
@@ -941,7 +962,9 @@ document.addEventListener("DOMContentLoaded", () => {
       days.push(d.toISOString().slice(0, 10));
     }
 
-    const dayAbbr = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+    const dayAbbr = State.language === "es"
+      ? ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sá"]
+      : ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
     const counts = days.map((d) => (State.player.completedByDay || {})[d] || 0);
     const maxCount = Math.max(...counts, 1);
 
@@ -951,14 +974,18 @@ document.addEventListener("DOMContentLoaded", () => {
       const date = new Date(day + "T00:00:00");
 
       const group = document.createElement("div");
-      group.className = "analytics-bar-group";
+      group.className = "analytics-bar-group" + (count === 0 ? " is-zero" : "");
+      group.tabIndex = 0;
+      group.setAttribute("role", "img");
+      group.setAttribute("aria-label", `${dayAbbr[date.getDay()]}: ${count} ${t("completed").toLowerCase()}`);
 
       const countLabel = document.createElement("span");
       countLabel.className = "analytics-bar-count";
-      countLabel.textContent = count > 0 ? count : "";
+      countLabel.textContent = count;
 
       const track = document.createElement("div");
       track.className = "analytics-bar-track";
+      track.setAttribute("aria-hidden", "true");
 
       const fill = document.createElement("div");
       fill.className = "analytics-bar-fill";
@@ -1381,6 +1408,9 @@ document.addEventListener("DOMContentLoaded", () => {
     miniXpProgressText.textContent = xpLabel;
     xpFill.style.width = `${xpPercent}%`;
     collapsedXpFill.style.width = `${xpPercent}%`;
+    const roundedXpPercent = Math.round(xpPercent);
+    xpFill.parentElement.setAttribute("aria-valuenow", String(roundedXpPercent));
+    collapsedXpFill.parentElement.setAttribute("aria-valuenow", String(roundedXpPercent));
 
     const challenges = getDailyChallenges();
     const completedChallengeCount = challenges.filter((challenge) => challenge.progress >= challenge.goal).length;
@@ -1389,8 +1419,14 @@ document.addEventListener("DOMContentLoaded", () => {
     challengeList.innerHTML = "";
 
     challenges.forEach((challenge) => {
+      const isComplete = challenge.progress >= challenge.goal;
       const item = document.createElement("div");
-      item.className = "challenge-item";
+      item.className = "challenge-item" + (isComplete ? " challenge-complete" : "");
+      item.setAttribute("role", "group");
+      item.setAttribute(
+        "aria-label",
+        `${challenge.title}. ${Math.min(challenge.progress, challenge.goal)}/${challenge.goal}. ${isComplete ? t("challengeCompleteStatus") : t("challengeInProgressStatus")}`
+      );
 
       const top = document.createElement("div");
       top.className = "challenge-item-top";
@@ -1412,14 +1448,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const bar = document.createElement("div");
       bar.className = "challenge-progress-bar";
+      bar.setAttribute("role", "progressbar");
+      bar.setAttribute("aria-valuemin", "0");
+      bar.setAttribute("aria-valuemax", String(challenge.goal));
+      bar.setAttribute("aria-valuenow", String(Math.min(challenge.progress, challenge.goal)));
+      bar.setAttribute("aria-label", challenge.title);
 
       const fill = document.createElement("div");
       fill.className = "challenge-progress-fill";
       fill.style.width = `${Math.min((challenge.progress / challenge.goal) * 100, 100)}%`;
-
-      if (challenge.progress >= challenge.goal) {
-        item.classList.add("challenge-complete");
-      }
 
       bar.appendChild(fill);
       item.appendChild(top);
@@ -1641,6 +1678,7 @@ document.addEventListener("DOMContentLoaded", () => {
     tasksCompleted.textContent = doneCount;
     progressPercent.textContent = `${percent}%`;
     progressFill.style.width = `${percent}%`;
+    progressFill.parentElement.setAttribute("aria-valuenow", String(percent));
 
     clearCompletedBtn.disabled = doneTasks.length === 0;
 

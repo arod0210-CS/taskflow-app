@@ -252,7 +252,7 @@
               <span id="taskProgressLabel">Task Progress</span>
               <span id="progressPercent">0%</span>
             </div>
-            <div class="progress-bar">
+            <div class="progress-bar" role="progressbar" aria-labelledby="taskProgressLabel progressPercent" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
               <div class="progress-fill" id="progressFill"></div>
             </div>
           </div>
@@ -273,7 +273,7 @@
             </button>
 
             <div class="collapsed-xp-preview">
-              <div class="progress-bar xp-bar">
+              <div class="progress-bar xp-bar" role="progressbar" aria-labelledby="miniXpProgressText" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                 <div class="progress-fill xp-fill" id="collapsedXpFill"></div>
               </div>
             </div>
@@ -295,7 +295,7 @@
                   <span id="xpProgressLabel">XP Progress</span>
                   <span id="xpProgressText">0 / 100 XP</span>
                 </div>
-                <div class="progress-bar xp-bar">
+                <div class="progress-bar xp-bar" role="progressbar" aria-labelledby="xpProgressLabel xpProgressText" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                   <div class="progress-fill xp-fill" id="xpFill"></div>
                 </div>
               </div>
@@ -349,10 +349,11 @@
           </div>
         </div>
 
+        <div class="stats-insights-grid">
         <div class="badges-section" id="badgesSection">
           <button class="badges-toggle" id="badgesToggle" type="button" aria-expanded="false" aria-controls="badgesBody">
             <span id="achievementsHeaderText">Achievements</span>
-            <div style="display:flex;align-items:center;gap:8px;">
+            <div class="section-toggle-meta">
               <span id="badgesCount" class="challenge-count">0/8</span>
               <span class="level-toggle-arrow" id="badgesToggleArrow">▾</span>
             </div>
@@ -370,6 +371,7 @@
           <div class="analytics-body hidden" id="analyticsBody">
             <div id="analyticsChart" class="analytics-chart"></div>
           </div>
+        </div>
         </div>
 
       </div>
