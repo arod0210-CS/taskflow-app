@@ -363,20 +363,24 @@ document.addEventListener("DOMContentLoaded", () => {
       this.notify();
     },
     toggleTask(id) {
-      const task = this.tasks.find((item) => item.id === id);
-      if (!task) return;
+  const task = this.tasks.find((item) => item.id === id);
+  if (!task) return;
 
-      if (!task.completed) {
-        task.completed = true;
-        task.completedAt = new Date().toISOString();
-        rewardForCompletion(task);
-      } else {
-        task.completed = false;
-        task.completedAt = null;
-      }
+  if (task.completed) {
+    task.completed = false;
+    task.completedAt = null;
+  } else {
+    task.completed = true;
+    task.completedAt = new Date().toISOString();
 
-      this.notify();
-    },
+    if (!task.rewardGranted) {
+      rewardForCompletion(task);
+      task.rewardGranted = true;
+    }
+  }
+
+  this.notify();
+},
     updateTask(id, updates) {
       this.tasks = this.tasks.map((task) =>
         task.id === id
@@ -568,21 +572,23 @@ document.addEventListener("DOMContentLoaded", () => {
     return ["high", "medium", "low"].includes(priority) ? priority : "medium";
   }
 
-  function sanitizeTasks(rawTasks) {
-    if (!Array.isArray(rawTasks)) return [];
-    return rawTasks
-      .map((task, index) => ({
-        id: String(task.id ?? `${Date.now()}-${index}`),
-        text: String(task.text ?? "").trim(),
-        completed: Boolean(task.completed),
-        completedAt: task.completedAt || null,
-        dueDate: task.dueDate || null,
-        priority: normalizePriority(task.priority),
-        createdAt: task.createdAt || new Date().toISOString(),
-        notes: String(task.notes ?? "").trim()
-      }))
-      .filter((task) => task.text !== "");
-  }
+ function sanitizeTasks(rawTasks) {
+  if (!Array.isArray(rawTasks)) return [];
+
+  return rawTasks
+    .map((task, index) => ({
+      id: String(task.id ?? `${Date.now()}-${index}`),
+      text: String(task.text ?? "").trim(),
+      completed: Boolean(task.completed),
+      completedAt: task.completedAt || null,
+      dueDate: task.dueDate || null,
+      priority: normalizePriority(task.priority),
+      createdAt: task.createdAt || new Date().toISOString(),
+      notes: String(task.notes ?? "").trim(),
+      rewardGranted: Boolean(task.rewardGranted)
+    }))
+    .filter((task) => task.text !== "");
+}
 
   function sanitizePlayer(player) {
     return {
@@ -1562,7 +1568,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const priorityDiff = priorityOrder[normalizePriority(a.priority)] - priorityOrder[normalizePriority(b.priority)];
       if (priorityDiff !== 0) return priorityDiff;
 
-      return Number(b.id) - Number(a.id);
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
   }
 
@@ -1653,15 +1659,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     State.addTask({
-      id: String(Date.now()),
-      text,
-      completed: false,
-      completedAt: null,
-      dueDate: dueDateInput.value || null,
-      priority: priorityInput.value || "medium",
-      createdAt: new Date().toISOString(),
-      notes: notesInput.value.trim()
-    });
+  id: crypto.randomUUID(),
+  text,
+  completed: false,
+  completedAt: null,
+  dueDate: dueDateInput.value || null,
+  priority: priorityInput.value || "medium",
+  createdAt: new Date().toISOString(),
+  notes: notesInput.value.trim(),
+  rewardGranted: false
+});
 
     taskInput.value = "";
     dueDateInput.value = "";
