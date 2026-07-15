@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
       appLanguage: "en",
       eyebrow: "Stay organized",
       settings: "Settings",
+      settingsMenu: "Settings menu",
       darkMode: "Dark mode",
       language: "Language",
       themes: "Themes",
@@ -57,6 +58,9 @@ document.addEventListener("DOMContentLoaded", () => {
       completedHeading: "Completed",
       editTask: "Edit Task",
       task: "Task",
+      markTaskComplete: "Mark as complete",
+      markTaskIncomplete: "Mark as incomplete",
+      deleteTask: "Delete task",
       taskDescriptionPlaceholder: "Task description",
       dueDate: "Due Date",
       priority: "Priority",
@@ -154,6 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
       appLanguage: "es",
       eyebrow: "Mantente organizado",
       settings: "Configuración",
+      settingsMenu: "Menú de configuración",
       darkMode: "Modo oscuro",
       language: "Idioma",
       themes: "Temas",
@@ -190,6 +195,9 @@ document.addEventListener("DOMContentLoaded", () => {
       completedHeading: "Completadas",
       editTask: "Editar tarea",
       task: "Tarea",
+      markTaskComplete: "Marcar como completada",
+      markTaskIncomplete: "Marcar como pendiente",
+      deleteTask: "Eliminar tarea",
       taskDescriptionPlaceholder: "Descripción de la tarea",
       dueDate: "Fecha límite",
       priority: "Prioridad",
@@ -322,6 +330,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const notesToggle = document.getElementById("notesToggle");
   const notesArea = document.getElementById("notesArea");
   const notesInput = document.getElementById("notesInput");
+  let modalReturnFocus = null;
 
   const levelCard = document.getElementById("levelCard");
   const levelToggle = document.getElementById("levelToggle");
@@ -709,6 +718,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateEditModeUI() {
     editModeToggle.textContent = State.editMode ? t("editModeOn") : t("editModeOff");
     editModeToggle.classList.toggle("edit-mode-active", State.editMode);
+    editModeToggle.setAttribute("aria-pressed", String(State.editMode));
   }
 
   function applyTheme(theme) {
@@ -726,6 +736,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.documentElement.lang = t("appLanguage");
     document.getElementById("eyebrowText").textContent = t("eyebrow");
     document.getElementById("settingsHeaderText").textContent = t("settings");
+    settingsBtn.setAttribute("aria-label", t("settingsMenu"));
     document.getElementById("darkModeLabel").textContent = t("darkMode");
     document.getElementById("languageLabel").textContent = t("language");
     document.getElementById("themesHeaderText").textContent = t("themes");
@@ -754,7 +765,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("todayMissionsLabel").textContent = t("todayMissions");
 
     taskInput.placeholder = t("addTaskPlaceholder");
+    taskInput.setAttribute("aria-label", t("task"));
+    dueDateInput.setAttribute("aria-label", t("dueDate"));
+    priorityInput.setAttribute("aria-label", t("priority"));
     searchInput.placeholder = t("searchPlaceholder");
+    searchInput.setAttribute("aria-label", t("searchPlaceholder"));
     editTextInput.placeholder = t("taskDescriptionPlaceholder");
 
     addTaskBtn.textContent = t("addTask");
@@ -779,6 +794,7 @@ document.addEventListener("DOMContentLoaded", () => {
     editNotesInput.placeholder = t("optionalNotesPlaceholder");
     document.getElementById("notesToggleLabel").textContent = t("addNotes");
     notesInput.placeholder = t("optionalNotesPlaceholder");
+    notesInput.setAttribute("aria-label", t("notesLabel"));
 
     priorityInput.options[0].text = t("highPriority");
     priorityInput.options[1].text = t("mediumPriority");
@@ -826,6 +842,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function createEmptyState(message) {
     const li = document.createElement("li");
     li.className = "empty-state";
+    li.setAttribute("role", "status");
     li.textContent = message;
     return li;
   }
@@ -1008,6 +1025,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const isActive = btn.dataset.tab === name;
       btn.classList.toggle("active", isActive);
       btn.setAttribute("aria-selected", String(isActive));
+      btn.tabIndex = isActive ? 0 : -1;
     });
     document.querySelectorAll(".tab-panel").forEach((panel) => {
       panel.classList.toggle("active", panel.id === `panel-${name}`);
@@ -1470,6 +1488,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const task = State.tasks.find((item) => item.id === taskId);
     if (!task) return;
 
+    modalReturnFocus = document.activeElement;
     State.editingTaskId = taskId;
     editTextInput.value = task.text;
     editDateInput.value = task.dueDate || "";
@@ -1483,6 +1502,10 @@ document.addEventListener("DOMContentLoaded", () => {
   function closeEditModal() {
     State.editingTaskId = null;
     editModal.classList.add("hidden");
+    if (modalReturnFocus && modalReturnFocus.isConnected) {
+      modalReturnFocus.focus();
+    }
+    modalReturnFocus = null;
   }
 
   function saveEdit() {
@@ -1531,7 +1554,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const toggleBtn = document.createElement("button");
     toggleBtn.className = "toggle-btn";
     toggleBtn.type = "button";
-    toggleBtn.setAttribute("aria-label", task.completed ? "Mark as incomplete" : "Mark as complete");
+    toggleBtn.setAttribute("aria-label", task.completed ? t("markTaskIncomplete") : t("markTaskComplete"));
+    toggleBtn.setAttribute("aria-pressed", String(task.completed));
     if (task.completed) toggleBtn.classList.add("completed");
     toggleBtn.addEventListener("click", () => State.toggleTask(task.id));
 
@@ -1580,12 +1604,14 @@ document.addEventListener("DOMContentLoaded", () => {
       editBtn.className = "task-action-btn edit-btn";
       editBtn.type = "button";
       editBtn.textContent = t("editTask");
+      editBtn.setAttribute("aria-label", `${t("editTask")}: ${task.text}`);
       editBtn.addEventListener("click", () => openEditModal(task.id));
 
       const deleteBtn = document.createElement("button");
       deleteBtn.className = "task-action-btn delete-btn";
       deleteBtn.type = "button";
       deleteBtn.textContent = State.language === "es" ? "Eliminar" : "Delete";
+      deleteBtn.setAttribute("aria-label", `${t("deleteTask")}: ${task.text}`);
       deleteBtn.addEventListener("click", () => State.deleteTask(task.id));
 
       actions.appendChild(editBtn);
@@ -1681,6 +1707,9 @@ document.addEventListener("DOMContentLoaded", () => {
     progressFill.parentElement.setAttribute("aria-valuenow", String(percent));
 
     clearCompletedBtn.disabled = doneTasks.length === 0;
+    viewButtons.forEach((button) => {
+      button.setAttribute("aria-pressed", String(button.dataset.view === state.view));
+    });
 
     renderHeroCard(todoTasks.length, state.player.streak);
     renderWeekStrip();
@@ -1752,9 +1781,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!expanded) notesInput.focus();
   });
 
+  function setSettingsOpen(isOpen) {
+    settingsPanel.classList.toggle("hidden", !isOpen);
+    settingsBtn.setAttribute("aria-expanded", String(isOpen));
+  }
+
   settingsBtn.addEventListener("click", (event) => {
     event.stopPropagation();
-    settingsPanel.classList.toggle("hidden");
+    setSettingsOpen(settingsPanel.classList.contains("hidden"));
   });
 
   document.addEventListener("click", (event) => {
@@ -1763,7 +1797,7 @@ document.addEventListener("DOMContentLoaded", () => {
       !settingsPanel.contains(event.target) &&
       !settingsBtn.contains(event.target)
     ) {
-      settingsPanel.classList.add("hidden");
+      setSettingsOpen(false);
     }
   });
 
@@ -1833,8 +1867,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  document.querySelectorAll(".tab-btn").forEach((btn) => {
+  const tabButtons = Array.from(document.querySelectorAll(".tab-btn"));
+  tabButtons.forEach((btn, index) => {
     btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+    btn.addEventListener("keydown", (event) => {
+      let targetIndex = null;
+      if (event.key === "ArrowRight") targetIndex = (index + 1) % tabButtons.length;
+      if (event.key === "ArrowLeft") targetIndex = (index - 1 + tabButtons.length) % tabButtons.length;
+      if (event.key === "Home") targetIndex = 0;
+      if (event.key === "End") targetIndex = tabButtons.length - 1;
+      if (targetIndex === null) return;
+      event.preventDefault();
+      tabButtons[targetIndex].focus();
+      switchTab(tabButtons[targetIndex].dataset.tab);
+    });
   });
 
   const addHabitBtnEl = document.getElementById("addHabitBtn");
@@ -1879,6 +1925,16 @@ document.addEventListener("DOMContentLoaded", () => {
   if (reminderBannerClose) {
     reminderBannerClose.addEventListener("click", () => {
       document.getElementById("reminderBanner").classList.add("hidden");
+    });
+  }
+
+  const uploadLabel = document.querySelector(".upload-label");
+  if (uploadLabel) {
+    uploadLabel.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        importFile.click();
+      }
     });
   }
 
@@ -2010,6 +2066,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !settingsPanel.classList.contains("hidden")) {
+      setSettingsOpen(false);
+      settingsBtn.focus();
+      return;
+    }
+
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
       event.preventDefault();
       searchInput.focus();
@@ -2019,6 +2081,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (event.key === "Escape" && !editModal.classList.contains("hidden")) {
       closeEditModal();
+      return;
+    }
+
+    if (event.key === "Tab" && !editModal.classList.contains("hidden")) {
+      const focusable = Array.from(editModal.querySelectorAll("input, select, textarea, button"))
+        .filter((element) => !element.disabled);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     }
   });
 

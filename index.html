@@ -16,7 +16,7 @@
       <!-- ===== PERSISTENT TOP BAR ===== -->
       <div class="top-bar">
         <div class="top-bar-left">
-          <div class="user-avatar">🎯</div>
+          <div class="user-avatar" aria-hidden="true">🎯</div>
           <div class="greeting-block">
             <h1 class="greeting-text" id="greetingText">Hello!</h1>
             <div class="date-box" id="todayDate"></div>
@@ -27,7 +27,7 @@
         <p class="hidden" id="eyebrowText"></p>
 
         <div class="top-bar-right">
-          <button id="settingsBtn" class="hamburger-btn" type="button" aria-label="Menu">
+          <button id="settingsBtn" class="hamburger-btn" type="button" aria-label="Settings menu" aria-expanded="false" aria-controls="settingsPanel">
             <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <line x1="3" y1="12" x2="21" y2="12"></line>
               <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -35,7 +35,7 @@
             </svg>
           </button>
 
-          <div id="settingsPanel" class="hamburger-menu hidden">
+          <div id="settingsPanel" class="hamburger-menu hidden" role="dialog" aria-labelledby="settingsHeaderText">
             <div class="menu-section">
               <h3 id="settingsHeaderText">Settings</h3>
               <div class="setting-item">
@@ -72,19 +72,19 @@
             <div class="menu-section">
               <h3 id="dataHeaderText">Data Management</h3>
               <button id="exportBtn" class="setting-action-btn" type="button">Export Data (.json)</button>
-              <label class="setting-action-btn neutral-action upload-label">
+              <label class="setting-action-btn neutral-action upload-label" role="button" tabindex="0">
                 <span id="importBtnText">Import Data</span>
                 <input type="file" id="importFile" accept=".json" hidden />
               </label>
             </div>
 
-            <div class="menu-section">
+            <div class="menu-section danger-zone-section">
               <h3 id="dangerZoneHeaderText">Danger Zone</h3>
               <button id="resetBtn" class="setting-action-btn danger-action" type="button">Reset</button>
             </div>
 
-            <div class="menu-section">
-              <button id="editModeToggle" class="setting-action-btn" type="button">Edit Mode: OFF</button>
+            <div class="menu-section edit-mode-section">
+              <button id="editModeToggle" class="setting-action-btn" type="button" aria-pressed="false">Edit Mode: OFF</button>
             </div>
           </div>
         </div>
@@ -93,15 +93,15 @@
       <!-- ===== TAB NAVIGATION ===== -->
       <nav class="tab-nav" role="tablist" aria-label="Main navigation">
         <button class="tab-btn active" role="tab" data-tab="tasks" id="tab-tasks" aria-selected="true" aria-controls="panel-tasks">
-          <span class="tab-icon">📋</span>
+          <span class="tab-icon" aria-hidden="true">📋</span>
           <span class="tab-label" id="tabTasksLabel">Tasks</span>
         </button>
         <button class="tab-btn" role="tab" data-tab="habits" id="tab-habits" aria-selected="false" aria-controls="panel-habits">
-          <span class="tab-icon">🌅</span>
+          <span class="tab-icon" aria-hidden="true">🌅</span>
           <span class="tab-label" id="tabHabitsLabel">Habits</span>
         </button>
         <button class="tab-btn" role="tab" data-tab="stats" id="tab-stats" aria-selected="false" aria-controls="panel-stats">
-          <span class="tab-icon">📊</span>
+          <span class="tab-icon" aria-hidden="true">📊</span>
           <span class="tab-label" id="tabStatsLabel">Stats</span>
         </button>
       </nav>
@@ -116,7 +116,7 @@
             <div class="hero-card-title" id="heroTitle">Let's get started!</div>
             <div class="hero-card-sub" id="heroSub">Ready to be productive today?</div>
           </div>
-          <div class="hero-card-deco">🎯</div>
+          <div class="hero-card-deco" aria-hidden="true">🎯</div>
         </div>
 
         <!-- Week Calendar Strip -->
@@ -131,9 +131,9 @@
         </div>
 
         <div class="task-input">
-          <input type="text" id="taskInput" placeholder="Add a new task..." />
-          <input type="date" id="dueDateInput" />
-          <select id="priorityInput">
+          <input type="text" id="taskInput" placeholder="Add a new task..." aria-label="Task" />
+          <input type="date" id="dueDateInput" aria-label="Due Date" />
+          <select id="priorityInput" aria-label="Priority">
             <option value="high">High Priority</option>
             <option value="medium" selected>Medium Priority</option>
             <option value="low">Low Priority</option>
@@ -141,28 +141,28 @@
           <button id="addTaskBtn" type="button">Add Task</button>
         </div>
         <div class="notes-expander">
-          <button id="notesToggle" class="notes-toggle-btn" type="button" aria-expanded="false">
+          <button id="notesToggle" class="notes-toggle-btn" type="button" aria-expanded="false" aria-controls="notesArea">
             <span id="notesToggleLabel">+ Add Notes</span>
             <span class="notes-chevron">▾</span>
           </button>
           <div id="notesArea" class="notes-area hidden">
-            <textarea id="notesInput" rows="3" placeholder="Optional notes..."></textarea>
+            <textarea id="notesInput" rows="3" placeholder="Optional notes..." aria-label="Notes"></textarea>
           </div>
         </div>
 
         <div class="view-bar">
           <div class="view-group">
-            <button class="view-btn active" type="button" data-view="all" id="viewAllBtn">All</button>
-            <button class="view-btn" type="button" data-view="today" id="viewTodayBtn">Today</button>
-            <button class="view-btn" type="button" data-view="week" id="viewWeekBtn">Week</button>
-            <button class="view-btn" type="button" data-view="month" id="viewMonthBtn">Month</button>
+            <button class="view-btn active" type="button" data-view="all" id="viewAllBtn" aria-pressed="true">All</button>
+            <button class="view-btn" type="button" data-view="today" id="viewTodayBtn" aria-pressed="false">Today</button>
+            <button class="view-btn" type="button" data-view="week" id="viewWeekBtn" aria-pressed="false">Week</button>
+            <button class="view-btn" type="button" data-view="month" id="viewMonthBtn" aria-pressed="false">Month</button>
           </div>
           <div class="search-field">
             <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="11" cy="11" r="7"></circle>
               <path d="m16.5 16.5 4 4"></path>
             </svg>
-            <input type="text" id="searchInput" placeholder="Search tasks..." aria-keyshortcuts="Meta+K Control+K" />
+            <input type="text" id="searchInput" placeholder="Search tasks..." aria-label="Search tasks" aria-keyshortcuts="Meta+K Control+K" />
             <span class="search-shortcut" aria-hidden="true">⌘K</span>
           </div>
         </div>
@@ -208,7 +208,7 @@
             <h2 id="habitsTitle" class="habits-heading">Daily Habits</h2>
             <p id="habitsSubtitle" class="habits-subtitle">Your daily routines</p>
           </div>
-          <div class="habits-progress-pill" id="habitsProgressPill">
+          <div class="habits-progress-pill" id="habitsProgressPill" role="status" aria-live="polite">
             <span id="habitsDoneCount">0</span>/<span id="habitsTotalCount">0</span>
             <span id="habitsDoneLabel"> done</span>
           </div>
@@ -216,7 +216,7 @@
 
         <div id="reminderBanner" class="reminder-banner hidden" role="status" aria-live="polite">
           <span id="reminderBannerText"></span>
-          <button id="reminderBannerClose" class="reminder-banner-close" type="button">✕</button>
+          <button id="reminderBannerClose" class="reminder-banner-close" type="button" aria-label="Dismiss reminder">✕</button>
         </div>
 
         <div id="habitsList" class="habits-list"></div>
@@ -381,7 +381,7 @@
   </div>
 
   <!-- ===== EDIT TASK MODAL ===== -->
-  <div id="editModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Edit task">
+  <div id="editModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="editTaskTitle">
     <div class="modal-card">
       <h3 class="modal-title" id="editTaskTitle">Edit Task</h3>
 
