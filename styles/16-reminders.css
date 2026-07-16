@@ -1,0 +1,293 @@
+/* =========================================
+   PHASE 4.3 — REMINDER CENTER
+   ========================================= */
+
+.reminder-center-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  padding: 0;
+  color: var(--text-main);
+  background: var(--card-bg);
+  border: 1px solid var(--separator);
+  border-radius: 14px;
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.reminder-center-btn:hover,
+.reminder-center-btn[aria-expanded="true"] {
+  color: var(--accent-color);
+  background: color-mix(in srgb, var(--accent-color) 8%, var(--card-bg));
+  border-color: color-mix(in srgb, var(--accent-color) 28%, var(--separator));
+}
+
+.reminder-center-btn:active,
+.reminder-center-close:active,
+.reminder-item-actions button:active {
+  transform: scale(.96);
+}
+
+.reminder-center-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  color: #fff;
+  background: #d92d20;
+  border: 2px solid var(--page-bg);
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.reminder-center-panel {
+  position: absolute;
+  z-index: 315;
+  top: calc(100% + 10px);
+  right: 54px;
+  display: grid;
+  width: min(390px, calc(100vw - 24px));
+  max-height: calc(100vh - 92px);
+  max-height: calc(100dvh - 92px);
+  gap: 13px;
+  padding: 15px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  color: var(--text-main);
+  background: var(--card-solid);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.reminder-center-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 11px;
+  border-bottom: 1px solid var(--separator);
+}
+
+.reminder-center-header h3 {
+  margin: 0 0 3px;
+  font-size: 18px;
+  letter-spacing: -.02em;
+}
+
+.reminder-center-header p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.reminder-center-close {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  color: var(--text-soft);
+  background: var(--input-bg);
+  border: 1px solid var(--separator);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.reminder-center-summary {
+  margin: 0;
+  padding: 9px 11px;
+  color: var(--text-main);
+  background: color-mix(in srgb, var(--accent-color) 9%, var(--input-bg));
+  border: 1px solid color-mix(in srgb, var(--accent-color) 20%, var(--separator));
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.reminder-center-section {
+  display: grid;
+  gap: 7px;
+}
+
+.reminder-center-section h4 {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.reminder-center-list {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reminder-center-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 11px;
+  background: var(--card-bg);
+  border: 1px solid var(--separator);
+  border-left: 3px solid var(--accent-color);
+  border-radius: 11px;
+}
+
+.reminder-status-overdue {
+  border-left-color: #d92d20;
+}
+
+.reminder-status-today,
+.reminder-status-missedHabit {
+  border-left-color: #d97706;
+}
+
+.reminder-status-tomorrow,
+.reminder-status-habit {
+  border-left-style: double;
+}
+
+.reminder-item-copy {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.reminder-item-type {
+  color: var(--accent-color);
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.reminder-item-copy strong {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+
+.reminder-item-meta {
+  overflow: hidden;
+  color: var(--text-soft);
+  font-size: 9px;
+  font-weight: 650;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reminder-item-actions {
+  display: grid;
+  gap: 5px;
+}
+
+.reminder-item-actions button {
+  min-height: 34px;
+  padding: 5px 8px;
+  color: var(--text-main);
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 780;
+  cursor: pointer;
+}
+
+.reminder-complete-action {
+  color: #fff !important;
+  background: #16845b !important;
+  border-color: #16845b !important;
+}
+
+.reminder-center-empty {
+  padding: 18px 12px;
+  color: var(--text-soft);
+  text-align: center;
+  background: var(--input-bg);
+  border: 1px dashed var(--border-color);
+  border-radius: 10px;
+  font-size: 11px;
+}
+
+.reminder-center-btn:focus-visible,
+.reminder-center-close:focus-visible,
+.reminder-item-actions button:focus-visible {
+  outline: 3px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .reminder-center-panel {
+    position: fixed;
+    top: 70px;
+    right: 12px;
+    width: min(390px, calc(100vw - 24px));
+    max-height: calc(100vh - 84px);
+    max-height: calc(100dvh - 84px);
+  }
+
+  .reminder-center-item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .reminder-item-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reminder-item-actions button,
+  .reminder-center-close {
+    min-height: 42px;
+  }
+}
+
+@media (max-width: 360px) {
+  .top-bar-right {
+    gap: 6px;
+  }
+
+  .reminder-center-btn,
+  .hamburger-btn {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+  }
+
+  .date-box {
+    max-width: 118px;
+  }
+
+  .reminder-center-panel {
+    top: 62px;
+    right: 8px;
+    width: calc(100vw - 16px);
+    max-height: calc(100vh - 72px);
+    max-height: calc(100dvh - 72px);
+    padding: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reminder-center-btn,
+  .reminder-center-close,
+  .reminder-item-actions button {
+    transition-duration: .01ms;
+  }
+}

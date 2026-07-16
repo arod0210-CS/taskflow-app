@@ -24,6 +24,26 @@ export function parseDateOnly(dateString) {
   return new Date(`${dateString}T00:00:00`);
 }
 
+export function toDateKey(date) {
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0")
+  ].join("-");
+}
+
+export function addDays(date, amount) {
+  const next = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  next.setDate(next.getDate() + amount);
+  return next;
+}
+
+export function isValidDateKey(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ""))) return false;
+  const parsed = parseDateOnly(value);
+  return !Number.isNaN(parsed.getTime()) && toDateKey(parsed) === value;
+}
+
 export function isInCurrentWeek(dateString) {
   const today = startOfToday();
   const weekEnd = new Date(today);

@@ -1,4 +1,5 @@
 import { getTodayString, parseDateOnly } from "./dates.js";
+import { formatRecurrence } from "./recurrence.js";
 
 function isCompletedToday(task, today) {
   if (!task.completed || !task.completedAt) return false;
@@ -162,7 +163,12 @@ export function createDashboard({
         : task.dueDate === today
           ? t("dashboardDueToday")
           : dateLabel;
-      metadata.textContent = [status, t(`${task.priority}Priority`), ...getTaskOrganization(task, state, t)].join(" · ");
+      metadata.textContent = [
+        status,
+        t(`${task.priority}Priority`),
+        ...getTaskOrganization(task, state, t),
+        ...(task.recurrence ? [`↻ ${formatRecurrence(task.recurrence, t)}`] : [])
+      ].join(" · ");
       link.append(title, metadata);
       item.appendChild(link);
       return item;
@@ -199,11 +205,14 @@ export function createDashboard({
       const title = document.createElement("strong");
       title.textContent = task.text;
       copy.append(reason, title);
-      const organization = getTaskOrganization(task, state, t);
-      if (organization.length > 0) {
+      const metadataLabels = [
+        ...getTaskOrganization(task, state, t),
+        ...(task.recurrence ? [`↻ ${formatRecurrence(task.recurrence, t)}`] : [])
+      ];
+      if (metadataLabels.length > 0) {
         const metadata = document.createElement("span");
         metadata.className = "dashboard-organization";
-        metadata.textContent = organization.join(" · ");
+        metadata.textContent = metadataLabels.join(" · ");
         copy.appendChild(metadata);
       }
 

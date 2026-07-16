@@ -7,6 +7,10 @@ export const PROJECTS_KEY = "taskflow-projects-v1";
 
 export const CATEGORIES = ["work", "school", "personal", "health", "other"];
 
+export const RECURRENCE_TYPES = ["daily", "weekdays", "weekly", "monthly", "interval"];
+export const RECURRENCE_UNITS = ["days", "weeks", "months"];
+export const MAX_RECURRENCE_INTERVAL = 999;
+
 export const THEME_CLASSES = [
   "theme-sunset",
   "theme-mint",

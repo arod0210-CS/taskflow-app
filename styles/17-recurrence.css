@@ -1,0 +1,187 @@
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.recurrence-fieldset {
+  min-width: 0;
+  margin: 12px 0 0;
+  padding: 12px;
+  color: var(--text-main);
+  background: color-mix(in srgb, var(--input-bg) 62%, transparent);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-md);
+}
+
+.recurrence-fieldset legend {
+  padding: 0 6px;
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+
+.recurrence-control-grid {
+  display: grid;
+  grid-template-columns: minmax(150px, 1.35fr) minmax(120px, 1fr) minmax(130px, 1fr);
+  gap: 10px;
+  align-items: end;
+}
+
+.recurrence-control-grid label,
+.recurrence-custom-fields {
+  min-width: 0;
+}
+
+.recurrence-control-grid label {
+  display: grid;
+  gap: 5px;
+}
+
+.recurrence-control-grid label > span:not(.visually-hidden) {
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.recurrence-control-grid input,
+.recurrence-control-grid select {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  box-sizing: border-box;
+  padding: 9px 10px;
+  color: var(--text-main);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: 14px;
+}
+
+.recurrence-custom-fields {
+  display: grid;
+  grid-template-columns: minmax(68px, .65fr) minmax(90px, 1fr);
+  gap: 7px;
+  align-items: end;
+}
+
+.recurrence-unit-field {
+  align-self: end;
+}
+
+.recurrence-control-grid input:focus-visible,
+.recurrence-control-grid select:focus-visible {
+  outline: 3px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.recurrence-control-grid select:disabled {
+  cursor: not-allowed;
+  opacity: .64;
+}
+
+.recurrence-feedback {
+  min-height: 17px;
+  margin: 7px 2px 0;
+  color: var(--text-soft);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.recurrence-feedback[data-validation-error="true"] {
+  color: #b42318;
+  font-weight: 700;
+}
+
+.task-recurrence-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  gap: 4px;
+  padding: 3px 8px;
+  color: var(--accent-color);
+  background: color-mix(in srgb, var(--accent-color) 9%, var(--card-bg));
+  border: 1px solid color-mix(in srgb, var(--accent-color) 20%, var(--separator));
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 720;
+  line-height: 1.2;
+}
+
+#completedList .task-recurrence-chip {
+  min-height: 21px;
+  padding-block: 2px;
+  opacity: .7;
+}
+
+.calendar-task-preview {
+  position: relative;
+}
+
+.calendar-recurrence-marker {
+  position: absolute;
+  right: 4px;
+  color: var(--accent-color);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.calendar-task-recurring .calendar-task-title {
+  padding-right: 10px;
+}
+
+.recurrence-modal-fieldset {
+  margin-top: 4px;
+}
+
+.recurrence-modal-fieldset .recurrence-control-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body.dark-mode .recurrence-feedback[data-validation-error="true"] {
+  color: #ffb4ab;
+}
+
+@media (max-width: 900px) {
+  .recurrence-control-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .recurrence-fieldset {
+    padding: 10px;
+  }
+
+  .recurrence-control-grid,
+  .recurrence-modal-fieldset .recurrence-control-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .recurrence-custom-fields {
+    grid-template-columns: minmax(72px, .7fr) minmax(0, 1fr);
+  }
+
+  .recurrence-control-grid input,
+  .recurrence-control-grid select {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .recurrence-control-grid input,
+  .recurrence-control-grid select,
+  .task-recurrence-chip {
+    scroll-behavior: auto;
+    transition: none !important;
+  }
+}

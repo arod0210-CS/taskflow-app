@@ -19,6 +19,9 @@
   <link rel="stylesheet" href="styles/12-polish.css" />
   <link rel="stylesheet" href="styles/13-dashboard.css" />
   <link rel="stylesheet" href="styles/14-projects.css" />
+  <link rel="stylesheet" href="styles/15-calendar.css" />
+  <link rel="stylesheet" href="styles/16-reminders.css" />
+  <link rel="stylesheet" href="styles/17-recurrence.css" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#7c3aed" />
@@ -41,6 +44,33 @@
         <p class="hidden" id="eyebrowText"></p>
 
         <div class="top-bar-right">
+          <button id="reminderCenterBtn" class="reminder-center-btn" type="button" aria-label="Reminder center" aria-expanded="false" aria-controls="reminderCenterPanel">
+            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+              <path d="M10 21h4"></path>
+            </svg>
+            <span id="reminderCenterBadge" class="reminder-center-badge hidden" aria-hidden="true">0</span>
+          </button>
+
+          <div id="reminderCenterPanel" class="reminder-center-panel hidden" role="dialog" aria-labelledby="reminderCenterTitle">
+            <header class="reminder-center-header">
+              <div>
+                <h3 id="reminderCenterTitle">Reminder Center</h3>
+                <p id="reminderCenterSubtitle">Current deadlines and habit reminders</p>
+              </div>
+              <button id="reminderCenterClose" class="reminder-center-close" type="button" aria-label="Close reminder center">✕</button>
+            </header>
+            <p id="reminderCenterSummary" class="reminder-center-summary" role="status" aria-live="polite"></p>
+            <section class="reminder-center-section" aria-labelledby="reminderActionableTitle">
+              <h4 id="reminderActionableTitle">Needs attention</h4>
+              <ul id="reminderActionableList" class="reminder-center-list"></ul>
+            </section>
+            <section id="reminderUpcomingSection" class="reminder-center-section" aria-labelledby="reminderUpcomingTitle">
+              <h4 id="reminderUpcomingTitle">Tomorrow</h4>
+              <ul id="reminderUpcomingList" class="reminder-center-list"></ul>
+            </section>
+          </div>
+
           <button id="settingsBtn" class="hamburger-btn" type="button" aria-label="Settings menu" aria-expanded="false" aria-controls="settingsPanel">
             <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -119,6 +149,10 @@
         <button class="tab-btn" role="tab" data-tab="dashboard" id="tab-dashboard" aria-selected="false" aria-controls="panel-dashboard">
           <span class="tab-icon" aria-hidden="true">⌂</span>
           <span class="tab-label" id="tabDashboardLabel">Dashboard</span>
+        </button>
+        <button class="tab-btn" role="tab" data-tab="calendar" id="tab-calendar" aria-selected="false" aria-controls="panel-calendar">
+          <span class="tab-icon" aria-hidden="true">▦</span>
+          <span class="tab-label" id="tabCalendarLabel">Calendar</span>
         </button>
         <button class="tab-btn active" role="tab" data-tab="tasks" id="tab-tasks" aria-selected="true" aria-controls="panel-tasks">
           <span class="tab-icon" aria-hidden="true">📋</span>
@@ -206,6 +240,51 @@
         </div>
       </div>
 
+      <!-- ===== CALENDAR PANEL ===== -->
+      <div class="tab-panel" id="panel-calendar" role="tabpanel" aria-labelledby="tab-calendar">
+        <header class="calendar-page-header">
+          <div>
+            <p class="calendar-eyebrow" id="calendarEyebrow">Plan by date</p>
+            <h2 id="calendarTitle">Calendar</h2>
+            <p id="calendarSubtitle">See deadlines and completed work across the month.</p>
+          </div>
+        </header>
+
+        <div class="calendar-layout">
+        <section class="calendar-shell" aria-labelledby="calendarMonthHeading">
+          <div class="calendar-toolbar">
+            <button id="calendarPreviousBtn" class="calendar-nav-btn" type="button" aria-label="Previous month">‹</button>
+            <h3 id="calendarMonthHeading"></h3>
+            <button id="calendarNextBtn" class="calendar-nav-btn" type="button" aria-label="Next month">›</button>
+            <button id="calendarTodayBtn" class="calendar-today-btn" type="button">Today</button>
+          </div>
+          <div id="calendarWeekdays" class="calendar-weekdays" role="row"></div>
+          <div id="calendarGrid" class="calendar-grid" role="grid" aria-labelledby="calendarMonthHeading"></div>
+          <p id="calendarSelectionStatus" class="calendar-live-region" aria-live="polite"></p>
+        </section>
+
+        <aside class="agenda-panel" aria-labelledby="agendaTitle">
+          <header class="agenda-header">
+            <div>
+              <p class="agenda-kicker" id="agendaKicker">Selected date</p>
+              <h3 id="agendaTitle">Daily Agenda</h3>
+              <p id="agendaDate"></p>
+            </div>
+            <span id="agendaCount" class="agenda-count" aria-live="polite"></span>
+          </header>
+          <section class="agenda-section" aria-labelledby="agendaIncompleteTitle">
+            <h4 id="agendaIncompleteTitle">Incomplete</h4>
+            <ul id="agendaIncompleteList" class="agenda-list"></ul>
+          </section>
+          <section class="agenda-section agenda-completed-section" aria-labelledby="agendaCompletedTitle">
+            <h4 id="agendaCompletedTitle">Completed</h4>
+            <ul id="agendaCompletedList" class="agenda-list"></ul>
+          </section>
+          <button id="agendaAddTaskBtn" class="agenda-add-task" type="button">Add task for this date</button>
+        </aside>
+        </div>
+      </div>
+
       <!-- ===== TASKS PANEL ===== -->
       <div class="tab-panel active" id="panel-tasks" role="tabpanel" aria-labelledby="tab-tasks">
 
@@ -261,6 +340,48 @@
           </button>
           <div id="notesArea" class="notes-area hidden">
             <textarea id="notesInput" rows="3" placeholder="Optional notes..." aria-label="Notes"></textarea>
+            <fieldset class="recurrence-fieldset">
+              <legend id="taskRecurrenceLegend">Repeat</legend>
+              <div class="recurrence-control-grid">
+                <label class="recurrence-select-field">
+                  <span id="taskRecurrenceLabel">Repeat</span>
+                  <select id="taskRecurrenceInput" aria-describedby="taskRecurrenceFeedback">
+                    <option value="none">Does not repeat</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekdays">Every weekday</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="interval">Custom</option>
+                  </select>
+                </label>
+                <div id="taskRecurrenceCustomFields" class="recurrence-custom-fields hidden">
+                  <label>
+                    <span id="taskRecurrenceEveryLabel">Every</span>
+                    <input id="taskRecurrenceIntervalInput" type="number" min="1" max="999" value="2" inputmode="numeric" />
+                  </label>
+                  <label class="recurrence-unit-field">
+                    <span class="visually-hidden" id="taskRecurrenceUnitLabel">Interval unit</span>
+                    <select id="taskRecurrenceUnitInput" aria-labelledby="taskRecurrenceEveryLabel taskRecurrenceUnitLabel">
+                      <option value="days">Days</option>
+                      <option value="weeks">Weeks</option>
+                      <option value="months">Months</option>
+                    </select>
+                  </label>
+                </div>
+                <label id="taskRecurrenceEndModeField" class="recurrence-end-mode hidden">
+                  <span id="taskRecurrenceEndsLabel">Ends</span>
+                  <select id="taskRecurrenceEndModeInput">
+                    <option value="never">Never</option>
+                    <option value="date">End date</option>
+                  </select>
+                </label>
+                <label id="taskRecurrenceEndDateField" class="recurrence-end-date hidden">
+                  <span id="taskRecurrenceEndDateLabel">End date</span>
+                  <input id="taskRecurrenceEndDateInput" type="date" />
+                </label>
+              </div>
+              <p id="taskRecurrenceFeedback" class="recurrence-feedback" role="status" aria-live="polite"></p>
+            </fieldset>
           </div>
         </div>
 
@@ -554,6 +675,49 @@
         <label for="editNotesInput" id="editNotesLabel">Notes</label>
         <textarea id="editNotesInput" rows="3" placeholder="Optional notes..."></textarea>
       </div>
+
+      <fieldset class="recurrence-fieldset recurrence-modal-fieldset">
+        <legend id="editRecurrenceLegend">Repeat</legend>
+        <div class="recurrence-control-grid">
+          <label class="recurrence-select-field">
+            <span id="editRecurrenceLabel">Repeat</span>
+            <select id="editRecurrenceInput" aria-describedby="editRecurrenceFeedback">
+              <option value="none">Does not repeat</option>
+              <option value="daily">Daily</option>
+              <option value="weekdays">Every weekday</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="interval">Custom</option>
+            </select>
+          </label>
+          <div id="editRecurrenceCustomFields" class="recurrence-custom-fields hidden">
+            <label>
+              <span id="editRecurrenceEveryLabel">Every</span>
+              <input id="editRecurrenceIntervalInput" type="number" min="1" max="999" value="2" inputmode="numeric" />
+            </label>
+            <label class="recurrence-unit-field">
+              <span class="visually-hidden" id="editRecurrenceUnitLabel">Interval unit</span>
+              <select id="editRecurrenceUnitInput" aria-labelledby="editRecurrenceEveryLabel editRecurrenceUnitLabel">
+                <option value="days">Days</option>
+                <option value="weeks">Weeks</option>
+                <option value="months">Months</option>
+              </select>
+            </label>
+          </div>
+          <label id="editRecurrenceEndModeField" class="recurrence-end-mode hidden">
+            <span id="editRecurrenceEndsLabel">Ends</span>
+            <select id="editRecurrenceEndModeInput">
+              <option value="never">Never</option>
+              <option value="date">End date</option>
+            </select>
+          </label>
+          <label id="editRecurrenceEndDateField" class="recurrence-end-date hidden">
+            <span id="editRecurrenceEndDateLabel">End date</span>
+            <input id="editRecurrenceEndDateInput" type="date" />
+          </label>
+        </div>
+        <p id="editRecurrenceFeedback" class="recurrence-feedback" role="status" aria-live="polite"></p>
+      </fieldset>
 
       <div class="modal-actions">
         <button id="editCancelBtn" class="modal-btn modal-btn-cancel" type="button">Cancel</button>

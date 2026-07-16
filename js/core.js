@@ -24,6 +24,13 @@ import {
 } from "./dates.js";
 import { safeParse } from "./storage.js";
 import { createDashboard } from "./dashboard.js";
+import { createCalendar } from "./calendar.js";
+import { createReminderCenter } from "./reminders.js";
+import {
+  createNextOccurrence,
+  formatRecurrence,
+  sanitizeRecurrence
+} from "./recurrence.js";
 import {
   createProjectsUI,
   sanitizeProjects,
@@ -115,8 +122,33 @@ export function startApp() {
       clearCompleted: "Clear Completed",
       clearCompletedConfirm: "Clear all completed tasks?",
       notesLabel: "Notes",
-      addNotes: "+ Add Notes",
+      addNotes: "+ Notes & repeat",
       optionalNotesPlaceholder: "Optional notes...",
+      repeat: "Repeat",
+      doesNotRepeat: "Does not repeat",
+      recurrenceDaily: "Daily",
+      recurrenceWeekdays: "Every weekday",
+      recurrenceWeekly: "Weekly",
+      recurrenceMonthly: "Monthly",
+      recurrenceCustom: "Custom",
+      recurrenceEvery: "Every",
+      recurrenceUnit: "Interval unit",
+      recurrenceDay: "day",
+      recurrenceDays: "days",
+      recurrenceWeek: "week",
+      recurrenceWeeks: "weeks",
+      recurrenceMonth: "month",
+      recurrenceMonths: "months",
+      recurrenceEnds: "Ends",
+      recurrenceNever: "Never",
+      recurrenceEndDate: "End date",
+      recurringTask: "Recurring task",
+      nextOccurrence: "Next occurrence",
+      recurrenceNeedsDueDate: "Add a due date to enable recurrence.",
+      recurrenceInvalidInterval: "Enter a whole number from 1 to 999.",
+      recurrenceInvalidEndDate: "Choose an end date on or after the due date.",
+      taskCompletedAnnouncement: "Task completed",
+      taskReopenedAnnouncement: "Task reopened",
       achievements: "Achievements",
       weeklyProgress: "Weekly Progress",
       earnedStatus: "Earned",
@@ -143,6 +175,27 @@ export function startApp() {
       tabHabits: "Habits",
       tabStats: "Stats",
       tabDashboard: "Dashboard",
+      tabCalendar: "Calendar",
+      calendarEyebrow: "Plan by date",
+      calendarTitle: "Calendar",
+      calendarSubtitle: "See deadlines and completed work across the month.",
+      calendarPreviousMonth: "Previous month",
+      calendarNextMonth: "Next month",
+      calendarSelectedDate: "Selected date",
+      calendarTaskSummary: "{incomplete} open, {completed} completed",
+      calendarOpenShort: "open",
+      calendarDoneShort: "done",
+      calendarIncompleteStatus: "Incomplete",
+      calendarCompletedStatus: "Completed",
+      calendarOpenTask: "Open task",
+      calendarMoreTasks: "+{count} more",
+      agendaTitle: "Daily Agenda",
+      agendaTaskCount: "{count} tasks",
+      agendaIncomplete: "Incomplete",
+      agendaCompleted: "Completed",
+      agendaNoIncomplete: "No incomplete tasks for this date.",
+      agendaNoCompleted: "No completed tasks for this date.",
+      agendaAddTask: "Add task for this date",
       dashboardEyebrow: "At a glance",
       dashboardTitle: "Dashboard",
       dashboardSubtitle: "Your priorities and progress for today.",
@@ -202,11 +255,18 @@ export function startApp() {
       habitsDoneLabel: " done",
       addHabitPlaceholder: "New habit name...",
       addHabitBtn: "Add",
-      addHabitHint: "Reminders only fire while this page is open",
+      addHabitHint: "Set a time for in-app reminders; browser alerts only fire while this page is open.",
+      addHabitHintGranted: "Browser alerts and the in-app reminder center work while this page is open.",
+      addHabitHintDenied: "Browser alerts are blocked; in-app reminders still work while this page is open.",
+      addHabitHintUnsupported: "In-app reminders work while this page is open; browser alerts are unavailable.",
       habitEmojiPlaceholder: "🌟",
       habitEmojiLabel: "Habit emoji",
       habitReminderLabel: "Optional reminder time",
       reminderAction: "Reminder",
+      reminderSetLabel: "Reminder set",
+      reminderSetAction: "Set reminder",
+      reminderPrompt: "Reminder time (HH:MM) or empty to clear:",
+      reminderInvalidTime: "Enter a valid time from 00:00 to 23:59.",
       habitMarkDone: "Mark habit as done",
       habitMarkNotDone: "Mark habit as not done",
       deleteHabit: "Delete",
@@ -214,8 +274,25 @@ export function startApp() {
       noHabits: "No habits yet — add one below!",
       reminderSet: "⏰ Reminder set!",
       reminderCleared: "Reminder cleared.",
-      notifPermDenied: "Notifications blocked. Enable them in browser settings.",
+      notifPermDenied: "Browser notifications are blocked. In-app reminders still work while TaskFlow is open.",
       notifBody: "Time to: ",
+      reminderCenterTitle: "Reminder Center",
+      reminderCenterSubtitle: "Current deadlines and habit reminders",
+      reminderCenterClose: "Close reminder center",
+      reminderNeedsAttention: "Needs attention",
+      reminderTomorrowSection: "Tomorrow",
+      reminderSummary: "{count} actionable reminders",
+      reminderNone: "No reminders need attention.",
+      reminderOverdue: "Overdue",
+      reminderDueToday: "Due today",
+      reminderDueTomorrow: "Due tomorrow",
+      reminderHabitUpcoming: "Habit reminder",
+      reminderHabitMissed: "Missed habit reminder",
+      reminderTaskType: "Task",
+      reminderHabitType: "Habit",
+      reminderOpenTask: "Open task",
+      reminderOpenHabit: "Open habit",
+      reminderMarkComplete: "Mark complete",
       quotes: [
         { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
         { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
@@ -307,8 +384,33 @@ export function startApp() {
       clearCompleted: "Borrar completadas",
       clearCompletedConfirm: "¿Eliminar todas las tareas completadas?",
       notesLabel: "Notas",
-      addNotes: "+ Agregar notas",
+      addNotes: "+ Notas y repetición",
       optionalNotesPlaceholder: "Notas opcionales...",
+      repeat: "Repetir",
+      doesNotRepeat: "No se repite",
+      recurrenceDaily: "Diariamente",
+      recurrenceWeekdays: "Cada día laborable",
+      recurrenceWeekly: "Semanalmente",
+      recurrenceMonthly: "Mensualmente",
+      recurrenceCustom: "Personalizado",
+      recurrenceEvery: "Cada",
+      recurrenceUnit: "Unidad del intervalo",
+      recurrenceDay: "día",
+      recurrenceDays: "días",
+      recurrenceWeek: "semana",
+      recurrenceWeeks: "semanas",
+      recurrenceMonth: "mes",
+      recurrenceMonths: "meses",
+      recurrenceEnds: "Termina",
+      recurrenceNever: "Nunca",
+      recurrenceEndDate: "Fecha de finalización",
+      recurringTask: "Tarea recurrente",
+      nextOccurrence: "Próxima repetición",
+      recurrenceNeedsDueDate: "Agrega una fecha límite para activar la recurrencia.",
+      recurrenceInvalidInterval: "Ingresa un número entero entre 1 y 999.",
+      recurrenceInvalidEndDate: "Elige una fecha final igual o posterior a la fecha límite.",
+      taskCompletedAnnouncement: "Tarea completada",
+      taskReopenedAnnouncement: "Tarea reabierta",
       achievements: "Logros",
       weeklyProgress: "Progreso semanal",
       earnedStatus: "Conseguido",
@@ -335,6 +437,27 @@ export function startApp() {
       tabHabits: "Hábitos",
       tabStats: "Stats",
       tabDashboard: "Resumen",
+      tabCalendar: "Calendario",
+      calendarEyebrow: "Planifica por fecha",
+      calendarTitle: "Calendario",
+      calendarSubtitle: "Consulta las fechas límite y el trabajo completado del mes.",
+      calendarPreviousMonth: "Mes anterior",
+      calendarNextMonth: "Mes siguiente",
+      calendarSelectedDate: "Fecha seleccionada",
+      calendarTaskSummary: "{incomplete} pendientes, {completed} completadas",
+      calendarOpenShort: "pend.",
+      calendarDoneShort: "hechas",
+      calendarIncompleteStatus: "Pendiente",
+      calendarCompletedStatus: "Completada",
+      calendarOpenTask: "Abrir tarea",
+      calendarMoreTasks: "+{count} más",
+      agendaTitle: "Agenda diaria",
+      agendaTaskCount: "{count} tareas",
+      agendaIncomplete: "Pendientes",
+      agendaCompleted: "Completadas",
+      agendaNoIncomplete: "No hay tareas pendientes para esta fecha.",
+      agendaNoCompleted: "No hay tareas completadas para esta fecha.",
+      agendaAddTask: "Agregar tarea para esta fecha",
       dashboardEyebrow: "De un vistazo",
       dashboardTitle: "Resumen",
       dashboardSubtitle: "Tus prioridades y progreso de hoy.",
@@ -394,11 +517,18 @@ export function startApp() {
       habitsDoneLabel: " hechos",
       addHabitPlaceholder: "Nombre del hábito...",
       addHabitBtn: "Agregar",
-      addHabitHint: "Los recordatorios solo funcionan con la página abierta",
+      addHabitHint: "Elige una hora para recordatorios internos; las alertas solo aparecen con la página abierta.",
+      addHabitHintGranted: "Las alertas del navegador y el centro de recordatorios funcionan con la página abierta.",
+      addHabitHintDenied: "Las alertas están bloqueadas; los recordatorios internos siguen funcionando con la página abierta.",
+      addHabitHintUnsupported: "Los recordatorios internos funcionan con la página abierta; las alertas del navegador no están disponibles.",
       habitEmojiPlaceholder: "🌟",
       habitEmojiLabel: "Emoji del hábito",
       habitReminderLabel: "Hora de recordatorio opcional",
       reminderAction: "Recordatorio",
+      reminderSetLabel: "Recordatorio activo",
+      reminderSetAction: "Establecer recordatorio",
+      reminderPrompt: "Hora del recordatorio (HH:MM) o vacío para eliminar:",
+      reminderInvalidTime: "Ingresa una hora válida entre 00:00 y 23:59.",
       habitMarkDone: "Marcar hábito como hecho",
       habitMarkNotDone: "Marcar hábito como no hecho",
       deleteHabit: "Eliminar",
@@ -406,8 +536,25 @@ export function startApp() {
       noHabits: "¡Sin hábitos aún — agrega uno abajo!",
       reminderSet: "⏰ ¡Recordatorio establecido!",
       reminderCleared: "Recordatorio eliminado.",
-      notifPermDenied: "Notificaciones bloqueadas. Actívalas en la configuración del navegador.",
+      notifPermDenied: "Las notificaciones del navegador están bloqueadas. Los recordatorios internos funcionan mientras TaskFlow está abierto.",
       notifBody: "Hora de: ",
+      reminderCenterTitle: "Centro de recordatorios",
+      reminderCenterSubtitle: "Fechas límite y recordatorios de hábitos actuales",
+      reminderCenterClose: "Cerrar centro de recordatorios",
+      reminderNeedsAttention: "Requiere atención",
+      reminderTomorrowSection: "Mañana",
+      reminderSummary: "{count} recordatorios activos",
+      reminderNone: "Ningún recordatorio requiere atención.",
+      reminderOverdue: "Atrasada",
+      reminderDueToday: "Vence hoy",
+      reminderDueTomorrow: "Vence mañana",
+      reminderHabitUpcoming: "Recordatorio de hábito",
+      reminderHabitMissed: "Recordatorio de hábito perdido",
+      reminderTaskType: "Tarea",
+      reminderHabitType: "Hábito",
+      reminderOpenTask: "Abrir tarea",
+      reminderOpenHabit: "Abrir hábito",
+      reminderMarkComplete: "Marcar como completado",
       quotes: [
         { text: "El secreto para avanzar es empezar.", author: "Mark Twain" },
         { text: "Siempre parece imposible hasta que se hace.", author: "Nelson Mandela" },
@@ -460,6 +607,30 @@ export function startApp() {
   const notesToggle = document.getElementById("notesToggle");
   const notesArea = document.getElementById("notesArea");
   const notesInput = document.getElementById("notesInput");
+  const addRecurrenceControls = {
+    recurrence: document.getElementById("taskRecurrenceInput"),
+    customFields: document.getElementById("taskRecurrenceCustomFields"),
+    interval: document.getElementById("taskRecurrenceIntervalInput"),
+    unit: document.getElementById("taskRecurrenceUnitInput"),
+    endModeField: document.getElementById("taskRecurrenceEndModeField"),
+    endMode: document.getElementById("taskRecurrenceEndModeInput"),
+    endDateField: document.getElementById("taskRecurrenceEndDateField"),
+    endDate: document.getElementById("taskRecurrenceEndDateInput"),
+    feedback: document.getElementById("taskRecurrenceFeedback"),
+    dueDate: dueDateInput
+  };
+  const editRecurrenceControls = {
+    recurrence: document.getElementById("editRecurrenceInput"),
+    customFields: document.getElementById("editRecurrenceCustomFields"),
+    interval: document.getElementById("editRecurrenceIntervalInput"),
+    unit: document.getElementById("editRecurrenceUnitInput"),
+    endModeField: document.getElementById("editRecurrenceEndModeField"),
+    endMode: document.getElementById("editRecurrenceEndModeInput"),
+    endDateField: document.getElementById("editRecurrenceEndDateField"),
+    endDate: document.getElementById("editRecurrenceEndDateInput"),
+    feedback: document.getElementById("editRecurrenceFeedback"),
+    dueDate: editDateInput
+  };
   let modalReturnFocus = null;
 
   const levelCard = document.getElementById("levelCard");
@@ -485,6 +656,8 @@ export function startApp() {
   const quoteText = document.getElementById("quoteText");
   const quoteAuthor = document.getElementById("quoteAuthor");
   let dashboard = null;
+  let calendar = null;
+  let reminderCenter = null;
   let projectsUI = null;
 
   const storedProjects = sanitizeProjects(safeParse(localStorage.getItem(PROJECTS_KEY), []));
@@ -518,7 +691,9 @@ export function startApp() {
       this.listeners.forEach((listener) => listener(this));
     },
     addTask(task) {
-      this.tasks.unshift(task);
+      const [sanitizedTask] = sanitizeTasks([task]);
+      if (!sanitizedTask) return;
+      this.tasks.unshift(sanitizedTask);
       this.notify();
     },
     deleteTask(id) {
@@ -540,28 +715,38 @@ export function startApp() {
           rewardForCompletion(task);
           task.rewardGranted = true;
         }
+
+        const nextOccurrence = createNextOccurrence(
+          task,
+          this.tasks,
+          () => crypto.randomUUID()
+        );
+        if (nextOccurrence.handled) {
+          task.nextOccurrenceGenerated = true;
+          if (nextOccurrence.task) this.tasks.unshift(nextOccurrence.task);
+        }
       }
 
       this.notify();
     },
     updateTask(id, updates) {
-      this.tasks = this.tasks.map((task) =>
-        task.id === id
-          ? {
-              ...task,
-              ...updates,
-              priority: normalizePriority(updates.priority ?? task.priority),
-              projectId: updates.projectId === undefined
-                ? task.projectId
-                : this.projects.some((project) => project.id === updates.projectId)
-                  ? updates.projectId
-                  : null,
-              category: updates.category === undefined
-                ? task.category
-                : sanitizeCategory(updates.category)
-            }
-          : task
-      );
+      this.tasks = this.tasks.map((task) => {
+        if (task.id !== id) return task;
+        const [sanitizedTask] = sanitizeTasks([{
+          ...task,
+          ...updates,
+          priority: normalizePriority(updates.priority ?? task.priority),
+          projectId: updates.projectId === undefined
+            ? task.projectId
+            : this.projects.some((project) => project.id === updates.projectId)
+              ? updates.projectId
+              : null,
+          category: updates.category === undefined
+            ? task.category
+            : sanitizeCategory(updates.category)
+        }]);
+        return sanitizedTask || task;
+      });
       this.notify();
     },
     reorderTasks(draggedId, targetId) {
@@ -750,6 +935,122 @@ export function startApp() {
     return translations[State.language][key];
   }
 
+  function setSelectOptionLabels(select, labels) {
+    Array.from(select.options).forEach((option) => {
+      if (labels[option.value]) option.textContent = labels[option.value];
+    });
+  }
+
+  function updateRecurrenceControls(controls) {
+    const hasDueDate = Boolean(controls.dueDate.value);
+    const type = controls.recurrence.value;
+    const repeats = hasDueDate && type !== "none";
+    const isCustom = repeats && type === "interval";
+    const hasEndDate = repeats && controls.endMode.value === "date";
+
+    controls.recurrence.disabled = !hasDueDate;
+    controls.customFields.classList.toggle("hidden", !isCustom);
+    controls.endModeField.classList.toggle("hidden", !repeats);
+    controls.endDateField.classList.toggle("hidden", !hasEndDate);
+    controls.interval.disabled = !isCustom;
+    controls.unit.disabled = !isCustom;
+    controls.endMode.disabled = !repeats;
+    controls.endDate.disabled = !hasEndDate;
+    controls.endDate.min = controls.dueDate.value || "";
+
+    if (!hasDueDate) {
+      controls.recurrence.value = "none";
+      controls.feedback.textContent = t("recurrenceNeedsDueDate");
+    } else if (!controls.feedback.dataset.validationError) {
+      controls.feedback.textContent = "";
+    }
+  }
+
+  function setRecurrenceControls(controls, recurrence) {
+    controls.recurrence.value = recurrence?.type || "none";
+    controls.interval.value = recurrence?.type === "interval" ? String(recurrence.interval) : "2";
+    controls.unit.value = recurrence?.type === "interval" ? recurrence.unit : "days";
+    controls.endMode.value = recurrence?.endDate ? "date" : "never";
+    controls.endDate.value = recurrence?.endDate || "";
+    controls.feedback.textContent = "";
+    delete controls.feedback.dataset.validationError;
+    updateRecurrenceControls(controls);
+  }
+
+  function readRecurrenceControls(controls) {
+    delete controls.feedback.dataset.validationError;
+    if (controls.recurrence.value === "none") {
+      controls.feedback.textContent = "";
+      return { valid: true, recurrence: null };
+    }
+
+    const dueDate = controls.dueDate.value;
+    if (!dueDate) {
+      controls.feedback.dataset.validationError = "true";
+      controls.feedback.textContent = t("recurrenceNeedsDueDate");
+      controls.dueDate.focus();
+      return { valid: false, recurrence: null };
+    }
+
+    const interval = Number(controls.interval.value);
+    if (controls.recurrence.value === "interval" &&
+      (!Number.isInteger(interval) || interval < 1 || interval > 999)) {
+      controls.feedback.dataset.validationError = "true";
+      controls.feedback.textContent = t("recurrenceInvalidInterval");
+      controls.interval.focus();
+      return { valid: false, recurrence: null };
+    }
+
+    const endDate = controls.endMode.value === "date" ? controls.endDate.value : null;
+    if (controls.endMode.value === "date" && (!endDate || endDate < dueDate)) {
+      controls.feedback.dataset.validationError = "true";
+      controls.feedback.textContent = t("recurrenceInvalidEndDate");
+      controls.endDate.focus();
+      return { valid: false, recurrence: null };
+    }
+
+    const due = parseDateOnly(dueDate);
+    const recurrence = sanitizeRecurrence({
+      type: controls.recurrence.value,
+      interval: controls.recurrence.value === "interval" ? interval : 1,
+      unit: controls.recurrence.value === "interval" ? controls.unit.value : null,
+      endDate,
+      anchorDay: due.getDate()
+    }, dueDate);
+
+    if (!recurrence) {
+      controls.feedback.dataset.validationError = "true";
+      controls.feedback.textContent = t("recurrenceInvalidInterval");
+      return { valid: false, recurrence: null };
+    }
+
+    controls.feedback.textContent = "";
+    return { valid: true, recurrence };
+  }
+
+  function bindRecurrenceControls(controls) {
+    controls.dueDate.addEventListener("change", () => {
+      delete controls.feedback.dataset.validationError;
+      updateRecurrenceControls(controls);
+    });
+    controls.recurrence.addEventListener("change", () => {
+      delete controls.feedback.dataset.validationError;
+      updateRecurrenceControls(controls);
+    });
+    controls.endMode.addEventListener("change", () => {
+      delete controls.feedback.dataset.validationError;
+      updateRecurrenceControls(controls);
+    });
+    controls.interval.addEventListener("input", () => {
+      delete controls.feedback.dataset.validationError;
+      controls.feedback.textContent = "";
+    });
+    controls.endDate.addEventListener("change", () => {
+      delete controls.feedback.dataset.validationError;
+      controls.feedback.textContent = "";
+    });
+  }
+
   function setDateConstraints() {
     const today = getTodayString();
     dueDateInput.min = today;
@@ -872,6 +1173,41 @@ export function startApp() {
     notesInput.placeholder = t("optionalNotesPlaceholder");
     notesInput.setAttribute("aria-label", t("notesLabel"));
 
+    ["task", "edit"].forEach((prefix) => {
+      document.getElementById(`${prefix}RecurrenceLegend`).textContent = t("repeat");
+      document.getElementById(`${prefix}RecurrenceLabel`).textContent = t("repeat");
+      document.getElementById(`${prefix}RecurrenceEveryLabel`).textContent = t("recurrenceEvery");
+      document.getElementById(`${prefix}RecurrenceUnitLabel`).textContent = t("recurrenceUnit");
+      document.getElementById(`${prefix}RecurrenceEndsLabel`).textContent = t("recurrenceEnds");
+      document.getElementById(`${prefix}RecurrenceEndDateLabel`).textContent = t("recurrenceEndDate");
+    });
+    [addRecurrenceControls, editRecurrenceControls].forEach((controls) => {
+      setSelectOptionLabels(controls.recurrence, {
+        none: t("doesNotRepeat"),
+        daily: t("recurrenceDaily"),
+        weekdays: t("recurrenceWeekdays"),
+        weekly: t("recurrenceWeekly"),
+        monthly: t("recurrenceMonthly"),
+        interval: t("recurrenceCustom")
+      });
+      setSelectOptionLabels(controls.unit, {
+        days: t("recurrenceDays"),
+        weeks: t("recurrenceWeeks"),
+        months: t("recurrenceMonths")
+      });
+      setSelectOptionLabels(controls.endMode, {
+        never: t("recurrenceNever"),
+        date: t("recurrenceEndDate")
+      });
+      controls.interval.setAttribute("aria-label", t("recurrenceEvery"));
+      controls.interval.setAttribute("aria-describedby", controls.feedback.id);
+      controls.unit.setAttribute("aria-describedby", controls.feedback.id);
+      controls.endMode.setAttribute("aria-label", t("recurrenceEnds"));
+      controls.endDate.setAttribute("aria-label", t("recurrenceEndDate"));
+      controls.endDate.setAttribute("aria-describedby", controls.feedback.id);
+      updateRecurrenceControls(controls);
+    });
+
     priorityInput.options[0].text = t("highPriority");
     priorityInput.options[1].text = t("mediumPriority");
     priorityInput.options[2].text = t("lowPriority");
@@ -884,10 +1220,19 @@ export function startApp() {
     const tabHabitsLabel = document.getElementById("tabHabitsLabel");
     const tabStatsLabel = document.getElementById("tabStatsLabel");
     const tabDashboardLabel = document.getElementById("tabDashboardLabel");
+    const tabCalendarLabel = document.getElementById("tabCalendarLabel");
     if (tabTasksLabel) tabTasksLabel.textContent = t("tabTasks");
     if (tabHabitsLabel) tabHabitsLabel.textContent = t("tabHabits");
     if (tabStatsLabel) tabStatsLabel.textContent = t("tabStats");
     if (tabDashboardLabel) tabDashboardLabel.textContent = t("tabDashboard");
+    if (tabCalendarLabel) tabCalendarLabel.textContent = t("tabCalendar");
+
+    document.getElementById("calendarEyebrow").textContent = t("calendarEyebrow");
+    document.getElementById("calendarTitle").textContent = t("calendarTitle");
+    document.getElementById("calendarSubtitle").textContent = t("calendarSubtitle");
+    document.getElementById("calendarPreviousBtn").setAttribute("aria-label", t("calendarPreviousMonth"));
+    document.getElementById("calendarNextBtn").setAttribute("aria-label", t("calendarNextMonth"));
+    document.getElementById("calendarTodayBtn").textContent = t("today");
 
     document.getElementById("dashboardEyebrow").textContent = t("dashboardEyebrow");
     document.getElementById("dashboardTitle").textContent = t("dashboardTitle");
@@ -918,7 +1263,16 @@ export function startApp() {
     const reminderBannerCloseEl = document.getElementById("reminderBannerClose");
     if (habitsTitleEl) habitsTitleEl.textContent = t("habitsTitle");
     if (habitsSubtitleEl) habitsSubtitleEl.textContent = t("habitsSubtitle");
-    if (addHabitHintEl) addHabitHintEl.textContent = t("addHabitHint");
+    if (addHabitHintEl) {
+      const hintKey = typeof Notification === "undefined"
+        ? "addHabitHintUnsupported"
+        : Notification.permission === "granted"
+          ? "addHabitHintGranted"
+          : Notification.permission === "denied"
+            ? "addHabitHintDenied"
+            : "addHabitHint";
+      addHabitHintEl.textContent = t(hintKey);
+    }
     if (habitNameInputEl) habitNameInputEl.placeholder = t("addHabitPlaceholder");
     if (habitNameInputEl) habitNameInputEl.setAttribute("aria-label", t("addHabitPlaceholder"));
     if (habitEmojiInputEl) {
@@ -1133,6 +1487,7 @@ export function startApp() {
   const notifiedThisSession = new Set();
 
   function checkHabitReminders() {
+    if (typeof Notification === "undefined") return;
     if (Notification.permission !== "granted") return;
     const now = new Date();
     const hh = String(now.getHours()).padStart(2, "0");
@@ -1176,15 +1531,13 @@ export function startApp() {
 
   function handleSetReminder(habitId, currentTime) {
     const doPrompt = () => {
-      const val = prompt(
-        State.language === "es"
-          ? "Hora del recordatorio (HH:MM) o vacío para eliminar:"
-          : "Reminder time (HH:MM) or empty to clear:",
-        currentTime || ""
-      );
+      const val = prompt(t("reminderPrompt"), currentTime || "");
       if (val === null) return;
       const trimmed = val.trim();
-      if (trimmed && !/^\d{2}:\d{2}$/.test(trimmed)) return;
+      if (trimmed && !/^([01]\d|2[0-3]):[0-5]\d$/.test(trimmed)) {
+        showReminderBanner(t("reminderInvalidTime"));
+        return;
+      }
       State.setHabitReminder(habitId, trimmed);
       showReminderBanner(trimmed ? t("reminderSet") : t("reminderCleared"));
     };
@@ -1197,12 +1550,12 @@ export function startApp() {
       Notification.requestPermission().then((perm) => {
         if (perm === "denied") {
           showReminderBanner(t("notifPermDenied"));
-        } else {
-          doPrompt();
         }
+        doPrompt();
       });
     } else if (Notification.permission === "denied") {
       showReminderBanner(t("notifPermDenied"));
+      doPrompt();
     } else {
       doPrompt();
     }
@@ -1250,10 +1603,12 @@ export function startApp() {
     reminderBtn.type = "button";
     reminderBtn.className = "habit-reminder-btn";
     reminderBtn.title = habit.reminderTime
-      ? (State.language === "es" ? `Recordatorio: ${habit.reminderTime}` : `Reminder: ${habit.reminderTime}`)
-      : (State.language === "es" ? "Establecer recordatorio" : "Set reminder");
+      ? `${t("reminderSetLabel")}: ${habit.reminderTime}`
+      : t("reminderSetAction");
     reminderBtn.setAttribute("aria-label", reminderBtn.title);
-    reminderBtn.textContent = habit.reminderTime ? `⏰ ${habit.reminderTime}` : `⏰ ${t("reminderAction")}`;
+    reminderBtn.textContent = habit.reminderTime
+      ? `⏰ ${t("reminderSetLabel")} · ${habit.reminderTime}`
+      : `⏰ ${t("reminderSetAction")}`;
     reminderBtn.addEventListener("click", () => handleSetReminder(habit.id, habit.reminderTime));
     meta.appendChild(reminderBtn);
 
@@ -1593,6 +1948,7 @@ export function startApp() {
     editProjectInput.value = task.projectId || "";
     editCategoryInput.value = task.category || "";
     editNotesInput.value = task.notes || "";
+    setRecurrenceControls(editRecurrenceControls, task.recurrence);
 
     editModal.classList.remove("hidden");
     editTextInput.focus();
@@ -1618,13 +1974,24 @@ export function startApp() {
       return;
     }
 
+    const recurrenceResult = readRecurrenceControls(editRecurrenceControls);
+    if (!recurrenceResult.valid) return;
+    const task = State.tasks.find((item) => item.id === State.editingTaskId);
+    if (!task) return;
+    const recurrence = recurrenceResult.recurrence;
+
     State.updateTask(State.editingTaskId, {
       text: newText,
       dueDate: editDateInput.value || null,
       priority: editPriorityInput.value,
       projectId: editProjectInput.value || null,
       category: editCategoryInput.value || null,
-      notes: editNotesInput.value.trim()
+      notes: editNotesInput.value.trim(),
+      recurrence,
+      recurrenceSeriesId: recurrence ? task.recurrenceSeriesId || task.id : null,
+      recurrenceSourceId: recurrence ? task.recurrenceSourceId : null,
+      recurrenceOccurrenceDate: recurrence ? editDateInput.value : null,
+      nextOccurrenceGenerated: recurrence ? task.nextOccurrenceGenerated : false
     });
 
     closeEditModal();
@@ -1688,6 +2055,19 @@ export function startApp() {
     prioritySpan.textContent = getPriorityLabel(normalizePriority(task.priority));
     meta.appendChild(prioritySpan);
 
+    if (task.recurrence) {
+      const recurrenceSpan = document.createElement("span");
+      recurrenceSpan.className = "task-recurrence-chip";
+      recurrenceSpan.setAttribute("aria-label", `${t("recurringTask")}: ${formatRecurrence(task.recurrence, t)}`);
+      const recurrenceIcon = document.createElement("span");
+      recurrenceIcon.setAttribute("aria-hidden", "true");
+      recurrenceIcon.textContent = "↻";
+      const recurrenceText = document.createElement("span");
+      recurrenceText.textContent = formatRecurrence(task.recurrence, t);
+      recurrenceSpan.append(recurrenceIcon, recurrenceText);
+      meta.appendChild(recurrenceSpan);
+    }
+
     const project = State.projects.find((item) => item.id === task.projectId);
     if (project) {
       const projectSpan = document.createElement("span");
@@ -1749,7 +2129,8 @@ export function startApp() {
       const searchableText = [
         task.text,
         project?.name || "",
-        task.category ? getCategoryLabel(task.category) : ""
+        task.category ? getCategoryLabel(task.category) : "",
+        task.recurrence ? formatRecurrence(task.recurrence, t) : ""
       ].join(" ").toLowerCase();
 
       if (state.searchQuery && !searchableText.includes(state.searchQuery)) {
@@ -1844,6 +2225,8 @@ export function startApp() {
     updateQuote(true);
     projectsUI?.render(state);
     dashboard?.render(state);
+    calendar?.render(state);
+    reminderCenter?.render(state);
   }
 
   let searchTimeout;
@@ -1879,8 +2262,18 @@ export function startApp() {
       return;
     }
 
+    const recurrenceResult = readRecurrenceControls(addRecurrenceControls);
+    if (!recurrenceResult.valid) {
+      notesArea.classList.remove("hidden");
+      notesToggle.setAttribute("aria-expanded", "true");
+      return;
+    }
+
+    const id = crypto.randomUUID();
+    const recurrence = recurrenceResult.recurrence;
+
     State.addTask({
-      id: crypto.randomUUID(),
+      id,
       text,
       completed: false,
       completedAt: null,
@@ -1890,7 +2283,12 @@ export function startApp() {
       notes: notesInput.value.trim(),
       rewardGranted: false,
       projectId: taskProjectInput.value || null,
-      category: taskCategoryInput.value || null
+      category: taskCategoryInput.value || null,
+      recurrence,
+      recurrenceSeriesId: recurrence ? id : null,
+      recurrenceSourceId: null,
+      recurrenceOccurrenceDate: recurrence ? dueDateInput.value : null,
+      nextOccurrenceGenerated: false
     });
 
     taskInput.value = "";
@@ -1899,6 +2297,7 @@ export function startApp() {
     taskProjectInput.value = "";
     taskCategoryInput.value = "";
     notesInput.value = "";
+    setRecurrenceControls(addRecurrenceControls, null);
     notesArea.classList.add("hidden");
     notesToggle.setAttribute("aria-expanded", "false");
     taskInput.focus();
@@ -1911,7 +2310,12 @@ export function startApp() {
     if (!expanded) notesInput.focus();
   });
 
+  bindRecurrenceControls(addRecurrenceControls);
+  bindRecurrenceControls(editRecurrenceControls);
+  setRecurrenceControls(addRecurrenceControls, null);
+
   function setSettingsOpen(isOpen) {
+    if (isOpen) reminderCenter?.close(false);
     settingsPanel.classList.toggle("hidden", !isOpen);
     settingsBtn.setAttribute("aria-expanded", String(isOpen));
   }
@@ -2258,6 +2662,35 @@ export function startApp() {
     toggleTask: (id) => State.toggleTask(id),
     toggleHabit: (id) => State.toggleHabit(id),
     xpNeededForLevel
+  });
+
+  calendar = createCalendar({
+    t,
+    sortTasks,
+    openTask: (id) => openEditModal(id),
+    toggleTask: (id) => State.toggleTask(id),
+    prepareTaskForDate: (date) => {
+      switchTab("tasks");
+      dueDateInput.value = date;
+      updateRecurrenceControls(addRecurrenceControls);
+      requestAnimationFrame(() => taskInput.focus());
+    }
+  });
+
+  reminderCenter = createReminderCenter({
+    t,
+    openTask: (id) => openEditModal(id),
+    toggleTask: (id) => State.toggleTask(id),
+    openHabit: (id) => {
+      switchTab("habits");
+      requestAnimationFrame(() => {
+        const card = Array.from(document.querySelectorAll(".habit-card"))
+          .find((element) => element.dataset.id === id);
+        card?.querySelector(".habit-toggle")?.focus();
+      });
+    },
+    toggleHabit: (id) => State.toggleHabit(id),
+    closeSettings: () => setSettingsOpen(false)
   });
 
   projectsUI = createProjectsUI({

@@ -1,4 +1,5 @@
 import { CATEGORIES, DEFAULT_HABITS } from "./constants.js";
+import { sanitizeRecurrenceFields } from "./recurrence.js";
 
 export function defaultPlayer() {
   return {
@@ -31,21 +32,24 @@ export function sanitizeTasks(rawTasks) {
   if (!Array.isArray(rawTasks)) return [];
 
   return rawTasks
-    .map((task, index) => ({
-      id: String(task.id ?? `${Date.now()}-${index}`),
-      text: String(task.text ?? "").trim(),
-      completed: Boolean(task.completed),
-      completedAt: task.completedAt || null,
-      dueDate: task.dueDate || null,
-      priority: normalizePriority(task.priority),
-      createdAt: task.createdAt || new Date().toISOString(),
-      notes: String(task.notes ?? "").trim(),
-      rewardGranted: Boolean(task.rewardGranted),
-      projectId: task.projectId === null || task.projectId === undefined || task.projectId === ""
-        ? null
-        : String(task.projectId),
-      category: sanitizeCategory(task.category)
-    }))
+    .map((task, index) => {
+      const sanitized = {
+        id: String(task.id ?? `${Date.now()}-${index}`),
+        text: String(task.text ?? "").trim(),
+        completed: Boolean(task.completed),
+        completedAt: task.completedAt || null,
+        dueDate: task.dueDate || null,
+        priority: normalizePriority(task.priority),
+        createdAt: task.createdAt || new Date().toISOString(),
+        notes: String(task.notes ?? "").trim(),
+        rewardGranted: Boolean(task.rewardGranted),
+        projectId: task.projectId === null || task.projectId === undefined || task.projectId === ""
+          ? null
+          : String(task.projectId),
+        category: sanitizeCategory(task.category)
+      };
+      return { ...sanitized, ...sanitizeRecurrenceFields(task, sanitized) };
+    })
     .filter((task) => task.text !== "");
 }
 
