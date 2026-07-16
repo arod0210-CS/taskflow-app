@@ -4,6 +4,7 @@ export const LANG_KEY = "taskflow-language-v1";
 export const HABITS_KEY = "taskflow-habits-v1";
 export const TAB_KEY = "taskflow-active-tab-v1";
 export const PROJECTS_KEY = "taskflow-projects-v1";
+export const FOCUS_KEY = "taskflow-focus-v1";
 
 export const CATEGORIES = ["work", "school", "personal", "health", "other"];
 

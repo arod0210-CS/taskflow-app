@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="styles/15-calendar.css" />
   <link rel="stylesheet" href="styles/16-reminders.css" />
   <link rel="stylesheet" href="styles/17-recurrence.css" />
+  <link rel="stylesheet" href="styles/18-focus.css" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#7c3aed" />
@@ -44,6 +45,11 @@
         <p class="hidden" id="eyebrowText"></p>
 
         <div class="top-bar-right">
+          <button id="focusTopIndicator" class="focus-top-indicator hidden" type="button">
+            <span id="focusTopMode">Focus</span>
+            <strong id="focusTopTime">25:00</strong>
+          </button>
+
           <button id="reminderCenterBtn" class="reminder-center-btn" type="button" aria-label="Reminder center" aria-expanded="false" aria-controls="reminderCenterPanel">
             <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
@@ -158,6 +164,10 @@
           <span class="tab-icon" aria-hidden="true">📋</span>
           <span class="tab-label" id="tabTasksLabel">Tasks</span>
         </button>
+        <button class="tab-btn" role="tab" data-tab="focus" id="tab-focus" aria-selected="false" aria-controls="panel-focus">
+          <span class="tab-icon" aria-hidden="true">◉</span>
+          <span class="tab-label" id="tabFocusLabel">Focus</span>
+        </button>
         <button class="tab-btn" role="tab" data-tab="habits" id="tab-habits" aria-selected="false" aria-controls="panel-habits">
           <span class="tab-icon" aria-hidden="true">🌅</span>
           <span class="tab-label" id="tabHabitsLabel">Habits</span>
@@ -200,6 +210,24 @@
               </div>
             </div>
             <ul class="dashboard-list dashboard-focus-list" id="dashboardFocusList"></ul>
+          </section>
+
+          <section class="dashboard-widget dashboard-focus-timer-widget" aria-labelledby="dashboardTimerTitle">
+            <div class="dashboard-widget-header">
+              <div>
+                <p class="dashboard-widget-kicker" id="dashboardTimerKicker">Pomodoro</p>
+                <h3 id="dashboardTimerTitle">Focus timer</h3>
+              </div>
+              <span id="dashboardFocusToday" class="dashboard-focus-today">0 today</span>
+            </div>
+            <div class="dashboard-focus-timer-main">
+              <div>
+                <span id="dashboardTimerMode">Ready to focus</span>
+                <strong id="dashboardTimerTime">25:00</strong>
+              </div>
+              <p id="dashboardTimerTask">Choose a task or start without one.</p>
+            </div>
+            <button id="dashboardFocusAction" class="dashboard-focus-action" type="button">Start</button>
           </section>
 
           <section class="dashboard-widget" aria-labelledby="dashboardHabitsTitle">
@@ -447,6 +475,91 @@
     </div>
     <!-- closes panel-tasks -->
 
+    <!-- ===== FOCUS PANEL ===== -->
+    <div class="tab-panel" id="panel-focus" role="tabpanel" aria-labelledby="tab-focus">
+      <header class="focus-page-header">
+        <div>
+          <p class="focus-eyebrow" id="focusEyebrow">Work with intention</p>
+          <h2 id="focusTitle">Focus</h2>
+          <p id="focusSubtitle">A calm timer for focused work and deliberate breaks.</p>
+        </div>
+        <span id="focusSessionCount" class="focus-session-count">0 focus sessions</span>
+      </header>
+
+      <div class="focus-layout">
+        <section class="focus-timer-card" aria-labelledby="focusCurrentMode">
+          <div class="focus-mode-selector" role="group" aria-label="Timer mode">
+            <button class="focus-mode-btn active" type="button" data-focus-mode="focus" aria-pressed="true" id="focusModeFocus">Focus</button>
+            <button class="focus-mode-btn" type="button" data-focus-mode="shortBreak" aria-pressed="false" id="focusModeShort">Short break</button>
+            <button class="focus-mode-btn" type="button" data-focus-mode="longBreak" aria-pressed="false" id="focusModeLong">Long break</button>
+          </div>
+
+          <p id="focusCurrentMode" class="focus-current-mode">Focus session</p>
+          <div id="focusCountdown" class="focus-countdown" role="timer" aria-describedby="focusTimerAnnouncement">25:00</div>
+          <p id="focusTimerAnnouncement" class="visually-hidden" aria-live="polite"></p>
+          <div id="focusProgress" class="focus-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <span id="focusProgressFill"></span>
+          </div>
+
+          <label class="focus-task-field" for="focusTaskSelect">
+            <span id="focusTaskLabel">Link a task</span>
+            <select id="focusTaskSelect">
+              <option value="">No linked task</option>
+            </select>
+          </label>
+          <p id="focusTaskMeta" class="focus-task-meta"></p>
+
+          <div class="focus-primary-actions">
+            <button id="focusMainAction" class="focus-main-action" type="button">Start</button>
+            <button id="focusResetAction" class="focus-secondary-action" type="button" disabled>Reset</button>
+          </div>
+          <button id="focusEnterMode" class="focus-enter-mode" type="button" disabled>Enter Focus Mode</button>
+        </section>
+
+        <div class="focus-side-column">
+          <section id="focusCompletionCard" class="focus-completion-card hidden" aria-labelledby="focusCompletionTitle">
+            <h3 id="focusCompletionTitle">Session complete</h3>
+            <p id="focusCompletionText"></p>
+            <div class="focus-completion-actions">
+              <button id="focusStartShortBreak" type="button">Start short break</button>
+              <button id="focusStartLongBreak" type="button">Start long break</button>
+              <button id="focusStartAnother" type="button">Start another focus session</button>
+              <button id="focusCompleteTask" type="button">Mark task complete</button>
+            </div>
+          </section>
+
+          <section class="focus-settings-card" aria-labelledby="focusSettingsTitle">
+            <button id="focusSettingsToggle" class="focus-settings-toggle" type="button" aria-expanded="false" aria-controls="focusSettingsPanel">
+              <span id="focusSettingsTitle">Focus settings</span>
+              <span aria-hidden="true">▾</span>
+            </button>
+            <div id="focusSettingsPanel" class="focus-settings-panel hidden">
+              <form id="focusSettingsForm">
+                <div class="focus-settings-grid">
+                  <label><span id="focusDurationLabel">Focus duration</span><input id="focusMinutesInput" type="number" min="5" max="90" /></label>
+                  <label><span id="focusShortDurationLabel">Short break duration</span><input id="focusShortBreakInput" type="number" min="1" max="30" /></label>
+                  <label><span id="focusLongDurationLabel">Long break duration</span><input id="focusLongBreakInput" type="number" min="5" max="60" /></label>
+                  <label><span id="focusCycleLabel">Sessions before long break</span><input id="focusSessionsBeforeLongInput" type="number" min="2" max="8" /></label>
+                </div>
+                <label class="focus-check-field"><input id="focusAutoBreaksInput" type="checkbox" /><span id="focusAutoBreaksLabel">Auto-start breaks</span></label>
+                <label class="focus-check-field"><input id="focusAutoFocusInput" type="checkbox" /><span id="focusAutoFocusLabel">Auto-start focus</span></label>
+                <div class="focus-settings-actions">
+                  <button id="focusSaveSettings" type="submit">Save settings</button>
+                  <button id="focusResetSettings" type="button">Reset defaults</button>
+                </div>
+                <p id="focusSettingsStatus" class="focus-settings-status" role="status" aria-live="polite"></p>
+              </form>
+            </div>
+          </section>
+
+          <section class="focus-recent-card" aria-labelledby="focusRecentTitle">
+            <h3 id="focusRecentTitle">Recent sessions</h3>
+            <ul id="focusRecentList" class="focus-history-list"></ul>
+          </section>
+        </div>
+      </div>
+    </div>
+
     <!-- ===== HABITS PANEL ===== -->
     <div
       class="tab-panel"
@@ -600,6 +713,23 @@
           </div>
         </div>
 
+        <section class="focus-stats-section" aria-labelledby="focusStatsTitle">
+          <div class="focus-stats-header">
+            <div>
+              <p id="focusStatsKicker">Real session history</p>
+              <h3 id="focusStatsTitle">Focus statistics</h3>
+            </div>
+          </div>
+          <div class="focus-stats-metrics">
+            <div><strong id="focusStatsToday">0</strong><span id="focusStatsTodayLabel">Completed sessions today</span></div>
+            <div><strong id="focusStatsWeek">0</strong><span id="focusStatsWeekLabel">Completed sessions this week</span></div>
+            <div><strong id="focusStatsMinutes">0</strong><span id="focusStatsMinutesLabel">Focus minutes this week</span></div>
+          </div>
+          <div id="focusStatsChart" class="focus-stats-chart" role="group"></div>
+          <h4 id="focusStatsRecentTitle">Recent sessions</h4>
+          <ul id="focusStatsRecent" class="focus-history-list focus-stats-recent"></ul>
+        </section>
+
         <div class="stats-insights-grid">
         <div class="badges-section" id="badgesSection">
           <button class="badges-toggle" id="badgesToggle" type="button" aria-expanded="false" aria-controls="badgesBody">
@@ -628,6 +758,20 @@
       </div>
       <!-- end panel-stats -->
 
+    </div>
+  </div>
+
+  <div id="focusModeOverlay" class="focus-mode-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="focusModeLabel" aria-describedby="focusTimerAnnouncement">
+    <div class="focus-mode-card">
+      <p id="focusModeLabel" class="focus-mode-label">Focus session</p>
+      <div id="focusModeCountdown" class="focus-mode-countdown" aria-hidden="true">25:00</div>
+      <h2 id="focusModeTask">No linked task</h2>
+      <p id="focusModeTaskMeta"></p>
+      <div class="focus-mode-actions">
+        <button id="focusModeAction" type="button">Pause</button>
+        <button id="focusModeReset" type="button">Reset</button>
+        <button id="focusModeExit" type="button">Exit Focus Mode</button>
+      </div>
     </div>
   </div>
 

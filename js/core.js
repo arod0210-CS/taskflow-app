@@ -31,6 +31,7 @@ import {
   formatRecurrence,
   sanitizeRecurrence
 } from "./recurrence.js";
+import { createFocusTimer, createFocusUI } from "./focus.js";
 import {
   createProjectsUI,
   sanitizeProjects,
@@ -149,6 +150,59 @@ export function startApp() {
       recurrenceInvalidEndDate: "Choose an end date on or after the due date.",
       taskCompletedAnnouncement: "Task completed",
       taskReopenedAnnouncement: "Task reopened",
+      focus: "Focus",
+      focusSession: "Focus session",
+      focusShortBreak: "Short break",
+      focusLongBreak: "Long break",
+      focusStart: "Start",
+      focusPause: "Pause",
+      focusResume: "Resume",
+      focusReset: "Reset",
+      focusExitMode: "Exit Focus Mode",
+      focusEnterMode: "Enter Focus Mode",
+      focusLinkTask: "Link a task",
+      focusNoLinkedTask: "No linked task",
+      focusSessionComplete: "Session complete",
+      focusBreakComplete: "Break complete",
+      focusStartShortBreak: "Start short break",
+      focusStartLongBreak: "Start long break",
+      focusStartAnother: "Start another focus session",
+      focusMarkTaskComplete: "Mark task complete",
+      focusSettings: "Focus settings",
+      focusDuration: "Focus duration",
+      focusShortDuration: "Short break duration",
+      focusLongDuration: "Long break duration",
+      focusSessionsBeforeLong: "Sessions before long break",
+      focusAutoStartBreaks: "Auto-start breaks",
+      focusAutoStartFocus: "Auto-start focus",
+      focusCompletedToday: "Completed sessions today",
+      focusCompletedWeek: "Completed sessions this week",
+      focusMinutesWeek: "Focus minutes this week",
+      focusRecentSessions: "Recent sessions",
+      focusNoSessions: "No focus sessions yet.",
+      focusRemainingTime: "{minutes} minutes and {seconds} seconds remaining",
+      focusOpen: "Open Focus",
+      focusReady: "Ready to focus",
+      focusDashboardIdle: "Choose a task or start without one.",
+      focusCompletedTodayValue: "{count} today",
+      focusSessionCountValue: "{count} completed focus sessions",
+      focusCompletionSummary: "{mode} finished after {minutes} minutes.",
+      focusMinutesShort: "min",
+      focusCompletedStatus: "Completed",
+      focusStoppedStatus: "Stopped",
+      focusSessionsLabel: "focus sessions",
+      focusEyebrow: "Work with intention",
+      focusSubtitle: "A calm timer for focused work and deliberate breaks.",
+      focusTimerMode: "Timer mode",
+      focusDashboardKicker: "Pomodoro",
+      focusDashboardTitle: "Focus timer",
+      focusStatsKicker: "Real session history",
+      focusStatsTitle: "Focus statistics",
+      focusSaveSettings: "Save settings",
+      focusResetDefaults: "Reset defaults",
+      focusSettingsSaved: "Focus settings saved.",
+      focusCompletionNotification: "Your {mode} is complete.",
+      focusTaskAction: "Focus",
       achievements: "Achievements",
       weeklyProgress: "Weekly Progress",
       earnedStatus: "Earned",
@@ -411,6 +465,59 @@ export function startApp() {
       recurrenceInvalidEndDate: "Elige una fecha final igual o posterior a la fecha límite.",
       taskCompletedAnnouncement: "Tarea completada",
       taskReopenedAnnouncement: "Tarea reabierta",
+      focus: "Enfoque",
+      focusSession: "Sesión de enfoque",
+      focusShortBreak: "Descanso corto",
+      focusLongBreak: "Descanso largo",
+      focusStart: "Iniciar",
+      focusPause: "Pausar",
+      focusResume: "Reanudar",
+      focusReset: "Reiniciar",
+      focusExitMode: "Salir del modo enfoque",
+      focusEnterMode: "Entrar al modo enfoque",
+      focusLinkTask: "Vincular una tarea",
+      focusNoLinkedTask: "Sin tarea vinculada",
+      focusSessionComplete: "Sesión completada",
+      focusBreakComplete: "Descanso completado",
+      focusStartShortBreak: "Iniciar descanso corto",
+      focusStartLongBreak: "Iniciar descanso largo",
+      focusStartAnother: "Iniciar otra sesión de enfoque",
+      focusMarkTaskComplete: "Marcar tarea como completada",
+      focusSettings: "Configuración de enfoque",
+      focusDuration: "Duración del enfoque",
+      focusShortDuration: "Duración del descanso corto",
+      focusLongDuration: "Duración del descanso largo",
+      focusSessionsBeforeLong: "Sesiones antes del descanso largo",
+      focusAutoStartBreaks: "Iniciar descansos automáticamente",
+      focusAutoStartFocus: "Iniciar enfoque automáticamente",
+      focusCompletedToday: "Sesiones completadas hoy",
+      focusCompletedWeek: "Sesiones completadas esta semana",
+      focusMinutesWeek: "Minutos de enfoque esta semana",
+      focusRecentSessions: "Sesiones recientes",
+      focusNoSessions: "Aún no hay sesiones de enfoque.",
+      focusRemainingTime: "Quedan {minutes} minutos y {seconds} segundos",
+      focusOpen: "Abrir Enfoque",
+      focusReady: "Listo para enfocarte",
+      focusDashboardIdle: "Elige una tarea o comienza sin una.",
+      focusCompletedTodayValue: "{count} hoy",
+      focusSessionCountValue: "{count} sesiones de enfoque completadas",
+      focusCompletionSummary: "{mode} finalizó después de {minutes} minutos.",
+      focusMinutesShort: "min",
+      focusCompletedStatus: "Completada",
+      focusStoppedStatus: "Detenida",
+      focusSessionsLabel: "sesiones de enfoque",
+      focusEyebrow: "Trabaja con intención",
+      focusSubtitle: "Un temporizador tranquilo para trabajar con enfoque y descansar a propósito.",
+      focusTimerMode: "Modo del temporizador",
+      focusDashboardKicker: "Pomodoro",
+      focusDashboardTitle: "Temporizador de enfoque",
+      focusStatsKicker: "Historial de sesiones reales",
+      focusStatsTitle: "Estadísticas de enfoque",
+      focusSaveSettings: "Guardar configuración",
+      focusResetDefaults: "Restablecer valores",
+      focusSettingsSaved: "Configuración de enfoque guardada.",
+      focusCompletionNotification: "Tu {mode} ha terminado.",
+      focusTaskAction: "Enfocar",
       achievements: "Logros",
       weeklyProgress: "Progreso semanal",
       earnedStatus: "Conseguido",
@@ -659,12 +766,14 @@ export function startApp() {
   let calendar = null;
   let reminderCenter = null;
   let projectsUI = null;
+  let focusUI = null;
 
   const storedProjects = sanitizeProjects(safeParse(localStorage.getItem(PROJECTS_KEY), []));
   const storedTasks = sanitizeTaskProjectReferences(
     sanitizeTasks(safeParse(localStorage.getItem(STORAGE_KEY), [])),
     storedProjects
   );
+  const focusTimer = createFocusTimer();
 
   const State = {
     tasks: storedTasks,
@@ -789,6 +898,7 @@ export function startApp() {
       this.notify();
     },
     resetAllData() {
+      focusTimer.resetAll();
       this.tasks = [];
       this.player = defaultPlayer();
       this.habits = sanitizeHabits(null);
@@ -1221,11 +1331,50 @@ export function startApp() {
     const tabStatsLabel = document.getElementById("tabStatsLabel");
     const tabDashboardLabel = document.getElementById("tabDashboardLabel");
     const tabCalendarLabel = document.getElementById("tabCalendarLabel");
+    const tabFocusLabel = document.getElementById("tabFocusLabel");
     if (tabTasksLabel) tabTasksLabel.textContent = t("tabTasks");
     if (tabHabitsLabel) tabHabitsLabel.textContent = t("tabHabits");
     if (tabStatsLabel) tabStatsLabel.textContent = t("tabStats");
     if (tabDashboardLabel) tabDashboardLabel.textContent = t("tabDashboard");
     if (tabCalendarLabel) tabCalendarLabel.textContent = t("tabCalendar");
+    if (tabFocusLabel) tabFocusLabel.textContent = t("focus");
+
+    document.getElementById("focusEyebrow").textContent = t("focusEyebrow");
+    document.getElementById("focusTitle").textContent = t("focus");
+    document.getElementById("focusSubtitle").textContent = t("focusSubtitle");
+    document.querySelector(".focus-mode-selector").setAttribute("aria-label", t("focusTimerMode"));
+    document.getElementById("focusModeFocus").textContent = t("focus");
+    document.getElementById("focusModeShort").textContent = t("focusShortBreak");
+    document.getElementById("focusModeLong").textContent = t("focusLongBreak");
+    document.getElementById("focusTaskLabel").textContent = t("focusLinkTask");
+    document.getElementById("focusResetAction").textContent = t("focusReset");
+    document.getElementById("focusEnterMode").textContent = t("focusEnterMode");
+    document.getElementById("focusSettingsTitle").textContent = t("focusSettings");
+    document.getElementById("focusDurationLabel").textContent = t("focusDuration");
+    document.getElementById("focusShortDurationLabel").textContent = t("focusShortDuration");
+    document.getElementById("focusLongDurationLabel").textContent = t("focusLongDuration");
+    document.getElementById("focusCycleLabel").textContent = t("focusSessionsBeforeLong");
+    document.getElementById("focusAutoBreaksLabel").textContent = t("focusAutoStartBreaks");
+    document.getElementById("focusAutoFocusLabel").textContent = t("focusAutoStartFocus");
+    document.getElementById("focusSaveSettings").textContent = t("focusSaveSettings");
+    document.getElementById("focusResetSettings").textContent = t("focusResetDefaults");
+    document.getElementById("focusRecentTitle").textContent = t("focusRecentSessions");
+    document.getElementById("focusStartShortBreak").textContent = t("focusStartShortBreak");
+    document.getElementById("focusStartLongBreak").textContent = t("focusStartLongBreak");
+    document.getElementById("focusStartAnother").textContent = t("focusStartAnother");
+    document.getElementById("focusCompleteTask").textContent = t("focusMarkTaskComplete");
+    document.getElementById("dashboardTimerKicker").textContent = t("focusDashboardKicker");
+    document.getElementById("dashboardTimerTitle").textContent = t("focusDashboardTitle");
+    document.getElementById("focusStatsKicker").textContent = t("focusStatsKicker");
+    document.getElementById("focusStatsTitle").textContent = t("focusStatsTitle");
+    document.getElementById("focusStatsTodayLabel").textContent = t("focusCompletedToday");
+    document.getElementById("focusStatsWeekLabel").textContent = t("focusCompletedWeek");
+    document.getElementById("focusStatsMinutesLabel").textContent = t("focusMinutesWeek");
+    document.getElementById("focusStatsRecentTitle").textContent = t("focusRecentSessions");
+    document.getElementById("focusStatsChart").setAttribute("aria-label", t("focusCompletedWeek"));
+    document.getElementById("focusModeExit").textContent = t("focusExitMode");
+    document.getElementById("focusModeReset").textContent = t("focusReset");
+    document.getElementById("focusModeAction").textContent = t("focusPause");
 
     document.getElementById("calendarEyebrow").textContent = t("calendarEyebrow");
     document.getElementById("calendarTitle").textContent = t("calendarTitle");
@@ -1338,6 +1487,28 @@ export function startApp() {
       toast.classList.add("toast-exit");
       toast.addEventListener("animationend", () => toast.remove(), { once: true });
     }, 2500);
+  }
+
+  function showFocusCompletion(event) {
+    const modeKey = {
+      focus: "focusSession",
+      shortBreak: "focusShortBreak",
+      longBreak: "focusLongBreak"
+    }[event.entry.mode];
+    const message = t("focusCompletionNotification").replace("{mode}", t(modeKey));
+    const container = document.getElementById("toastContainer");
+    const toast = document.createElement("div");
+    toast.className = "toast focus-completion-toast";
+    toast.textContent = `✓ ${message}`;
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.classList.add("toast-exit");
+      toast.addEventListener("animationend", () => toast.remove(), { once: true });
+    }, 4000);
+
+    if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+      new Notification("TaskFlow", { body: message, icon: "favicon.svg" });
+    }
   }
 
   function showBadgeToast(badge, index) {
@@ -2097,6 +2268,16 @@ export function startApp() {
     mainWrapper.appendChild(content);
     li.appendChild(mainWrapper);
 
+    if (!task.completed) {
+      const focusBtn = document.createElement("button");
+      focusBtn.className = "task-focus-action";
+      focusBtn.type = "button";
+      focusBtn.textContent = t("focusTaskAction");
+      focusBtn.setAttribute("aria-label", `${t("focusTaskAction")}: ${task.text}`);
+      focusBtn.addEventListener("click", () => focusUI?.prepareTask(task.id));
+      li.appendChild(focusBtn);
+    }
+
     if (State.editMode) {
       const actions = document.createElement("div");
       actions.className = "task-actions";
@@ -2227,6 +2408,7 @@ export function startApp() {
     dashboard?.render(state);
     calendar?.render(state);
     reminderCenter?.render(state);
+    focusUI?.render(state);
   }
 
   let searchTimeout;
@@ -2548,7 +2730,8 @@ export function startApp() {
       player: State.player,
       habits: State.habits,
       language: State.language,
-      projects: State.projects
+      projects: State.projects,
+      focus: focusTimer.getExportData()
     };
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
     const downloadAnchor = document.createElement("a");
@@ -2575,6 +2758,9 @@ export function startApp() {
           State.tasks = sanitizeTaskProjectReferences(sanitizeTasks(imported.tasks || []), State.projects);
           State.player = sanitizePlayer(imported.player || defaultPlayer());
           if (imported.habits) State.habits = sanitizeHabits(imported.habits);
+          if (imported.focus && typeof imported.focus === "object") {
+            focusTimer.replaceImportedData(imported.focus);
+          }
           if (imported.language && translations[imported.language]) {
             State.language = imported.language;
             languageSelect.value = imported.language;
@@ -2702,7 +2888,17 @@ export function startApp() {
     setCategoryFilter: (category) => State.setCategoryFilter(category)
   });
 
+  focusUI = createFocusUI({
+    timer: focusTimer,
+    t,
+    switchTab,
+    toggleTask: (id) => State.toggleTask(id),
+    onSessionComplete: showFocusCompletion
+  });
+  focusTimer.subscribe((snapshot, event) => focusUI.handleTimerEvent(snapshot, event));
+
   State.subscribe(render);
   render(State);
+  focusTimer.activate();
   setInterval(() => updateQuote(false), 15000);
 }
