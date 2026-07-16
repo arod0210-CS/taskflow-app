@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="TaskFlow is a private, browser-based task, habit, project, and focus tracker." />
+  <meta name="application-name" content="TaskFlow" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
   <title>TaskFlow</title>
   <!-- Styles are loaded in cascade order; keep this sequence stable. -->
   <link rel="stylesheet" href="styles/01-tokens.css" />
@@ -23,7 +28,12 @@
   <link rel="stylesheet" href="styles/16-reminders.css" />
   <link rel="stylesheet" href="styles/17-recurrence.css" />
   <link rel="stylesheet" href="styles/18-focus.css" />
+  <link rel="stylesheet" href="styles/19-search-bulk.css" />
+  <link rel="stylesheet" href="styles/20-rich-projects.css" />
+  <link rel="stylesheet" href="styles/21-analytics.css" />
+  <link rel="stylesheet" href="styles/22-pwa.css" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#7c3aed" />
 </head>
@@ -150,6 +160,22 @@
         </div>
       </div>
 
+      <div id="appStatusRegion" class="app-status-region hidden" aria-label="Application status">
+        <div id="persistenceStatus" class="app-status-message app-status-warning hidden" role="alert">
+          <span class="app-status-icon" aria-hidden="true">!</span>
+          <span id="persistenceStatusText"></span>
+        </div>
+        <div id="connectivityStatus" class="app-status-message app-status-connectivity hidden" role="status" aria-live="polite">
+          <span class="app-status-icon" aria-hidden="true">○</span>
+          <span id="connectivityStatusText"></span>
+        </div>
+        <div id="updateStatus" class="app-status-message app-status-update hidden" role="status" aria-live="polite">
+          <span class="app-status-icon" aria-hidden="true">↻</span>
+          <span id="updateStatusText"></span>
+          <button id="updateNowBtn" type="button">Update now</button>
+        </div>
+      </div>
+
       <!-- ===== TAB NAVIGATION ===== -->
       <nav class="tab-nav" role="tablist" aria-label="Main navigation">
         <button class="tab-btn" role="tab" data-tab="dashboard" id="tab-dashboard" aria-selected="false" aria-controls="panel-dashboard">
@@ -163,6 +189,10 @@
         <button class="tab-btn active" role="tab" data-tab="tasks" id="tab-tasks" aria-selected="true" aria-controls="panel-tasks">
           <span class="tab-icon" aria-hidden="true">📋</span>
           <span class="tab-label" id="tabTasksLabel">Tasks</span>
+        </button>
+        <button class="tab-btn" role="tab" data-tab="projects" id="tab-projects" aria-selected="false" aria-controls="panel-projects">
+          <span class="tab-icon" aria-hidden="true">▤</span>
+          <span class="tab-label" id="tabProjectsLabel">Projects</span>
         </button>
         <button class="tab-btn" role="tab" data-tab="focus" id="tab-focus" aria-selected="false" aria-controls="panel-focus">
           <span class="tab-icon" aria-hidden="true">◉</span>
@@ -252,6 +282,18 @@
             <div class="dashboard-activity" id="dashboardActivity" role="group"></div>
           </section>
 
+          <section class="dashboard-widget dashboard-widget-wide dashboard-projects-widget" aria-labelledby="dashboardProjectsTitle">
+            <div class="dashboard-widget-header">
+              <div>
+                <p class="dashboard-widget-kicker" id="dashboardProjectsKicker">Projects</p>
+                <h3 id="dashboardProjectsTitle">Project Progress</h3>
+              </div>
+              <button class="dashboard-text-action" id="dashboardOpenProjects" type="button">Open Projects</button>
+            </div>
+            <p class="dashboard-widget-summary" id="dashboardProjectsSummary"></p>
+            <div id="dashboardProjectsList" class="dashboard-projects-list"></div>
+          </section>
+
           <section class="dashboard-widget dashboard-quick-widget" aria-labelledby="dashboardQuickTitle">
             <div class="dashboard-widget-header">
               <div>
@@ -277,6 +319,20 @@
             <p id="calendarSubtitle">See deadlines and completed work across the month.</p>
           </div>
         </header>
+
+        <div class="calendar-project-controls" aria-label="Calendar project filter">
+          <label>
+            <span id="calendarProjectFilterLabel">Project</span>
+            <select id="calendarProjectFilter">
+              <option value="all">All Projects</option>
+              <option value="unassigned">Unassigned</option>
+            </select>
+          </label>
+          <label class="calendar-archived-toggle">
+            <input id="calendarIncludeArchived" type="checkbox" />
+            <span id="calendarIncludeArchivedLabel">Include archived</span>
+          </label>
+        </div>
 
         <div class="calendar-layout">
         <section class="calendar-shell" aria-labelledby="calendarMonthHeading">
@@ -427,7 +483,18 @@
             </svg>
             <input type="text" id="searchInput" placeholder="Search tasks..." aria-label="Search tasks" aria-keyshortcuts="Meta+K Control+K" />
             <span class="search-shortcut" aria-hidden="true">⌘K</span>
+            <button id="clearSearchBtn" class="search-clear-btn hidden" type="button" aria-label="Clear search">×</button>
           </div>
+          <div class="task-mode-actions">
+            <button id="searchHelpBtn" class="task-tool-btn" type="button" aria-haspopup="dialog">Search help</button>
+            <button id="taskSelectionToggle" class="task-tool-btn" type="button" aria-pressed="false">Select</button>
+          </div>
+        </div>
+
+        <div class="advanced-search-feedback" aria-label="Advanced search">
+          <div id="searchTokenChips" class="search-token-chips" aria-label="Active search filters"></div>
+          <p id="searchFeedback" class="search-feedback" role="status" aria-live="polite"></p>
+          <p id="searchResultCount" class="search-result-count" role="status" aria-live="polite">0 results</p>
         </div>
 
         <div class="organization-filters" aria-label="Organization filters">
@@ -445,6 +512,81 @@
             </select>
           </label>
         </div>
+
+        <div class="saved-filter-bar" aria-label="Saved filters">
+          <label>
+            <span id="savedFiltersLabel">Saved filters</span>
+            <select id="savedFilterSelect" aria-label="Saved filters">
+              <option value="">No saved filters</option>
+            </select>
+          </label>
+          <button id="applyFilterPresetBtn" type="button" disabled>Apply</button>
+          <button id="saveFilterPresetBtn" type="button">Save filter</button>
+          <button id="renameFilterPresetBtn" type="button" disabled>Rename</button>
+          <button id="deleteFilterPresetBtn" class="preset-delete-btn" type="button" disabled>Delete preset</button>
+        </div>
+
+        <section id="bulkToolbar" class="bulk-toolbar hidden" aria-labelledby="bulkToolbarTitle">
+          <div class="bulk-toolbar-heading">
+            <div>
+              <p id="bulkToolbarTitle">Selection mode</p>
+              <strong id="bulkSelectedCount" role="status" aria-live="polite">0 tasks selected</strong>
+            </div>
+            <div class="bulk-selection-actions">
+              <button id="bulkSelectVisibleBtn" type="button">Select visible</button>
+              <button id="bulkClearSelectionBtn" type="button">Clear selection</button>
+              <button id="bulkExitSelectionBtn" type="button">Done</button>
+            </div>
+          </div>
+          <div class="bulk-action-grid">
+            <button id="bulkCompleteBtn" type="button">Mark complete</button>
+            <button id="bulkReopenBtn" type="button">Reopen tasks</button>
+            <label>
+              <span id="bulkPriorityLabel">Change priority</span>
+              <span class="bulk-control-row">
+                <select id="bulkPriorityInput" aria-label="Change priority">
+                  <option value="high">High</option>
+                  <option value="medium" selected>Medium</option>
+                  <option value="low">Low</option>
+                </select>
+                <button id="bulkPriorityApplyBtn" type="button">Apply</button>
+              </span>
+            </label>
+            <label>
+              <span id="bulkProjectLabel">Assign project</span>
+              <span class="bulk-control-row">
+                <select id="bulkProjectInput" aria-label="Assign project">
+                  <option value="">No project</option>
+                </select>
+                <button id="bulkProjectApplyBtn" type="button">Apply</button>
+              </span>
+            </label>
+            <label>
+              <span id="bulkCategoryLabel">Assign category</span>
+              <span class="bulk-control-row">
+                <select id="bulkCategoryInput" aria-label="Assign category">
+                  <option value="">No category</option>
+                  <option value="work">Work</option>
+                  <option value="school">School</option>
+                  <option value="personal">Personal</option>
+                  <option value="health">Health</option>
+                  <option value="other">Other</option>
+                </select>
+                <button id="bulkCategoryApplyBtn" type="button">Apply</button>
+              </span>
+            </label>
+            <label>
+              <span id="bulkDueDateLabel">Change due date</span>
+              <span class="bulk-control-row">
+                <input id="bulkDueDateInput" type="date" aria-label="Change due date" />
+                <button id="bulkDueDateApplyBtn" type="button">Apply</button>
+              </span>
+            </label>
+            <button id="bulkRemoveDueDateBtn" type="button">Remove due date</button>
+            <button id="bulkDeleteBtn" class="bulk-delete-btn" type="button">Delete selected</button>
+          </div>
+          <p id="bulkStatus" class="bulk-status" role="status" aria-live="polite"></p>
+        </section>
 
             <div class="task-columns">
 
@@ -474,6 +616,130 @@
 
     </div>
     <!-- closes panel-tasks -->
+
+    <!-- ===== PROJECTS PANEL ===== -->
+    <div class="tab-panel" id="panel-projects" role="tabpanel" aria-labelledby="tab-projects">
+      <div id="projectsOverview">
+        <header class="projects-page-header">
+          <div>
+            <p class="projects-page-eyebrow" id="projectsPageEyebrow">Organize meaningful work</p>
+            <h2 id="projectsPageTitle">Projects</h2>
+            <p id="projectsPageSubtitle">See progress, deadlines, and activity in one place.</p>
+          </div>
+          <div class="projects-page-header-actions">
+            <span id="projectsPageCount" class="projects-page-count">0 projects</span>
+            <button id="projectsCreateBtn" type="button">Create project</button>
+          </div>
+        </header>
+        <p id="projectsPageStatus" class="projects-page-status" role="status" aria-live="polite"></p>
+
+        <section aria-labelledby="activeProjectsTitle">
+          <div class="projects-section-heading">
+            <div>
+              <p id="activeProjectsKicker">Current work</p>
+              <h3 id="activeProjectsTitle">Active Projects</h3>
+            </div>
+          </div>
+          <div id="projectsEmptyState" class="projects-page-empty hidden">
+            <span aria-hidden="true">▤</span>
+            <strong id="projectsEmptyTitle">No projects yet</strong>
+            <p id="projectsEmptyText">Create a project to group related work and deadlines.</p>
+            <button id="projectsEmptyCreateBtn" type="button">Create project</button>
+          </div>
+          <div id="activeProjectsGrid" class="rich-project-grid"></div>
+        </section>
+
+        <section id="archivedProjectsSection" class="archived-projects-section hidden" aria-labelledby="archivedProjectsTitle">
+          <button id="archivedProjectsToggle" class="archived-projects-toggle" type="button" aria-expanded="false" aria-controls="archivedProjectsGrid">
+            <span id="archivedProjectsTitle">Archived Projects</span>
+            <span aria-hidden="true">⌄</span>
+          </button>
+          <div id="archivedProjectsGrid" class="rich-project-grid hidden"></div>
+        </section>
+      </div>
+
+      <section id="projectDetail" class="project-detail hidden" aria-labelledby="projectDetailIdentity">
+        <button id="projectDetailBack" class="project-detail-back" type="button">← Back to projects</button>
+        <p id="projectDetailStatus" class="projects-page-status" role="status" aria-live="polite"></p>
+        <header class="project-detail-header">
+          <div>
+            <h2 id="projectDetailIdentity">Project</h2>
+            <p id="projectDetailDescription"></p>
+          </div>
+          <div class="project-detail-header-actions">
+            <button id="projectAddTaskBtn" type="button">Add task to project</button>
+            <button id="projectViewTasksBtn" type="button">View project tasks</button>
+            <button id="projectViewCalendarBtn" type="button">View in calendar</button>
+          </div>
+        </header>
+
+        <div id="projectDetailMetrics" class="project-detail-metrics"></div>
+        <div class="project-detail-progress-wrap">
+          <div>
+            <strong id="projectProgressLabel">Completion progress</strong>
+            <span id="projectDetailProgressText"></span>
+          </div>
+          <div id="projectDetailProgress" class="project-detail-progress" role="progressbar" aria-labelledby="projectProgressLabel" aria-valuemin="0" aria-valuemax="100">
+            <span id="projectDetailProgressFill"></span>
+          </div>
+        </div>
+
+        <div class="project-detail-management">
+          <button id="projectEditBtn" type="button">Edit project</button>
+          <button id="projectArchiveBtn" type="button">Archive project</button>
+          <button id="projectDeleteBtn" class="project-danger-action" type="button">Delete project</button>
+        </div>
+
+        <div class="project-detail-grid">
+          <section class="project-detail-card project-detail-tasks-card" aria-labelledby="projectTasksTitle">
+            <div class="project-detail-card-heading">
+              <div>
+                <p id="projectTasksKicker">Work</p>
+                <h3 id="projectTasksTitle">Project tasks</h3>
+              </div>
+              <div class="project-detail-filters">
+                <input id="projectDetailSearch" type="search" placeholder="Search project tasks" aria-label="Search project tasks" />
+                <select id="projectDetailStatusFilter" aria-label="Task status">
+                  <option value="all">All</option>
+                  <option value="open">Open</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+            </div>
+            <div class="project-task-groups">
+              <section aria-labelledby="projectDetailOpenHeading">
+                <h4 id="projectDetailOpenHeading">Open tasks</h4>
+                <ul id="projectDetailOpenTasks" class="project-detail-list"></ul>
+              </section>
+              <section aria-labelledby="projectDetailCompletedHeading">
+                <h4 id="projectDetailCompletedHeading">Completed tasks</h4>
+                <ul id="projectDetailCompletedTasks" class="project-detail-list"></ul>
+              </section>
+            </div>
+          </section>
+
+          <section class="project-detail-card" aria-labelledby="projectDeadlineTitle">
+            <div class="project-detail-card-heading">
+              <div>
+                <p id="projectDeadlineKicker">Schedule</p>
+                <h3 id="projectDeadlineTitle">Upcoming deadlines</h3>
+              </div>
+            </div>
+            <ul id="projectDeadlineList" class="project-detail-list"></ul>
+          </section>
+
+          <section class="project-detail-card" aria-labelledby="projectActivityTitle">
+            <div class="project-detail-card-heading">
+              <div>
+                <p id="projectActivityKicker">Latest</p>
+                <h3 id="projectActivityTitle">Recent activity</h3>
+              </div>
+            </div>
+            <ul id="projectActivityList" class="project-detail-list"></ul>
+          </section>
+        </div>
+      </section>
+    </div>
 
     <!-- ===== FOCUS PANEL ===== -->
     <div class="tab-panel" id="panel-focus" role="tabpanel" aria-labelledby="tab-focus">
@@ -755,6 +1021,29 @@
         </div>
         </div>
 
+        <section id="analytics2Section" class="analytics2-section" aria-labelledby="analytics2Title">
+          <header class="analytics2-header">
+            <div>
+              <p id="analytics2Eyebrow" class="analytics2-eyebrow">Analytics 2.0</p>
+              <h2 id="analytics2Title">Productivity analytics</h2>
+              <p id="analytics2Subtitle">A transparent view of your retained TaskFlow activity.</p>
+            </div>
+            <div class="analytics2-controls">
+              <label for="analytics2Range" id="analytics2RangeLabel">Date range</label>
+              <select id="analytics2Range">
+                <option value="last7">Last 7 days</option>
+                <option value="last30" selected>Last 30 days</option>
+                <option value="thisMonth">This month</option>
+                <option value="previousMonth">Previous month</option>
+                <option value="all">All retained data</option>
+              </select>
+              <button id="analytics2Export" type="button">Export analytics JSON</button>
+            </div>
+          </header>
+          <p id="analytics2Status" class="sr-only" role="status" aria-live="polite"></p>
+          <div id="analytics2Body" class="analytics2-body"></div>
+        </section>
+
       </div>
       <!-- end panel-stats -->
 
@@ -773,6 +1062,69 @@
         <button id="focusModeExit" type="button">Exit Focus Mode</button>
       </div>
     </div>
+  </div>
+
+  <div id="searchHelpDialog" class="search-help-dialog hidden" role="dialog" aria-modal="true" aria-labelledby="searchHelpTitle" aria-describedby="searchHelpDescription">
+    <div class="search-help-card">
+      <div class="search-help-header">
+        <div>
+          <p id="searchHelpKicker">Advanced search</p>
+          <h2 id="searchHelpTitle">Search help</h2>
+        </div>
+        <button id="searchHelpClose" type="button" aria-label="Close search help">×</button>
+      </div>
+      <p id="searchHelpDescription">Combine normal words with stable English filter keywords.</p>
+      <div class="search-help-examples" aria-label="Search examples">
+        <code>priority:high</code>
+        <code>project:"School"</code>
+        <code>due:today</code>
+        <code>status:open</code>
+        <code>has:notes</code>
+        <code>repeat:true</code>
+      </div>
+      <p id="searchHelpHint">Quoted values can contain spaces. Unknown filters are treated as text and shown as a warning.</p>
+    </div>
+  </div>
+
+  <div id="presetNameDialog" class="preset-name-dialog hidden" role="dialog" aria-modal="true" aria-labelledby="presetNameTitle">
+    <form id="presetNameForm" class="preset-name-card">
+      <h2 id="presetNameTitle">Save filter</h2>
+      <label>
+        <span id="presetNameLabel">Preset name</span>
+        <input id="presetNameInput" type="text" maxlength="60" autocomplete="off" required />
+      </label>
+      <div class="preset-name-actions">
+        <button id="presetNameCancel" type="button">Cancel</button>
+        <button id="presetNameSave" type="submit">Save</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="projectEditDialog" class="project-edit-dialog hidden" role="dialog" aria-modal="true" aria-labelledby="projectEditTitle">
+    <form id="projectEditForm" class="project-edit-card">
+      <div>
+        <p id="projectEditKicker">Project details</p>
+        <h2 id="projectEditTitle">Edit project</h2>
+      </div>
+      <div class="project-edit-fields">
+        <label>
+          <span id="projectEditEmojiLabel">Emoji</span>
+          <input id="projectEditEmoji" type="text" maxlength="8" />
+        </label>
+        <label>
+          <span id="projectEditNameLabel">Project name</span>
+          <input id="projectEditName" type="text" maxlength="100" required />
+        </label>
+        <label class="project-edit-description-field">
+          <span id="projectEditDescriptionLabel">Project description</span>
+          <textarea id="projectEditDescription" rows="4" maxlength="300"></textarea>
+        </label>
+      </div>
+      <div class="project-edit-actions">
+        <button id="projectEditCancel" type="button">Cancel</button>
+        <button id="projectEditSave" type="submit">Save</button>
+      </div>
+    </form>
   </div>
 
   <!-- ===== EDIT TASK MODAL ===== -->

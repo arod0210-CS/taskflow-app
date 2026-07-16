@@ -226,7 +226,8 @@ export function createFocusTimer({
   }
 
   function save() {
-    storage?.setItem(FOCUS_KEY, JSON.stringify(data));
+    if (typeof storage?.setJson === "function") storage.setJson(FOCUS_KEY, data);
+    else storage?.setItem(FOCUS_KEY, JSON.stringify(data));
   }
 
   function stopTicker() {
@@ -515,7 +516,7 @@ export function createFocusUI({ timer, t, switchTab, toggleTask, onSessionComple
     if (!task) return "";
     const labels = [];
     const project = state.projects.find((item) => item.id === task.projectId);
-    if (project) labels.push(`${project.emoji} ${project.name}`);
+    if (project) labels.push(`${project.emoji} ${project.name}${project.archived ? ` · ${t("archived")}` : ""}`);
     if (task.category) labels.push(t(`category${task.category[0].toUpperCase()}${task.category.slice(1)}`));
     return labels.join(" · ");
   }

@@ -1,0 +1,125 @@
+.app-status-region {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.app-status-message {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid #c48b22;
+  border-radius: 14px;
+  background: #fff8e8;
+  color: #563700;
+  box-shadow: var(--shadow);
+  font-size: 0.86rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.app-status-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #8b5b00;
+  color: white;
+  font-weight: 900;
+}
+
+.app-status-connectivity {
+  border-color: #557296;
+  background: #edf5ff;
+  color: #173657;
+}
+
+.app-status-connectivity .app-status-icon {
+  background: #315f8f;
+}
+
+.app-status-connectivity.is-online,
+.app-status-warning.is-recovered {
+  border-color: #4d8465;
+  background: #edf9f1;
+  color: #174d2f;
+}
+
+.app-status-connectivity.is-online .app-status-icon,
+.app-status-warning.is-recovered .app-status-icon {
+  background: #31704c;
+}
+
+.app-status-update {
+  border-color: color-mix(in srgb, var(--accent-color) 56%, var(--border-color));
+  background: color-mix(in srgb, var(--card-bg) 80%, var(--input-bg));
+  color: var(--text-main);
+}
+
+.app-status-update .app-status-icon {
+  background: var(--accent-color);
+}
+
+.app-status-update button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--accent-color);
+  color: white;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.app-status-update button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent-color) 35%, transparent);
+  outline-offset: 3px;
+}
+
+body.dark-mode .app-status-warning {
+  border-color: #d9a441;
+  background: #3b2d0e;
+  color: #ffe8ad;
+}
+
+body.dark-mode .app-status-connectivity {
+  border-color: #6591bf;
+  background: #172d45;
+  color: #d8ebff;
+}
+
+body.dark-mode .app-status-connectivity.is-online,
+body.dark-mode .app-status-warning.is-recovered {
+  border-color: #64a47e;
+  background: #173727;
+  color: #d9f8e5;
+}
+
+@media (max-width: 640px) {
+  .app-status-region {
+    margin-inline: 2px;
+  }
+
+  .app-status-message {
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 10px 12px;
+  }
+
+  .app-status-update button {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-status-message,
+  .app-status-update button {
+    transition: none;
+  }
+}

@@ -82,7 +82,7 @@ export function createReminderCenter({
   function organizationLabels(task, state) {
     const labels = [];
     const project = state.projects.find((item) => item.id === task.projectId);
-    if (project) labels.push(`${project.emoji} ${project.name}`);
+    if (project) labels.push(`${project.emoji} ${project.name}${project.archived ? ` · ${t("archived")}` : ""}`);
     if (task.category) labels.push(t(categoryKey(task.category)));
     return labels;
   }

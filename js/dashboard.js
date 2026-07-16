@@ -1,5 +1,6 @@
 import { getTodayString, parseDateOnly } from "./dates.js";
 import { formatRecurrence } from "./recurrence.js";
+import { calculateProjectMetrics } from "./project-dashboard.js";
 
 function isCompletedToday(task, today) {
   if (!task.completed || !task.completedAt) return false;
@@ -30,7 +31,7 @@ function getLocalDateKey(date) {
 function getTaskOrganization(task, state, t) {
   const labels = [];
   const project = state.projects?.find((item) => item.id === task.projectId);
-  if (project) labels.push(`${project.emoji} ${project.name}`);
+  if (project) labels.push(`${project.emoji} ${project.name}${project.archived ? ` · ${t("archived")}` : ""}`);
   if (task.category) {
     const categoryKey = `category${task.category[0].toUpperCase()}${task.category.slice(1)}`;
     labels.push(t(categoryKey));
@@ -52,7 +53,8 @@ export function createDashboard({
   sortTasks,
   toggleTask,
   toggleHabit,
-  xpNeededForLevel
+  xpNeededForLevel,
+  openProject
 }) {
   const elements = {
     overview: document.getElementById("dashboardOverview"),
@@ -61,7 +63,9 @@ export function createDashboard({
     habitSummary: document.getElementById("dashboardHabitSummary"),
     habits: document.getElementById("dashboardHabitList"),
     activity: document.getElementById("dashboardActivity"),
-    date: document.getElementById("dashboardDate")
+    date: document.getElementById("dashboardDate"),
+    projectsSummary: document.getElementById("dashboardProjectsSummary"),
+    projects: document.getElementById("dashboardProjectsList")
   };
 
   function navigateAndFocus(tab, elementId) {
@@ -73,6 +77,7 @@ export function createDashboard({
   document.getElementById("dashboardAddTask")?.addEventListener("click", () => navigateAndFocus("tasks", "taskInput"));
   document.getElementById("dashboardAddHabit")?.addEventListener("click", () => navigateAndFocus("habits", "habitNameInput"));
   document.getElementById("dashboardViewStats")?.addEventListener("click", () => switchTab("stats"));
+  document.getElementById("dashboardOpenProjects")?.addEventListener("click", () => switchTab("projects"));
 
   function renderMetric({ icon, label, value, progress }) {
     const card = document.createElement("article");
@@ -308,6 +313,47 @@ export function createDashboard({
     elements.activity.replaceChildren(...bars);
   }
 
+  function renderProjects(state) {
+    const active = state.projects.filter((project) => !project.archived);
+    const entries = active.map((project) => ({
+      project,
+      metrics: calculateProjectMetrics(state.tasks, project.id)
+    })).sort((a, b) => b.metrics.openTasks - a.metrics.openTasks || a.project.name.localeCompare(b.project.name)).slice(0, 3);
+    const totalOpen = active.reduce((total, project) => total + calculateProjectMetrics(state.tasks, project.id).openTasks, 0);
+    elements.projectsSummary.textContent = t(active.length === 1 ? "dashboardProjectsSummaryOne" : "dashboardProjectsSummary")
+      .replace("{count}", active.length)
+      .replace("{open}", totalOpen);
+    if (!entries.length) {
+      const empty = document.createElement("p");
+      empty.className = "dashboard-empty";
+      empty.textContent = t("noProjects");
+      elements.projects.replaceChildren(empty);
+      return;
+    }
+    elements.projects.replaceChildren(...entries.map(({ project, metrics }) => {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "dashboard-project-summary-card";
+      card.addEventListener("click", () => openProject(project.id));
+      const name = document.createElement("strong");
+      name.textContent = `${project.emoji} ${project.name}`;
+      const open = document.createElement("span");
+      open.textContent = metrics.openTasks === 1
+        ? t("dashboardProjectOpenTask")
+        : t("dashboardProjectOpenTasks").replace("{count}", metrics.openTasks);
+      card.append(name, open);
+      if (metrics.nearestDeadline) {
+        const deadline = document.createElement("span");
+        deadline.textContent = t("dashboardProjectDeadline").replace(
+          "{date}",
+          parseDateOnly(metrics.nearestDeadline).toLocaleDateString(state.language === "es" ? "es-ES" : "en-US", { month: "short", day: "numeric" })
+        );
+        card.appendChild(deadline);
+      }
+      return card;
+    }));
+  }
+
   function render(state) {
     const today = getTodayString();
     const locale = state.language === "es" ? "es-ES" : "en-US";
@@ -321,6 +367,7 @@ export function createDashboard({
     renderFocus(state, today);
     renderHabits(state, today);
     renderActivity(state);
+    renderProjects(state);
   }
 
   return { render };

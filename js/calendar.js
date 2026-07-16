@@ -37,7 +37,9 @@ export function createCalendar({ t, sortTasks, openTask, toggleTask, prepareTask
     agendaCompletedTitle: document.getElementById("agendaCompletedTitle"),
     agendaIncomplete: document.getElementById("agendaIncompleteList"),
     agendaCompleted: document.getElementById("agendaCompletedList"),
-    agendaAddTask: document.getElementById("agendaAddTaskBtn")
+    agendaAddTask: document.getElementById("agendaAddTaskBtn"),
+    projectFilter: document.getElementById("calendarProjectFilter"),
+    includeArchived: document.getElementById("calendarIncludeArchived")
   };
 
   const todayKey = getTodayString();
@@ -45,6 +47,37 @@ export function createCalendar({ t, sortTasks, openTask, toggleTask, prepareTask
   let visibleMonth = new Date(todayDate.getFullYear(), todayDate.getMonth(), 1);
   let selectedDate = todayKey;
   let latestState = null;
+  let projectFilter = "all";
+
+  function makeProjectOption(value, label) {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    return option;
+  }
+
+  function renderProjectOptions(state) {
+    const available = state.projects.filter((project) => !project.archived || elements.includeArchived.checked);
+    if (projectFilter !== "all" && projectFilter !== "unassigned" && !available.some((project) => project.id === projectFilter)) {
+      projectFilter = "all";
+    }
+    elements.projectFilter.replaceChildren(
+      makeProjectOption("all", t("allProjects")),
+      makeProjectOption("unassigned", t("unassigned")),
+      ...available.map((project) => makeProjectOption(project.id, `${project.emoji} ${project.name}${project.archived ? ` · ${t("archived")}` : ""}`))
+    );
+    elements.projectFilter.value = projectFilter;
+  }
+
+  function visibleTasks(state) {
+    const archivedIds = new Set(state.projects.filter((project) => project.archived).map((project) => project.id));
+    return state.tasks.filter((task) => {
+      if (!elements.includeArchived.checked && task.projectId && archivedIds.has(task.projectId)) return false;
+      if (projectFilter === "unassigned") return !task.projectId;
+      if (projectFilter !== "all") return task.projectId === projectFilter;
+      return true;
+    });
+  }
 
   function locale(state) {
     return state.language === "es" ? "es-ES" : "en-US";
@@ -53,7 +86,7 @@ export function createCalendar({ t, sortTasks, openTask, toggleTask, prepareTask
   function organizationLabels(task, state) {
     const labels = [];
     const project = state.projects.find((item) => item.id === task.projectId);
-    if (project) labels.push(`${project.emoji} ${project.name}`);
+    if (project) labels.push(`${project.emoji} ${project.name}${project.archived ? ` · ${t("archived")}` : ""}`);
     if (task.category) labels.push(t(categoryKey(task.category)));
     return labels;
   }
@@ -264,7 +297,7 @@ export function createCalendar({ t, sortTasks, openTask, toggleTask, prepareTask
   }
 
   function renderAgenda(state) {
-    const tasks = sortTasks(state.tasks.filter((task) => task.dueDate === selectedDate));
+    const tasks = sortTasks(visibleTasks(state).filter((task) => task.dueDate === selectedDate));
     const incomplete = tasks.filter((task) => !task.completed);
     const completed = tasks.filter((task) => task.completed);
     const selected = parseDateOnly(selectedDate);
@@ -297,9 +330,10 @@ export function createCalendar({ t, sortTasks, openTask, toggleTask, prepareTask
     elements.previous.setAttribute("aria-label", t("calendarPreviousMonth"));
     elements.next.setAttribute("aria-label", t("calendarNextMonth"));
     elements.today.textContent = t("today");
+    renderProjectOptions(state);
     renderWeekdays(state);
 
-    const groupedTasks = groupTasksByDueDate(state.tasks);
+    const groupedTasks = groupTasksByDueDate(visibleTasks(state));
     const days = getCalendarDays(visibleMonth.getFullYear(), visibleMonth.getMonth());
     elements.grid.replaceChildren(...days.map((date) => buildDay(date, state, groupedTasks)));
     renderAgenda(state);
@@ -316,9 +350,20 @@ export function createCalendar({ t, sortTasks, openTask, toggleTask, prepareTask
   });
   elements.today.addEventListener("click", () => moveSelection(parseDateOnly(getTodayString()), true));
   elements.agendaAddTask.addEventListener("click", () => prepareTaskForDate(selectedDate));
+  elements.projectFilter.addEventListener("change", () => {
+    projectFilter = elements.projectFilter.value;
+    render(latestState);
+  });
+  elements.includeArchived.addEventListener("change", () => render(latestState));
 
   return {
     render,
-    getSelectedDate: () => selectedDate
+    getSelectedDate: () => selectedDate,
+    setProjectFilter(value) {
+      const project = latestState?.projects.find((item) => item.id === value);
+      if (project?.archived) elements.includeArchived.checked = true;
+      projectFilter = value === "unassigned" || project ? value : "all";
+      render(latestState);
+    }
   };
 }

@@ -5,12 +5,21 @@ export function sanitizeProjects(rawProjects) {
 
   const seenIds = new Set();
   return rawProjects
-    .map((project, index) => ({
-      id: String(project?.id ?? `project-${Date.now()}-${index}`),
-      name: String(project?.name ?? "").trim(),
-      emoji: String(project?.emoji ?? "📁").trim() || "📁",
-      createdAt: project?.createdAt || new Date().toISOString()
-    }))
+    .map((project, index) => {
+      const createdAt = project?.createdAt || new Date().toISOString();
+      const updatedAt = typeof project?.updatedAt === "string" && Number.isFinite(Date.parse(project.updatedAt))
+        ? project.updatedAt
+        : createdAt;
+      return {
+        id: String(project?.id ?? `project-${Date.now()}-${index}`),
+        name: String(project?.name ?? "").trim().slice(0, 100),
+        emoji: String(project?.emoji ?? "📁").trim().slice(0, 8) || "📁",
+        description: String(project?.description ?? "").trim().slice(0, 300),
+        archived: project?.archived === true,
+        createdAt,
+        updatedAt
+      };
+    })
     .filter((project) => {
       if (!project.name || seenIds.has(project.id)) return false;
       seenIds.add(project.id);
@@ -73,7 +82,10 @@ export function createProjectsUI({
       id: crypto.randomUUID(),
       name,
       emoji: projectEmojiInput.value.trim() || "📁",
-      createdAt: new Date().toISOString()
+      description: "",
+      archived: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     });
     projectEmojiInput.value = "";
     projectNameInput.value = "";
@@ -96,14 +108,24 @@ export function createProjectsUI({
     const taskProjectValue = taskProjectInput.value;
     const editProjectValue = editProjectInput.value;
     const projectFilterValue = state.projectFilter;
-    const projectOptions = state.projects.map((project) => makeOption(project.id, `${project.emoji} ${project.name}`));
+    const activeProjects = state.projects.filter((project) => !project.archived);
+    const archivedFilterProject = state.projects.find((project) => project.archived && project.id === projectFilterValue);
+    const projectOptions = activeProjects.map((project) => makeOption(project.id, `${project.emoji} ${project.name}`));
+    const editOptions = [
+      ...projectOptions.map((option) => option.cloneNode(true)),
+      ...state.projects.filter((project) => project.archived)
+        .map((project) => makeOption(project.id, `${project.emoji} ${project.name} · ${t("archivedProjects")}`))
+    ];
+    const filterOptions = archivedFilterProject
+      ? [...projectOptions.map((option) => option.cloneNode(true)), makeOption(archivedFilterProject.id, `${archivedFilterProject.emoji} ${archivedFilterProject.name} · ${t("archivedProjects")}`)]
+      : projectOptions;
 
     replaceSelectOptions(taskProjectInput, [makeOption("", t("noProject")), ...projectOptions.map((option) => option.cloneNode(true))], taskProjectValue);
-    replaceSelectOptions(editProjectInput, [makeOption("", t("noProject")), ...projectOptions.map((option) => option.cloneNode(true))], editProjectValue);
+    replaceSelectOptions(editProjectInput, [makeOption("", t("noProject")), ...editOptions], editProjectValue);
     replaceSelectOptions(projectFilterInput, [
       makeOption("all", t("allProjects")),
       makeOption("unassigned", t("unassigned")),
-      ...projectOptions
+      ...filterOptions
     ], projectFilterValue);
   }
 
@@ -165,7 +187,10 @@ export function createProjectsUI({
       const name = document.createElement("strong");
       name.textContent = `${project.emoji} ${project.name}`;
       const countLabel = document.createElement("span");
-      countLabel.textContent = t("projectTaskCount").replace("{count}", count);
+      countLabel.textContent = [
+        t("projectTaskCount").replace("{count}", count),
+        ...(project.archived ? [t("archivedProjects")] : [])
+      ].join(" · ");
       identity.append(name, countLabel);
 
       const actions = document.createElement("div");

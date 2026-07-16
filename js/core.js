@@ -1,4 +1,5 @@
 import {
+  APP_VERSION,
   HABITS_KEY,
   LANG_KEY,
   PLAYER_KEY,
@@ -20,9 +21,10 @@ import {
   getYesterdayString,
   isInCurrentMonth,
   isInCurrentWeek,
+  isValidDateKey,
   parseDateOnly
 } from "./dates.js";
-import { safeParse } from "./storage.js";
+import { createSafeStorage, safeParse } from "./storage.js";
 import { createDashboard } from "./dashboard.js";
 import { createCalendar } from "./calendar.js";
 import { createReminderCenter } from "./reminders.js";
@@ -33,10 +35,22 @@ import {
 } from "./recurrence.js";
 import { createFocusTimer, createFocusUI } from "./focus.js";
 import {
+  formatActiveSearchSummary,
+  matchesTaskQuery,
+  parseTaskQuery
+} from "./search.js";
+import { createFilterPresetStore } from "./filter-presets.js";
+import { createTaskSelection } from "./bulk-actions.js";
+import {
   createProjectsUI,
   sanitizeProjects,
   sanitizeTaskProjectReferences
 } from "./projects.js";
+import { createRichProjectsUI, UNASSIGNED_PROJECT_ID } from "./project-dashboard.js";
+import { createAnalyticsUI } from "./analytics.js";
+import { buildBackupEnvelope, downloadBackupJson, parseBackupText } from "./backup.js";
+import { createAppStatus } from "./app-status.js";
+import { createPwaManager } from "./pwa.js";
 
 export function startApp() {
 
@@ -74,6 +88,58 @@ export function startApp() {
       addTask: "Add Task",
       reset: "Reset",
       searchPlaceholder: "Search tasks...",
+      advancedSearch: "Advanced search",
+      searchHelp: "Search help",
+      searchExamples: "Search examples",
+      clearSearch: "Clear search",
+      searchResults: "{count} results",
+      searchResultOne: "1 result",
+      closeSearchHelp: "Close search help",
+      unknownFilter: "Unknown filter treated as text: {filters}",
+      searchSyntaxHint: "Normal words search titles, notes, projects, and categories.",
+      searchHelpDescription: "Combine normal words with stable English filter keywords.",
+      searchHelpHint: "Quoted values can contain spaces. Unknown filters are treated as text and shown as a warning.",
+      saveFilter: "Save filter",
+      savedFilters: "Saved filters",
+      noSavedFilters: "No saved filters",
+      presetName: "Preset name",
+      presetNamePrompt: "Name this filter preset:",
+      presetNameRequired: "Enter a preset name.",
+      applyPreset: "Apply",
+      renamePreset: "Rename",
+      deletePreset: "Delete preset",
+      presetRenamePrompt: "Rename this filter preset:",
+      presetLimit: "You can save up to 20 filter presets.",
+      presetSaved: "Filter preset saved.",
+      presetApplied: "Filter preset applied.",
+      presetRenamed: "Filter preset renamed.",
+      presetDeleted: "Filter preset deleted.",
+      selectTasks: "Select",
+      selectionMode: "Selection mode",
+      selectedTasksCount: "{count} tasks selected",
+      selectVisible: "Select visible",
+      clearSelection: "Clear selection",
+      exitSelection: "Done",
+      selectTask: "Select task",
+      deselectTask: "Deselect task",
+      markCompleteBulk: "Mark complete",
+      reopenTasks: "Reopen tasks",
+      changePriority: "Change priority",
+      assignProject: "Assign project",
+      removeProject: "No project",
+      assignCategory: "Assign category",
+      removeCategory: "No category",
+      changeDueDate: "Change due date",
+      removeDueDate: "Remove due date",
+      deleteSelected: "Delete selected",
+      confirmBulkDeletion: "Delete {count} selected tasks? Recurring series will not be deleted.",
+      tasksUpdated: "{count} tasks updated.",
+      tasksDeleted: "{count} tasks deleted.",
+      noMatchingTasks: "No matching tasks.",
+      bulkApply: "Apply",
+      bulkPriorityHigh: "High",
+      bulkPriorityMedium: "Medium",
+      bulkPriorityLow: "Low",
       all: "All",
       today: "Today",
       week: "Week",
@@ -101,6 +167,12 @@ export function startApp() {
       clearConfirm: "Clear all tasks and reset game progress?",
       importSuccess: "Import successful!",
       invalidFile: "Invalid file.",
+      importInvalidJson: "This file is not valid JSON.",
+      importMissingData: "This backup is missing required TaskFlow data.",
+      importWrongFormat: "This file is not a TaskFlow backup.",
+      importUnsupportedVersion: "This backup was created by a newer or unsupported TaskFlow version.",
+      importInvalidCollection: "This backup contains damaged or invalid data and was not imported.",
+      importInvalidLanguage: "This backup contains an unsupported language setting.",
       complete3Tasks: "Complete 3 tasks today",
       complete1High: "Complete 1 high-priority task",
       complete2Medium: "Complete 2 medium tasks",
@@ -290,6 +362,69 @@ export function startApp() {
       deleteProject: "Delete project",
       deleteProjectConfirm: "Delete {name}? Its tasks will become unassigned.",
       projectTaskCount: "{count} tasks",
+      projectsPageEyebrow: "Organize meaningful work",
+      projectsPageSubtitle: "See progress, deadlines, and activity in one place.",
+      activeProjects: "Active Projects",
+      archivedProjects: "Archived Projects",
+      archived: "Archived",
+      currentWork: "Current work",
+      projectCount: "{count} active projects",
+      projectCountOne: "1 active project",
+      createProject: "Create project",
+      noProjectsYet: "No projects yet",
+      noProjectsDescription: "Create a project to group related work and deadlines.",
+      projectDescription: "Project description",
+      projectNoDescription: "No description added yet.",
+      unassignedProjectDescription: "Tasks that are not assigned to a project.",
+      openProject: "Open project",
+      backToProjects: "Back to projects",
+      openTasks: "Open tasks",
+      openTaskSingular: "open task",
+      completedTasks: "Completed tasks",
+      completedTaskSingular: "completed task",
+      totalTasks: "Total tasks",
+      overdue: "Overdue",
+      completedToday: "Completed today",
+      completionProgress: "Completion progress",
+      projectNoProgress: "No tasks yet",
+      nearestDeadline: "Nearest deadline",
+      upcomingDeadlines: "Upcoming deadlines",
+      noUpcomingDeadlines: "No upcoming deadlines",
+      recentActivity: "Recent activity",
+      noRecentActivity: "No recent activity yet.",
+      projectTasks: "Project tasks",
+      noTasksInProject: "No tasks in this project.",
+      addTaskToProject: "Add task to project",
+      viewProjectTasks: "View project tasks",
+      viewInCalendar: "View in calendar",
+      editProject: "Edit project",
+      archiveProject: "Archive project",
+      restoreProject: "Restore project",
+      projectArchived: "Project archived. Its tasks remain assigned.",
+      projectRestored: "Project restored.",
+      projectUpdated: "Project updated.",
+      projectDeletedTasksUnassigned: "Project deleted. Its tasks remain and are now unassigned.",
+      deleteProjectDetailConfirm: "Delete {name}? Tasks will remain and become unassigned.",
+      searchProjectTasks: "Search project tasks",
+      taskStatus: "Task status",
+      openTask: "Open task",
+      projectTaskCompletedActivity: "Completed “{task}”",
+      projectTaskCreatedActivity: "Created “{task}”",
+      projectFocusActivity: "Completed a {minutes}-minute focus session",
+      projectDetails: "Project details",
+      projectWorkKicker: "Work",
+      projectScheduleKicker: "Schedule",
+      projectLatestKicker: "Latest",
+      dashboardProjectsKicker: "Projects",
+      dashboardProjectProgress: "Project Progress",
+      dashboardOpenProjects: "Open Projects",
+      dashboardProjectsSummary: "{count} active projects · {open} open tasks",
+      dashboardProjectsSummaryOne: "1 active project · {open} open tasks",
+      dashboardProjectOpenTasks: "{count} open tasks",
+      dashboardProjectOpenTask: "1 open task",
+      dashboardProjectDeadline: "Next: {date}",
+      calendarProjectFilter: "Calendar project filter",
+      includeArchived: "Include archived",
       noProject: "No Project",
       noCategory: "No Category",
       allProjects: "All Projects",
@@ -389,6 +524,58 @@ export function startApp() {
       addTask: "Agregar tarea",
       reset: "Reiniciar",
       searchPlaceholder: "Buscar tareas...",
+      advancedSearch: "Búsqueda avanzada",
+      searchHelp: "Ayuda de búsqueda",
+      searchExamples: "Ejemplos de búsqueda",
+      clearSearch: "Borrar búsqueda",
+      searchResults: "{count} resultados",
+      searchResultOne: "1 resultado",
+      closeSearchHelp: "Cerrar ayuda de búsqueda",
+      unknownFilter: "Filtro desconocido tratado como texto: {filters}",
+      searchSyntaxHint: "Las palabras normales buscan en títulos, notas, proyectos y categorías.",
+      searchHelpDescription: "Combina palabras normales con palabras clave estables en inglés.",
+      searchHelpHint: "Los valores entre comillas pueden contener espacios. Los filtros desconocidos se tratan como texto y muestran un aviso.",
+      saveFilter: "Guardar filtro",
+      savedFilters: "Filtros guardados",
+      noSavedFilters: "No hay filtros guardados",
+      presetName: "Nombre del filtro",
+      presetNamePrompt: "Nombre para este filtro guardado:",
+      presetNameRequired: "Escribe un nombre para el filtro.",
+      applyPreset: "Aplicar",
+      renamePreset: "Renombrar",
+      deletePreset: "Eliminar filtro",
+      presetRenamePrompt: "Nuevo nombre para este filtro guardado:",
+      presetLimit: "Puedes guardar hasta 20 filtros.",
+      presetSaved: "Filtro guardado.",
+      presetApplied: "Filtro aplicado.",
+      presetRenamed: "Filtro renombrado.",
+      presetDeleted: "Filtro eliminado.",
+      selectTasks: "Seleccionar",
+      selectionMode: "Modo de selección",
+      selectedTasksCount: "{count} tareas seleccionadas",
+      selectVisible: "Seleccionar visibles",
+      clearSelection: "Borrar selección",
+      exitSelection: "Listo",
+      selectTask: "Seleccionar tarea",
+      deselectTask: "Deseleccionar tarea",
+      markCompleteBulk: "Marcar completadas",
+      reopenTasks: "Reabrir tareas",
+      changePriority: "Cambiar prioridad",
+      assignProject: "Asignar proyecto",
+      removeProject: "Sin proyecto",
+      assignCategory: "Asignar categoría",
+      removeCategory: "Sin categoría",
+      changeDueDate: "Cambiar fecha límite",
+      removeDueDate: "Quitar fecha límite",
+      deleteSelected: "Eliminar seleccionadas",
+      confirmBulkDeletion: "¿Eliminar {count} tareas seleccionadas? No se eliminarán las series recurrentes.",
+      tasksUpdated: "{count} tareas actualizadas.",
+      tasksDeleted: "{count} tareas eliminadas.",
+      noMatchingTasks: "No hay tareas coincidentes.",
+      bulkApply: "Aplicar",
+      bulkPriorityHigh: "Alta",
+      bulkPriorityMedium: "Media",
+      bulkPriorityLow: "Baja",
       all: "Todas",
       today: "Hoy",
       week: "Semana",
@@ -416,6 +603,12 @@ export function startApp() {
       clearConfirm: "¿Borrar todas las tareas y reiniciar el progreso del juego?",
       importSuccess: "¡Importación exitosa!",
       invalidFile: "Archivo inválido.",
+      importInvalidJson: "Este archivo no contiene JSON válido.",
+      importMissingData: "A esta copia le faltan datos obligatorios de TaskFlow.",
+      importWrongFormat: "Este archivo no es una copia de seguridad de TaskFlow.",
+      importUnsupportedVersion: "Esta copia fue creada por una versión de TaskFlow más nueva o no compatible.",
+      importInvalidCollection: "Esta copia contiene datos dañados o inválidos y no se importó.",
+      importInvalidLanguage: "Esta copia contiene un idioma no compatible.",
       complete3Tasks: "Completa 3 tareas hoy",
       complete1High: "Completa 1 tarea de prioridad alta",
       complete2Medium: "Completa 2 tareas medias",
@@ -605,6 +798,69 @@ export function startApp() {
       deleteProject: "Eliminar proyecto",
       deleteProjectConfirm: "¿Eliminar {name}? Sus tareas quedarán sin asignar.",
       projectTaskCount: "{count} tareas",
+      projectsPageEyebrow: "Organiza trabajo significativo",
+      projectsPageSubtitle: "Consulta el progreso, las fechas límite y la actividad en un solo lugar.",
+      activeProjects: "Proyectos activos",
+      archivedProjects: "Proyectos archivados",
+      archived: "Archivado",
+      currentWork: "Trabajo actual",
+      projectCount: "{count} proyectos activos",
+      projectCountOne: "1 proyecto activo",
+      createProject: "Crear proyecto",
+      noProjectsYet: "Aún no hay proyectos",
+      noProjectsDescription: "Crea un proyecto para agrupar trabajo relacionado y fechas límite.",
+      projectDescription: "Descripción del proyecto",
+      projectNoDescription: "Aún no se agregó una descripción.",
+      unassignedProjectDescription: "Tareas que no están asignadas a un proyecto.",
+      openProject: "Abrir proyecto",
+      backToProjects: "Volver a proyectos",
+      openTasks: "Tareas abiertas",
+      openTaskSingular: "tarea abierta",
+      completedTasks: "Tareas completadas",
+      completedTaskSingular: "tarea completada",
+      totalTasks: "Tareas totales",
+      overdue: "Atrasadas",
+      completedToday: "Completadas hoy",
+      completionProgress: "Progreso de finalización",
+      projectNoProgress: "Aún no hay tareas",
+      nearestDeadline: "Fecha límite más cercana",
+      upcomingDeadlines: "Próximas fechas límite",
+      noUpcomingDeadlines: "No hay próximas fechas límite",
+      recentActivity: "Actividad reciente",
+      noRecentActivity: "Aún no hay actividad reciente.",
+      projectTasks: "Tareas del proyecto",
+      noTasksInProject: "No hay tareas en este proyecto.",
+      addTaskToProject: "Agregar tarea al proyecto",
+      viewProjectTasks: "Ver tareas del proyecto",
+      viewInCalendar: "Ver en calendario",
+      editProject: "Editar proyecto",
+      archiveProject: "Archivar proyecto",
+      restoreProject: "Restaurar proyecto",
+      projectArchived: "Proyecto archivado. Sus tareas siguen asignadas.",
+      projectRestored: "Proyecto restaurado.",
+      projectUpdated: "Proyecto actualizado.",
+      projectDeletedTasksUnassigned: "Proyecto eliminado. Sus tareas permanecen y ahora están sin asignar.",
+      deleteProjectDetailConfirm: "¿Eliminar {name}? Las tareas permanecerán y quedarán sin asignar.",
+      searchProjectTasks: "Buscar tareas del proyecto",
+      taskStatus: "Estado de tarea",
+      openTask: "Abrir tarea",
+      projectTaskCompletedActivity: "Se completó “{task}”",
+      projectTaskCreatedActivity: "Se creó “{task}”",
+      projectFocusActivity: "Se completó una sesión de enfoque de {minutes} minutos",
+      projectDetails: "Detalles del proyecto",
+      projectWorkKicker: "Trabajo",
+      projectScheduleKicker: "Agenda",
+      projectLatestKicker: "Últimas",
+      dashboardProjectsKicker: "Proyectos",
+      dashboardProjectProgress: "Progreso de proyectos",
+      dashboardOpenProjects: "Abrir proyectos",
+      dashboardProjectsSummary: "{count} proyectos activos · {open} tareas abiertas",
+      dashboardProjectsSummaryOne: "1 proyecto activo · {open} tareas abiertas",
+      dashboardProjectOpenTasks: "{count} tareas abiertas",
+      dashboardProjectOpenTask: "1 tarea abierta",
+      dashboardProjectDeadline: "Siguiente: {date}",
+      calendarProjectFilter: "Filtro de proyecto del calendario",
+      includeArchived: "Incluir archivados",
       noProject: "Sin proyecto",
       noCategory: "Sin categoría",
       allProjects: "Todos los proyectos",
@@ -681,6 +937,46 @@ export function startApp() {
   const addTaskBtn = document.getElementById("addTaskBtn");
   const resetBtn = document.getElementById("resetBtn");
   const searchInput = document.getElementById("searchInput");
+  const searchBulkElements = {
+    clearSearch: document.getElementById("clearSearchBtn"),
+    searchHelp: document.getElementById("searchHelpBtn"),
+    searchHelpDialog: document.getElementById("searchHelpDialog"),
+    searchHelpClose: document.getElementById("searchHelpClose"),
+    searchTokenChips: document.getElementById("searchTokenChips"),
+    searchFeedback: document.getElementById("searchFeedback"),
+    searchResultCount: document.getElementById("searchResultCount"),
+    selectionToggle: document.getElementById("taskSelectionToggle"),
+    savedFilterSelect: document.getElementById("savedFilterSelect"),
+    applyPreset: document.getElementById("applyFilterPresetBtn"),
+    savePreset: document.getElementById("saveFilterPresetBtn"),
+    renamePreset: document.getElementById("renameFilterPresetBtn"),
+    deletePreset: document.getElementById("deleteFilterPresetBtn"),
+    presetDialog: document.getElementById("presetNameDialog"),
+    presetForm: document.getElementById("presetNameForm"),
+    presetTitle: document.getElementById("presetNameTitle"),
+    presetLabel: document.getElementById("presetNameLabel"),
+    presetName: document.getElementById("presetNameInput"),
+    presetCancel: document.getElementById("presetNameCancel"),
+    presetSave: document.getElementById("presetNameSave"),
+    bulkToolbar: document.getElementById("bulkToolbar"),
+    selectedCount: document.getElementById("bulkSelectedCount"),
+    selectVisible: document.getElementById("bulkSelectVisibleBtn"),
+    clearSelection: document.getElementById("bulkClearSelectionBtn"),
+    exitSelection: document.getElementById("bulkExitSelectionBtn"),
+    complete: document.getElementById("bulkCompleteBtn"),
+    reopen: document.getElementById("bulkReopenBtn"),
+    priority: document.getElementById("bulkPriorityInput"),
+    applyPriority: document.getElementById("bulkPriorityApplyBtn"),
+    project: document.getElementById("bulkProjectInput"),
+    applyProject: document.getElementById("bulkProjectApplyBtn"),
+    category: document.getElementById("bulkCategoryInput"),
+    applyCategory: document.getElementById("bulkCategoryApplyBtn"),
+    dueDate: document.getElementById("bulkDueDateInput"),
+    applyDueDate: document.getElementById("bulkDueDateApplyBtn"),
+    removeDueDate: document.getElementById("bulkRemoveDueDateBtn"),
+    deleteTasks: document.getElementById("bulkDeleteBtn"),
+    status: document.getElementById("bulkStatus")
+  };
 
   const todoList = document.getElementById("todoList");
   const completedList = document.getElementById("completedList");
@@ -766,37 +1062,102 @@ export function startApp() {
   let calendar = null;
   let reminderCenter = null;
   let projectsUI = null;
+  let richProjectsUI = null;
   let focusUI = null;
+  let analyticsUI = null;
+  let appStatus = null;
+  let pwaManager = null;
+  let persistenceStatusEvent = null;
+  let renderPersistenceStatus = () => {};
 
-  const storedProjects = sanitizeProjects(safeParse(localStorage.getItem(PROJECTS_KEY), []));
+  const safeStorage = createSafeStorage({
+    onStatus(event) {
+      persistenceStatusEvent = event;
+      renderPersistenceStatus();
+    }
+  });
+
+  const storedProjects = sanitizeProjects(safeParse(safeStorage.getItem(PROJECTS_KEY), []));
   const storedTasks = sanitizeTaskProjectReferences(
-    sanitizeTasks(safeParse(localStorage.getItem(STORAGE_KEY), [])),
+    sanitizeTasks(safeParse(safeStorage.getItem(STORAGE_KEY), [])),
     storedProjects
   );
-  const focusTimer = createFocusTimer();
+  const focusTimer = createFocusTimer({ storage: safeStorage });
+  const filterPresetStore = createFilterPresetStore({ storage: safeStorage });
+  const taskSelection = createTaskSelection();
+  let parsedTaskQuery = parseTaskQuery("");
+  let searchHelpReturnFocus = null;
+  let presetDialogMode = "save";
+  let presetDialogReturnFocus = null;
+
+  function mutateTaskCompletion(state, task, shouldComplete) {
+    if (!task || task.completed === shouldComplete) return false;
+    if (!shouldComplete) {
+      task.completed = false;
+      task.completedAt = null;
+      return true;
+    }
+
+    task.completed = true;
+    task.completedAt = new Date().toISOString();
+    if (!task.rewardGranted) {
+      rewardForCompletion(task);
+      task.rewardGranted = true;
+    }
+
+    const nextOccurrence = createNextOccurrence(
+      task,
+      state.tasks,
+      () => crypto.randomUUID()
+    );
+    if (nextOccurrence.handled) {
+      task.nextOccurrenceGenerated = true;
+      if (nextOccurrence.task) state.tasks.unshift(nextOccurrence.task);
+    }
+    return true;
+  }
+
+  function sanitizeTaskUpdate(state, task, updates) {
+    const [sanitizedTask] = sanitizeTasks([{
+      ...task,
+      ...updates,
+      priority: normalizePriority(updates.priority ?? task.priority),
+      projectId: updates.projectId === undefined
+        ? task.projectId
+        : state.projects.some((project) => project.id === updates.projectId)
+          ? updates.projectId
+          : null,
+      category: updates.category === undefined
+        ? task.category
+        : sanitizeCategory(updates.category)
+    }]);
+    return sanitizedTask || task;
+  }
 
   const State = {
     tasks: storedTasks,
     projects: storedProjects,
-    player: sanitizePlayer(safeParse(localStorage.getItem(PLAYER_KEY), defaultPlayer())),
-    habits: sanitizeHabits(safeParse(localStorage.getItem(HABITS_KEY), null)),
+    player: sanitizePlayer(safeParse(safeStorage.getItem(PLAYER_KEY), defaultPlayer())),
+    habits: sanitizeHabits(safeParse(safeStorage.getItem(HABITS_KEY), null)),
     view: "all",
     searchQuery: "",
     projectFilter: "all",
     categoryFilter: "all",
-    editMode: safeParse(localStorage.getItem("editMode"), false),
+    editMode: safeParse(safeStorage.getItem("editMode"), false),
     editingTaskId: null,
-    language: localStorage.getItem(LANG_KEY) || "en",
+    language: safeStorage.getItem(LANG_KEY) || "en",
     listeners: [],
     subscribe(listener) {
       this.listeners.push(listener);
     },
     notify() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.tasks));
-      localStorage.setItem(PLAYER_KEY, JSON.stringify(this.player));
-      localStorage.setItem(HABITS_KEY, JSON.stringify(this.habits));
-      localStorage.setItem(LANG_KEY, this.language);
-      localStorage.setItem(PROJECTS_KEY, JSON.stringify(this.projects));
+      safeStorage.batch(() => {
+        safeStorage.setJson(STORAGE_KEY, this.tasks);
+        safeStorage.setJson(PLAYER_KEY, this.player);
+        safeStorage.setJson(HABITS_KEY, this.habits);
+        safeStorage.setItem(LANG_KEY, this.language);
+        safeStorage.setJson(PROJECTS_KEY, this.projects);
+      });
       this.listeners.forEach((listener) => listener(this));
     },
     addTask(task) {
@@ -807,56 +1168,50 @@ export function startApp() {
     },
     deleteTask(id) {
       this.tasks = this.tasks.filter((task) => task.id !== id);
+      taskSelection.prune(new Set(this.tasks.map((task) => task.id)));
       this.notify();
     },
     toggleTask(id) {
       const task = this.tasks.find((item) => item.id === id);
       if (!task) return;
-
-      if (task.completed) {
-        task.completed = false;
-        task.completedAt = null;
-      } else {
-        task.completed = true;
-        task.completedAt = new Date().toISOString();
-
-        if (!task.rewardGranted) {
-          rewardForCompletion(task);
-          task.rewardGranted = true;
-        }
-
-        const nextOccurrence = createNextOccurrence(
-          task,
-          this.tasks,
-          () => crypto.randomUUID()
-        );
-        if (nextOccurrence.handled) {
-          task.nextOccurrenceGenerated = true;
-          if (nextOccurrence.task) this.tasks.unshift(nextOccurrence.task);
-        }
-      }
-
+      mutateTaskCompletion(this, task, !task.completed);
       this.notify();
     },
     updateTask(id, updates) {
       this.tasks = this.tasks.map((task) => {
         if (task.id !== id) return task;
-        const [sanitizedTask] = sanitizeTasks([{
-          ...task,
-          ...updates,
-          priority: normalizePriority(updates.priority ?? task.priority),
-          projectId: updates.projectId === undefined
-            ? task.projectId
-            : this.projects.some((project) => project.id === updates.projectId)
-              ? updates.projectId
-              : null,
-          category: updates.category === undefined
-            ? task.category
-            : sanitizeCategory(updates.category)
-        }]);
-        return sanitizedTask || task;
+        return sanitizeTaskUpdate(this, task, updates);
       });
       this.notify();
+    },
+    bulkSetCompletion(ids, shouldComplete) {
+      const selected = new Set(ids.map(String));
+      let updated = 0;
+      [...this.tasks].forEach((task) => {
+        if (selected.has(task.id) && mutateTaskCompletion(this, task, shouldComplete)) updated += 1;
+      });
+      if (updated > 0) this.notify();
+      return updated;
+    },
+    bulkUpdateTasks(ids, updates) {
+      const selected = new Set(ids.map(String));
+      let updated = 0;
+      this.tasks = this.tasks.map((task) => {
+        if (!selected.has(task.id)) return task;
+        updated += 1;
+        return sanitizeTaskUpdate(this, task, updates);
+      });
+      if (updated > 0) this.notify();
+      return updated;
+    },
+    bulkDeleteTasks(ids) {
+      const selected = new Set(ids.map(String));
+      const before = this.tasks.length;
+      this.tasks = this.tasks.filter((task) => !selected.has(task.id));
+      const deleted = before - this.tasks.length;
+      taskSelection.clear();
+      if (deleted > 0) this.notify();
+      return deleted;
     },
     reorderTasks(draggedId, targetId) {
       const draggedIndex = this.tasks.findIndex((task) => task.id === draggedId);
@@ -875,7 +1230,8 @@ export function startApp() {
       this.notify();
     },
     setSearch(query) {
-      this.searchQuery = query.trim().toLowerCase();
+      this.searchQuery = String(query ?? "").trim();
+      parsedTaskQuery = parseTaskQuery(this.searchQuery);
       this.notify();
     },
     setProjectFilter(projectId) {
@@ -890,7 +1246,7 @@ export function startApp() {
     },
     toggleEditMode() {
       this.editMode = !this.editMode;
-      localStorage.setItem("editMode", JSON.stringify(this.editMode));
+      safeStorage.setJson("editMode", this.editMode);
       this.notify();
     },
     setLanguage(language) {
@@ -899,16 +1255,23 @@ export function startApp() {
     },
     resetAllData() {
       focusTimer.resetAll();
+      filterPresetStore.reset();
+      taskSelection.exit();
       this.tasks = [];
       this.player = defaultPlayer();
       this.habits = sanitizeHabits(null);
       this.projects = [];
+      this.view = "all";
+      this.searchQuery = "";
+      parsedTaskQuery = parseTaskQuery("");
+      searchInput.value = "";
       this.projectFilter = "all";
       this.categoryFilter = "all";
       this.notify();
     },
     clearCompleted() {
       this.tasks = this.tasks.filter((task) => !task.completed);
+      taskSelection.prune(new Set(this.tasks.map((task) => task.id)));
       this.notify();
     },
     addHabit(habit) {
@@ -958,12 +1321,23 @@ export function startApp() {
       this.projects = sanitizeProjects([...this.projects, project]);
       this.notify();
     },
-    renameProject(id, name) {
+    updateProject(id, updates) {
       const project = this.projects.find((item) => item.id === id);
       if (!project) return;
-      project.name = String(name).trim();
-      if (!project.name) return;
+      this.projects = sanitizeProjects(this.projects.map((item) => item.id === id ? {
+        ...item,
+        ...updates,
+        id: item.id,
+        createdAt: item.createdAt,
+        updatedAt: new Date().toISOString()
+      } : item));
       this.notify();
+    },
+    renameProject(id, name) {
+      this.updateProject(id, { name });
+    },
+    archiveProject(id, archived) {
+      this.updateProject(id, { archived: Boolean(archived) });
     },
     deleteProject(id) {
       this.projects = this.projects.filter((project) => project.id !== id);
@@ -1195,7 +1569,7 @@ export function startApp() {
       document.body.classList.add(`theme-${theme}`);
     }
 
-    const isDark = safeParse(localStorage.getItem("darkMode"), false) === true;
+    const isDark = safeParse(safeStorage.getItem("darkMode"), false) === true;
     document.body.classList.toggle("dark-mode", isDark);
     darkModeToggle.checked = isDark;
   }
@@ -1253,6 +1627,64 @@ export function startApp() {
     document.querySelector(".organization-filters").setAttribute("aria-label", t("organizationFilters"));
     searchInput.placeholder = t("searchPlaceholder");
     searchInput.setAttribute("aria-label", t("searchPlaceholder"));
+    searchBulkElements.clearSearch.setAttribute("aria-label", t("clearSearch"));
+    searchBulkElements.searchHelp.textContent = t("searchHelp");
+    searchBulkElements.selectionToggle.textContent = taskSelection.isActive() ? t("exitSelection") : t("selectTasks");
+    searchBulkElements.selectionToggle.setAttribute("aria-pressed", String(taskSelection.isActive()));
+    document.querySelector(".advanced-search-feedback").setAttribute("aria-label", t("advancedSearch"));
+    searchBulkElements.searchTokenChips.setAttribute("aria-label", t("advancedSearch"));
+    document.getElementById("savedFiltersLabel").textContent = t("savedFilters");
+    searchBulkElements.savedFilterSelect.setAttribute("aria-label", t("savedFilters"));
+    searchBulkElements.applyPreset.textContent = t("applyPreset");
+    searchBulkElements.savePreset.textContent = t("saveFilter");
+    searchBulkElements.renamePreset.textContent = t("renamePreset");
+    searchBulkElements.deletePreset.textContent = t("deletePreset");
+    searchBulkElements.presetTitle.textContent = t(presetDialogMode === "rename" ? "renamePreset" : "saveFilter");
+    searchBulkElements.presetLabel.textContent = t("presetName");
+    searchBulkElements.presetCancel.textContent = t("cancel");
+    searchBulkElements.presetSave.textContent = t("save");
+    document.querySelector(".saved-filter-bar").setAttribute("aria-label", t("savedFilters"));
+    document.getElementById("bulkToolbarTitle").textContent = t("selectionMode");
+    searchBulkElements.selectVisible.textContent = t("selectVisible");
+    searchBulkElements.clearSelection.textContent = t("clearSelection");
+    searchBulkElements.exitSelection.textContent = t("exitSelection");
+    searchBulkElements.complete.textContent = t("markCompleteBulk");
+    searchBulkElements.reopen.textContent = t("reopenTasks");
+    document.getElementById("bulkPriorityLabel").textContent = t("changePriority");
+    searchBulkElements.priority.setAttribute("aria-label", t("changePriority"));
+    setSelectOptionLabels(searchBulkElements.priority, {
+      high: t("bulkPriorityHigh"),
+      medium: t("bulkPriorityMedium"),
+      low: t("bulkPriorityLow")
+    });
+    document.getElementById("bulkProjectLabel").textContent = t("assignProject");
+    searchBulkElements.project.setAttribute("aria-label", t("assignProject"));
+    document.getElementById("bulkCategoryLabel").textContent = t("assignCategory");
+    searchBulkElements.category.setAttribute("aria-label", t("assignCategory"));
+    setSelectOptionLabels(searchBulkElements.category, {
+      "": t("removeCategory"),
+      work: t("categoryWork"),
+      school: t("categorySchool"),
+      personal: t("categoryPersonal"),
+      health: t("categoryHealth"),
+      other: t("categoryOther")
+    });
+    document.getElementById("bulkDueDateLabel").textContent = t("changeDueDate");
+    searchBulkElements.dueDate.setAttribute("aria-label", t("changeDueDate"));
+    searchBulkElements.removeDueDate.textContent = t("removeDueDate");
+    searchBulkElements.deleteTasks.textContent = t("deleteSelected");
+    [
+      searchBulkElements.applyPriority,
+      searchBulkElements.applyProject,
+      searchBulkElements.applyCategory,
+      searchBulkElements.applyDueDate
+    ].forEach((button) => { button.textContent = t("bulkApply"); });
+    document.getElementById("searchHelpKicker").textContent = t("advancedSearch");
+    document.getElementById("searchHelpTitle").textContent = t("searchHelp");
+    document.getElementById("searchHelpDescription").textContent = t("searchHelpDescription");
+    document.getElementById("searchHelpHint").textContent = t("searchHelpHint");
+    document.querySelector(".search-help-examples").setAttribute("aria-label", t("searchExamples"));
+    searchBulkElements.searchHelpClose.setAttribute("aria-label", t("closeSearchHelp"));
     editTextInput.placeholder = t("taskDescriptionPlaceholder");
 
     addTaskBtn.textContent = t("addTask");
@@ -1332,12 +1764,14 @@ export function startApp() {
     const tabDashboardLabel = document.getElementById("tabDashboardLabel");
     const tabCalendarLabel = document.getElementById("tabCalendarLabel");
     const tabFocusLabel = document.getElementById("tabFocusLabel");
+    const tabProjectsLabel = document.getElementById("tabProjectsLabel");
     if (tabTasksLabel) tabTasksLabel.textContent = t("tabTasks");
     if (tabHabitsLabel) tabHabitsLabel.textContent = t("tabHabits");
     if (tabStatsLabel) tabStatsLabel.textContent = t("tabStats");
     if (tabDashboardLabel) tabDashboardLabel.textContent = t("tabDashboard");
     if (tabCalendarLabel) tabCalendarLabel.textContent = t("tabCalendar");
     if (tabFocusLabel) tabFocusLabel.textContent = t("focus");
+    if (tabProjectsLabel) tabProjectsLabel.textContent = t("projects");
 
     document.getElementById("focusEyebrow").textContent = t("focusEyebrow");
     document.getElementById("focusTitle").textContent = t("focus");
@@ -1382,6 +1816,10 @@ export function startApp() {
     document.getElementById("calendarPreviousBtn").setAttribute("aria-label", t("calendarPreviousMonth"));
     document.getElementById("calendarNextBtn").setAttribute("aria-label", t("calendarNextMonth"));
     document.getElementById("calendarTodayBtn").textContent = t("today");
+    document.getElementById("calendarProjectFilterLabel").textContent = t("project");
+    document.getElementById("calendarProjectFilter").setAttribute("aria-label", t("calendarProjectFilter"));
+    document.querySelector(".calendar-project-controls").setAttribute("aria-label", t("calendarProjectFilter"));
+    document.getElementById("calendarIncludeArchivedLabel").textContent = t("includeArchived");
 
     document.getElementById("dashboardEyebrow").textContent = t("dashboardEyebrow");
     document.getElementById("dashboardTitle").textContent = t("dashboardTitle");
@@ -1401,6 +1839,50 @@ export function startApp() {
     document.getElementById("dashboardAddTaskLabel").textContent = t("addTask");
     document.getElementById("dashboardAddHabitLabel").textContent = t("dashboardAddHabit");
     document.getElementById("dashboardViewStatsLabel").textContent = t("dashboardViewStats");
+    document.getElementById("dashboardProjectsKicker").textContent = t("dashboardProjectsKicker");
+    document.getElementById("dashboardProjectsTitle").textContent = t("dashboardProjectProgress");
+    document.getElementById("dashboardOpenProjects").textContent = t("dashboardOpenProjects");
+
+    document.getElementById("projectsPageEyebrow").textContent = t("projectsPageEyebrow");
+    document.getElementById("projectsPageStatus").textContent = "";
+    document.getElementById("projectDetailStatus").textContent = "";
+    document.getElementById("projectsPageTitle").textContent = t("projects");
+    document.getElementById("projectsPageSubtitle").textContent = t("projectsPageSubtitle");
+    document.getElementById("projectsCreateBtn").textContent = t("createProject");
+    document.getElementById("activeProjectsKicker").textContent = t("currentWork");
+    document.getElementById("activeProjectsTitle").textContent = t("activeProjects");
+    document.getElementById("projectsEmptyTitle").textContent = t("noProjectsYet");
+    document.getElementById("projectsEmptyText").textContent = t("noProjectsDescription");
+    document.getElementById("projectsEmptyCreateBtn").textContent = t("createProject");
+    document.getElementById("archivedProjectsTitle").textContent = t("archivedProjects");
+    document.getElementById("projectDetailBack").textContent = `← ${t("backToProjects")}`;
+    document.getElementById("projectAddTaskBtn").textContent = t("addTaskToProject");
+    document.getElementById("projectViewTasksBtn").textContent = t("viewProjectTasks");
+    document.getElementById("projectViewCalendarBtn").textContent = t("viewInCalendar");
+    document.getElementById("projectProgressLabel").textContent = t("completionProgress");
+    document.getElementById("projectEditBtn").textContent = t("editProject");
+    document.getElementById("projectDeleteBtn").textContent = t("deleteProject");
+    document.getElementById("projectTasksKicker").textContent = t("projectWorkKicker");
+    document.getElementById("projectTasksTitle").textContent = t("projectTasks");
+    document.getElementById("projectDetailSearch").placeholder = t("searchProjectTasks");
+    document.getElementById("projectDetailSearch").setAttribute("aria-label", t("searchProjectTasks"));
+    document.getElementById("projectDetailStatusFilter").setAttribute("aria-label", t("taskStatus"));
+    setSelectOptionLabels(document.getElementById("projectDetailStatusFilter"), {
+      all: t("all"),
+      open: t("openTasks"),
+      completed: t("completedTasks")
+    });
+    document.getElementById("projectDeadlineKicker").textContent = t("projectScheduleKicker");
+    document.getElementById("projectDeadlineTitle").textContent = t("upcomingDeadlines");
+    document.getElementById("projectActivityKicker").textContent = t("projectLatestKicker");
+    document.getElementById("projectActivityTitle").textContent = t("recentActivity");
+    document.getElementById("projectEditKicker").textContent = t("projectDetails");
+    document.getElementById("projectEditTitle").textContent = t("editProject");
+    document.getElementById("projectEditEmojiLabel").textContent = t("projectEmoji");
+    document.getElementById("projectEditNameLabel").textContent = t("projectName");
+    document.getElementById("projectEditDescriptionLabel").textContent = t("projectDescription");
+    document.getElementById("projectEditCancel").textContent = t("cancel");
+    document.getElementById("projectEditSave").textContent = t("save");
 
     const habitsTitleEl = document.getElementById("habitsTitle");
     const habitsSubtitleEl = document.getElementById("habitsSubtitle");
@@ -1437,6 +1919,7 @@ export function startApp() {
 
     updateEditModeUI();
     formatHeaderDate();
+    appStatus?.render();
   }
 
   function createEmptyState(message) {
@@ -1643,6 +2126,8 @@ export function startApp() {
   }
 
   function switchTab(name) {
+    const clearedSelection = name !== "tasks" && taskSelection.isActive();
+    if (clearedSelection) taskSelection.exit();
     document.querySelectorAll(".tab-btn").forEach((btn) => {
       const isActive = btn.dataset.tab === name;
       btn.classList.toggle("active", isActive);
@@ -1652,7 +2137,8 @@ export function startApp() {
     document.querySelectorAll(".tab-panel").forEach((panel) => {
       panel.classList.toggle("active", panel.id === `panel-${name}`);
     });
-    localStorage.setItem(TAB_KEY, name);
+    safeStorage.setItem(TAB_KEY, name);
+    if (clearedSelection) render(State);
   }
 
   const notifiedThisSession = new Set();
@@ -2179,12 +2665,40 @@ export function startApp() {
     return t(`category${category[0].toUpperCase()}${category.slice(1)}`);
   }
 
+  function toggleTaskSelection(taskId, restoreFocus = true) {
+    taskSelection.toggle(taskId);
+    render(State);
+    if (!restoreFocus) return;
+    requestAnimationFrame(() => {
+      const control = [...document.querySelectorAll(".task-select-control")]
+        .find((button) => button.closest(".task-card")?.dataset.id === taskId);
+      control?.focus();
+    });
+  }
+
   function buildTaskElement(task) {
+    const selecting = taskSelection.isActive();
+    const selected = taskSelection.isSelected(task.id);
     const li = document.createElement("li");
     li.className = "task-card";
-    li.draggable = true;
+    li.draggable = !selecting;
     li.dataset.id = task.id;
     li.dataset.priority = normalizePriority(task.priority);
+    li.classList.toggle("selection-mode", selecting);
+    li.classList.toggle("task-selected", selected);
+    if (selecting) {
+      li.setAttribute("aria-selected", String(selected));
+      li.tabIndex = 0;
+      li.addEventListener("click", (event) => {
+        if (event.target.closest("button, input, select, textarea, a")) return;
+        toggleTaskSelection(task.id, false);
+      });
+      li.addEventListener("keydown", (event) => {
+        if (event.target !== li || event.key !== " ") return;
+        event.preventDefault();
+        toggleTaskSelection(task.id, false);
+      });
+    }
 
     if (task.dueDate && !task.completed) {
       const today = getTodayString();
@@ -2196,12 +2710,23 @@ export function startApp() {
     mainWrapper.className = "task-main";
 
     const toggleBtn = document.createElement("button");
-    toggleBtn.className = "toggle-btn";
     toggleBtn.type = "button";
-    toggleBtn.setAttribute("aria-label", task.completed ? t("markTaskIncomplete") : t("markTaskComplete"));
-    toggleBtn.setAttribute("aria-pressed", String(task.completed));
-    if (task.completed) toggleBtn.classList.add("completed");
-    toggleBtn.addEventListener("click", () => State.toggleTask(task.id));
+    if (selecting) {
+      toggleBtn.className = "task-select-control";
+      toggleBtn.setAttribute("role", "checkbox");
+      toggleBtn.setAttribute("aria-checked", String(selected));
+      toggleBtn.setAttribute("aria-label", `${t(selected ? "deselectTask" : "selectTask")}: ${task.text}`);
+      toggleBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleTaskSelection(task.id);
+      });
+    } else {
+      toggleBtn.className = "toggle-btn";
+      toggleBtn.setAttribute("aria-label", task.completed ? t("markTaskIncomplete") : t("markTaskComplete"));
+      toggleBtn.setAttribute("aria-pressed", String(task.completed));
+      if (task.completed) toggleBtn.classList.add("completed");
+      toggleBtn.addEventListener("click", () => State.toggleTask(task.id));
+    }
 
     const content = document.createElement("div");
     content.className = "task-content";
@@ -2243,7 +2768,7 @@ export function startApp() {
     if (project) {
       const projectSpan = document.createElement("span");
       projectSpan.className = "task-organization-chip task-project-chip";
-      projectSpan.textContent = `${project.emoji} ${project.name}`;
+      projectSpan.textContent = `${project.emoji} ${project.name}${project.archived ? ` · ${t("archived")}` : ""}`;
       meta.appendChild(projectSpan);
     }
 
@@ -2268,7 +2793,7 @@ export function startApp() {
     mainWrapper.appendChild(content);
     li.appendChild(mainWrapper);
 
-    if (!task.completed) {
+    if (!selecting && !task.completed) {
       const focusBtn = document.createElement("button");
       focusBtn.className = "task-focus-action";
       focusBtn.type = "button";
@@ -2278,7 +2803,7 @@ export function startApp() {
       li.appendChild(focusBtn);
     }
 
-    if (State.editMode) {
+    if (!selecting && State.editMode) {
       const actions = document.createElement("div");
       actions.className = "task-actions";
 
@@ -2305,18 +2830,23 @@ export function startApp() {
   }
 
   function filterTasks(state) {
-    return state.tasks.filter((task) => {
-      const project = state.projects.find((item) => item.id === task.projectId);
-      const searchableText = [
-        task.text,
-        project?.name || "",
-        task.category ? getCategoryLabel(task.category) : "",
-        task.recurrence ? formatRecurrence(task.recurrence, t) : ""
-      ].join(" ").toLowerCase();
+    const focusedTaskIds = new Set(
+      focusTimer.getSnapshot().data.history
+        .filter((entry) => entry.mode === "focus" && entry.completed && entry.taskId)
+        .map((entry) => entry.taskId)
+    );
+    const categoryLabels = Object.fromEntries(
+      ["work", "school", "personal", "health", "other"].map((category) => [category, getCategoryLabel(category)])
+    );
+    const searchContext = {
+      projects: state.projects,
+      categoryLabels,
+      focusedTaskIds,
+      recurrenceLabel: (recurrence) => recurrence ? formatRecurrence(recurrence, t) : ""
+    };
 
-      if (state.searchQuery && !searchableText.includes(state.searchQuery)) {
-        return false;
-      }
+    return state.tasks.filter((task) => {
+      if (!matchesTaskQuery(task, parsedTaskQuery, searchContext)) return false;
 
       if (state.projectFilter === "unassigned" && task.projectId !== null) return false;
       if (state.projectFilter !== "all" && state.projectFilter !== "unassigned" && task.projectId !== state.projectFilter) return false;
@@ -2357,6 +2887,88 @@ export function startApp() {
     });
   }
 
+  function renderSearchFeedback(filteredCount) {
+    const hasQuery = Boolean(State.searchQuery);
+    searchInput.closest(".search-field").classList.toggle("has-query", hasQuery);
+    searchBulkElements.clearSearch.classList.toggle("hidden", !hasQuery);
+    const chips = parsedTaskQuery.tokens.map((token) => {
+      const chip = document.createElement("span");
+      chip.className = "search-token-chip";
+      chip.textContent = token.raw;
+      return chip;
+    });
+    searchBulkElements.searchTokenChips.replaceChildren(...chips);
+    searchBulkElements.searchFeedback.classList.toggle("has-warning", parsedTaskQuery.warnings.length > 0);
+    if (parsedTaskQuery.warnings.length > 0) {
+      searchBulkElements.searchFeedback.textContent = t("unknownFilter").replace(
+        "{filters}",
+        parsedTaskQuery.warnings.map((warning) => warning.raw).join(", ")
+      );
+    } else if (hasQuery) {
+      searchBulkElements.searchFeedback.textContent = formatActiveSearchSummary(parsedTaskQuery, State.language);
+    } else {
+      searchBulkElements.searchFeedback.textContent = t("searchSyntaxHint");
+    }
+    searchBulkElements.searchResultCount.textContent = filteredCount === 1
+      ? t("searchResultOne")
+      : t("searchResults").replace("{count}", filteredCount);
+  }
+
+  function renderFilterPresets() {
+    const presets = filterPresetStore.getAll();
+    const current = searchBulkElements.savedFilterSelect.value;
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = t("noSavedFilters");
+    const options = presets.map((preset) => {
+      const option = document.createElement("option");
+      option.value = preset.id;
+      option.textContent = preset.name;
+      return option;
+    });
+    searchBulkElements.savedFilterSelect.replaceChildren(placeholder, ...options);
+    searchBulkElements.savedFilterSelect.value = presets.some((preset) => preset.id === current) ? current : "";
+    const hasSelection = Boolean(searchBulkElements.savedFilterSelect.value);
+    searchBulkElements.applyPreset.disabled = !hasSelection;
+    searchBulkElements.renamePreset.disabled = !hasSelection;
+    searchBulkElements.deletePreset.disabled = !hasSelection;
+  }
+
+  function renderBulkControls(state, visibleTasks) {
+    taskSelection.prune(new Set(state.tasks.map((task) => task.id)));
+    const active = taskSelection.isActive();
+    const count = taskSelection.getCount();
+    searchBulkElements.bulkToolbar.classList.toggle("hidden", !active);
+    searchBulkElements.selectionToggle.setAttribute("aria-pressed", String(active));
+    searchBulkElements.selectionToggle.textContent = active ? t("exitSelection") : t("selectTasks");
+    searchBulkElements.selectedCount.textContent = t("selectedTasksCount").replace("{count}", count);
+    searchBulkElements.selectVisible.disabled = visibleTasks.length === 0;
+    searchBulkElements.clearSelection.disabled = count === 0;
+    [
+      searchBulkElements.complete,
+      searchBulkElements.reopen,
+      searchBulkElements.applyPriority,
+      searchBulkElements.applyProject,
+      searchBulkElements.applyCategory,
+      searchBulkElements.applyDueDate,
+      searchBulkElements.removeDueDate,
+      searchBulkElements.deleteTasks
+    ].forEach((control) => { control.disabled = count === 0; });
+
+    const projectValue = searchBulkElements.project.value;
+    const noProject = document.createElement("option");
+    noProject.value = "";
+    noProject.textContent = t("removeProject");
+    const projectOptions = state.projects.filter((project) => !project.archived).map((project) => {
+      const option = document.createElement("option");
+      option.value = project.id;
+      option.textContent = `${project.emoji} ${project.name}`;
+      return option;
+    });
+    searchBulkElements.project.replaceChildren(noProject, ...projectOptions);
+    searchBulkElements.project.value = state.projects.some((project) => project.id === projectValue) ? projectValue : "";
+  }
+
   function render(state) {
     updateStaticTranslations();
 
@@ -2364,18 +2976,20 @@ export function startApp() {
     completedList.innerHTML = "";
 
     const filteredTasks = filterTasks(state);
+    taskSelection.prune(new Set(state.tasks.map((task) => task.id)));
     const todoTasks = sortTasks(filteredTasks.filter((task) => !task.completed));
     const doneTasks = sortTasks(filteredTasks.filter((task) => task.completed));
 
     todoTasks.forEach((task) => todoList.appendChild(buildTaskElement(task)));
     doneTasks.forEach((task) => completedList.appendChild(buildTaskElement(task)));
 
+    const hasFilters = Boolean(state.searchQuery) || state.view !== "all" || state.projectFilter !== "all" || state.categoryFilter !== "all";
     if (todoTasks.length === 0) {
-      todoList.appendChild(createEmptyState(t("emptyView")));
+      todoList.appendChild(createEmptyState(t(hasFilters ? "noMatchingTasks" : "emptyView")));
     }
 
     if (doneTasks.length === 0) {
-      completedList.appendChild(createEmptyState(t("emptyView")));
+      completedList.appendChild(createEmptyState(t(hasFilters ? "noMatchingTasks" : "emptyView")));
     }
 
     todoHeading.textContent = `${t("todo")} (${todoTasks.length})`;
@@ -2395,7 +3009,11 @@ export function startApp() {
     clearCompletedBtn.disabled = doneTasks.length === 0;
     viewButtons.forEach((button) => {
       button.setAttribute("aria-pressed", String(button.dataset.view === state.view));
+      button.classList.toggle("active", button.dataset.view === state.view);
     });
+    renderSearchFeedback(filteredTasks.length);
+    renderFilterPresets();
+    renderBulkControls(state, filteredTasks);
 
     renderHeroCard(todoTasks.length, state.player.streak);
     renderWeekStrip();
@@ -2405,10 +3023,18 @@ export function startApp() {
     renderHabits();
     updateQuote(true);
     projectsUI?.render(state);
+    richProjectsUI?.render({
+      ...state,
+      focusHistory: focusTimer.getExportData().history
+    });
     dashboard?.render(state);
     calendar?.render(state);
     reminderCenter?.render(state);
     focusUI?.render(state);
+    analyticsUI?.render({
+      ...state,
+      focusHistory: focusTimer.getExportData().history
+    });
   }
 
   let searchTimeout;
@@ -2518,7 +3144,7 @@ export function startApp() {
   });
 
   themeSelect.addEventListener("change", () => {
-    localStorage.setItem("theme", themeSelect.value);
+    safeStorage.setItem("theme", themeSelect.value);
     applyTheme(themeSelect.value);
   });
 
@@ -2530,7 +3156,7 @@ export function startApp() {
   });
 
   darkModeToggle.addEventListener("change", () => {
-    localStorage.setItem("darkMode", JSON.stringify(darkModeToggle.checked));
+    safeStorage.setJson("darkMode", darkModeToggle.checked);
     applyTheme(themeSelect.value);
     if (darkModeToggle.checked) {
       State.player.usedDarkMode = true;
@@ -2682,6 +3308,196 @@ export function startApp() {
     searchTimeout = setTimeout(() => State.setSearch(event.target.value), 250);
   });
 
+  function clearTaskSearch() {
+    searchInput.value = "";
+    State.setSearch("");
+    searchInput.focus();
+  }
+
+  function openSearchHelp() {
+    searchHelpReturnFocus = document.activeElement;
+    searchBulkElements.searchHelpDialog.classList.remove("hidden");
+    searchBulkElements.searchHelpClose.focus();
+  }
+
+  function closeSearchHelp() {
+    if (searchBulkElements.searchHelpDialog.classList.contains("hidden")) return;
+    searchBulkElements.searchHelpDialog.classList.add("hidden");
+    if (searchHelpReturnFocus?.isConnected) searchHelpReturnFocus.focus();
+    searchHelpReturnFocus = null;
+  }
+
+  function openPresetDialog(mode) {
+    const preset = mode === "rename" ? selectedPreset() : null;
+    if (mode === "rename" && !preset) return;
+    presetDialogMode = mode;
+    presetDialogReturnFocus = document.activeElement;
+    searchBulkElements.presetTitle.textContent = t(mode === "rename" ? "renamePreset" : "saveFilter");
+    searchBulkElements.presetName.value = preset?.name || "";
+    searchBulkElements.presetDialog.classList.remove("hidden");
+    searchBulkElements.presetName.focus();
+    searchBulkElements.presetName.select();
+  }
+
+  function closePresetDialog() {
+    if (searchBulkElements.presetDialog.classList.contains("hidden")) return;
+    searchBulkElements.presetDialog.classList.add("hidden");
+    if (presetDialogReturnFocus?.isConnected) presetDialogReturnFocus.focus();
+    presetDialogReturnFocus = null;
+  }
+
+  function announcePreset(message) {
+    searchBulkElements.searchFeedback.classList.remove("has-warning");
+    searchBulkElements.searchFeedback.textContent = message;
+  }
+
+  function selectedPreset() {
+    const id = searchBulkElements.savedFilterSelect.value;
+    return filterPresetStore.getAll().find((preset) => preset.id === id) || null;
+  }
+
+  function applyFilterPreset(preset) {
+    if (!preset) return;
+    State.searchQuery = preset.query;
+    parsedTaskQuery = parseTaskQuery(preset.query);
+    State.view = preset.dateView;
+    State.projectFilter = preset.projectFilter === "unassigned" || State.projects.some((project) => project.id === preset.projectFilter)
+      ? preset.projectFilter
+      : "all";
+    State.categoryFilter = sanitizeCategory(preset.categoryFilter) || "all";
+    searchInput.value = preset.query;
+    State.notify();
+    announcePreset(t("presetApplied"));
+  }
+
+  function announceBulk(count, key = "tasksUpdated") {
+    const message = t(key).replace("{count}", count);
+    searchBulkElements.status.textContent = message;
+    return message;
+  }
+
+  function restoreBulkFocus(element) {
+    requestAnimationFrame(() => element?.focus());
+  }
+
+  searchBulkElements.clearSearch.addEventListener("click", clearTaskSearch);
+  searchBulkElements.searchHelp.addEventListener("click", openSearchHelp);
+  searchBulkElements.searchHelpClose.addEventListener("click", closeSearchHelp);
+  searchBulkElements.searchHelpDialog.addEventListener("click", (event) => {
+    if (event.target === searchBulkElements.searchHelpDialog) closeSearchHelp();
+  });
+  searchBulkElements.presetDialog.addEventListener("click", (event) => {
+    if (event.target === searchBulkElements.presetDialog) closePresetDialog();
+  });
+  searchBulkElements.presetCancel.addEventListener("click", closePresetDialog);
+  searchBulkElements.presetForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const name = searchBulkElements.presetName.value.trim();
+    if (!name) {
+      searchBulkElements.presetName.focus();
+      return;
+    }
+    if (presetDialogMode === "rename") {
+      const preset = selectedPreset();
+      if (!preset || !filterPresetStore.rename(preset.id, name)) return;
+      closePresetDialog();
+      renderFilterPresets();
+      announcePreset(t("presetRenamed"));
+      return;
+    }
+    const result = filterPresetStore.save(name, {
+      query: State.searchQuery,
+      dateView: State.view,
+      projectFilter: State.projectFilter,
+      categoryFilter: State.categoryFilter
+    });
+    if (!result.ok) {
+      announcePreset(t(result.reason === "limit" ? "presetLimit" : "presetNameRequired"));
+      if (result.reason !== "limit") searchBulkElements.presetName.focus();
+      else closePresetDialog();
+      return;
+    }
+    closePresetDialog();
+    renderFilterPresets();
+    searchBulkElements.savedFilterSelect.value = result.preset.id;
+    renderFilterPresets();
+    announcePreset(t("presetSaved"));
+  });
+  searchBulkElements.selectionToggle.addEventListener("click", () => {
+    if (taskSelection.isActive()) taskSelection.exit();
+    else taskSelection.enter();
+    render(State);
+    restoreBulkFocus(searchBulkElements.selectionToggle);
+  });
+  searchBulkElements.savedFilterSelect.addEventListener("change", () => renderFilterPresets());
+  searchBulkElements.applyPreset.addEventListener("click", () => applyFilterPreset(selectedPreset()));
+  searchBulkElements.savePreset.addEventListener("click", () => openPresetDialog("save"));
+  searchBulkElements.renamePreset.addEventListener("click", () => openPresetDialog("rename"));
+  searchBulkElements.deletePreset.addEventListener("click", () => {
+    const preset = selectedPreset();
+    if (!preset || !confirm(`${t("deletePreset")}: ${preset.name}?`)) return;
+    filterPresetStore.delete(preset.id);
+    announcePreset(t("presetDeleted"));
+    renderFilterPresets();
+  });
+  searchBulkElements.selectVisible.addEventListener("click", () => {
+    taskSelection.selectVisible(filterTasks(State).map((task) => task.id));
+    render(State);
+    restoreBulkFocus(searchBulkElements.selectVisible);
+  });
+  searchBulkElements.clearSelection.addEventListener("click", () => {
+    taskSelection.clear();
+    render(State);
+    restoreBulkFocus(searchBulkElements.clearSelection);
+  });
+  searchBulkElements.exitSelection.addEventListener("click", () => {
+    taskSelection.exit();
+    render(State);
+    restoreBulkFocus(searchBulkElements.selectionToggle);
+  });
+  searchBulkElements.complete.addEventListener("click", () => {
+    announceBulk(State.bulkSetCompletion(taskSelection.getIds(), true));
+    restoreBulkFocus(searchBulkElements.complete);
+  });
+  searchBulkElements.reopen.addEventListener("click", () => {
+    announceBulk(State.bulkSetCompletion(taskSelection.getIds(), false));
+    restoreBulkFocus(searchBulkElements.reopen);
+  });
+  searchBulkElements.applyPriority.addEventListener("click", () => {
+    announceBulk(State.bulkUpdateTasks(taskSelection.getIds(), { priority: searchBulkElements.priority.value }));
+    restoreBulkFocus(searchBulkElements.applyPriority);
+  });
+  searchBulkElements.applyProject.addEventListener("click", () => {
+    announceBulk(State.bulkUpdateTasks(taskSelection.getIds(), { projectId: searchBulkElements.project.value || null }));
+    restoreBulkFocus(searchBulkElements.applyProject);
+  });
+  searchBulkElements.applyCategory.addEventListener("click", () => {
+    announceBulk(State.bulkUpdateTasks(taskSelection.getIds(), { category: searchBulkElements.category.value || null }));
+    restoreBulkFocus(searchBulkElements.applyCategory);
+  });
+  searchBulkElements.applyDueDate.addEventListener("click", () => {
+    const dueDate = searchBulkElements.dueDate.value;
+    if (!isValidDateKey(dueDate)) {
+      searchBulkElements.dueDate.focus();
+      return;
+    }
+    announceBulk(State.bulkUpdateTasks(taskSelection.getIds(), { dueDate }));
+    restoreBulkFocus(searchBulkElements.applyDueDate);
+  });
+  searchBulkElements.removeDueDate.addEventListener("click", () => {
+    announceBulk(State.bulkUpdateTasks(taskSelection.getIds(), { dueDate: null }));
+    restoreBulkFocus(searchBulkElements.removeDueDate);
+  });
+  searchBulkElements.deleteTasks.addEventListener("click", () => {
+    const ids = taskSelection.getIds();
+    if (!ids.length || !confirm(t("confirmBulkDeletion").replace("{count}", ids.length))) return;
+    const deleted = State.bulkDeleteTasks(ids);
+    taskSelection.exit();
+    announceBulk(deleted, "tasksDeleted");
+    render(State);
+    restoreBulkFocus(searchBulkElements.selectionToggle);
+  });
+
   viewButtons.forEach((button) => {
     button.addEventListener("click", () => {
       viewButtons.forEach((btn) => btn.classList.remove("active"));
@@ -2691,6 +3507,7 @@ export function startApp() {
   });
 
   document.addEventListener("dragstart", (event) => {
+    if (taskSelection.isActive()) return;
     const card = event.target.closest(".task-card");
     if (!card) return;
 
@@ -2708,6 +3525,7 @@ export function startApp() {
   });
 
   document.addEventListener("dragover", (event) => {
+    if (taskSelection.isActive()) return;
     event.preventDefault();
     const targetCard = event.target.closest(".task-card");
     if (!targetCard || targetCard.dataset.id === draggedElementId) return;
@@ -2717,6 +3535,7 @@ export function startApp() {
   });
 
   document.addEventListener("drop", (event) => {
+    if (taskSelection.isActive()) return;
     event.preventDefault();
     const targetCard = event.target.closest(".task-card");
     if (!targetCard || !draggedElementId) return;
@@ -2725,19 +3544,16 @@ export function startApp() {
   });
 
   exportBtn.addEventListener("click", () => {
-    const exportData = {
+    const exportData = buildBackupEnvelope({
       tasks: State.tasks,
       player: State.player,
       habits: State.habits,
       language: State.language,
       projects: State.projects,
-      focus: focusTimer.getExportData()
-    };
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
-    const downloadAnchor = document.createElement("a");
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", "taskflow_data.json");
-    downloadAnchor.click();
+      focus: focusTimer.getExportData(),
+      filterPresets: filterPresetStore.getAll()
+    }, APP_VERSION);
+    downloadBackupJson(exportData);
   });
 
   importFile.addEventListener("change", (event) => {
@@ -2746,35 +3562,43 @@ export function startApp() {
 
     const reader = new FileReader();
     reader.onload = (loadEvent) => {
-      try {
-        const imported = JSON.parse(loadEvent.target.result);
-
-        if (Array.isArray(imported)) {
-          State.tasks = sanitizeTaskProjectReferences(sanitizeTasks(imported), State.projects);
-        } else {
-          if (Array.isArray(imported.projects)) {
-            State.projects = sanitizeProjects(imported.projects);
-          }
-          State.tasks = sanitizeTaskProjectReferences(sanitizeTasks(imported.tasks || []), State.projects);
-          State.player = sanitizePlayer(imported.player || defaultPlayer());
-          if (imported.habits) State.habits = sanitizeHabits(imported.habits);
-          if (imported.focus && typeof imported.focus === "object") {
-            focusTimer.replaceImportedData(imported.focus);
-          }
-          if (imported.language && translations[imported.language]) {
-            State.language = imported.language;
-            languageSelect.value = imported.language;
-          }
-          if (State.projectFilter !== "all" && State.projectFilter !== "unassigned" && !State.projects.some((project) => project.id === State.projectFilter)) {
-            State.projectFilter = "all";
-          }
-        }
-
-        State.notify();
-        alert(t("importSuccess"));
-      } catch (error) {
-        alert(t("invalidFile"));
+      const result = parseBackupText(loadEvent.target.result, {
+        tasks: State.tasks,
+        projects: State.projects,
+        player: State.player,
+        habits: State.habits,
+        language: State.language,
+        focus: focusTimer.getSnapshot().data,
+        filterPresets: filterPresetStore.getAll()
+      });
+      if (!result.ok) {
+        const errorKeys = {
+          invalidJson: "importInvalidJson",
+          missingData: "importMissingData",
+          wrongFormat: "importWrongFormat",
+          unsupportedVersion: "importUnsupportedVersion",
+          invalidCollection: "importInvalidCollection",
+          invalidLanguage: "importInvalidLanguage"
+        };
+        alert(t(errorKeys[result.reason] || "invalidFile"));
+        importFile.value = "";
+        return;
       }
+
+      State.tasks = result.data.tasks;
+      State.projects = result.data.projects;
+      State.player = result.data.player;
+      State.habits = result.data.habits;
+      State.language = result.data.language;
+      if (result.provided.focus) focusTimer.replaceImportedData(result.data.focus);
+      if (result.provided.filterPresets) filterPresetStore.replace(result.data.filterPresets);
+      languageSelect.value = State.language;
+      if (State.projectFilter !== "all" && State.projectFilter !== "unassigned" && !State.projects.some((project) => project.id === State.projectFilter)) {
+        State.projectFilter = "all";
+      }
+      taskSelection.exit();
+      State.notify();
+      alert(t("importSuccess"));
 
       importFile.value = "";
     };
@@ -2793,6 +3617,16 @@ export function startApp() {
   });
 
   document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !searchBulkElements.presetDialog.classList.contains("hidden")) {
+      closePresetDialog();
+      return;
+    }
+
+    if (event.key === "Escape" && !searchBulkElements.searchHelpDialog.classList.contains("hidden")) {
+      closeSearchHelp();
+      return;
+    }
+
     if (event.key === "Escape" && !settingsPanel.classList.contains("hidden")) {
       setSettingsOpen(false);
       settingsBtn.focus();
@@ -2801,8 +3635,14 @@ export function startApp() {
 
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
       event.preventDefault();
+      switchTab("tasks");
       searchInput.focus();
       searchInput.select();
+      return;
+    }
+
+    if (event.key === "Escape" && document.activeElement === searchInput && State.searchQuery) {
+      clearTaskSearch();
       return;
     }
 
@@ -2825,18 +3665,49 @@ export function startApp() {
         first.focus();
       }
     }
+
+    if (event.key === "Tab" && !searchBulkElements.searchHelpDialog.classList.contains("hidden")) {
+      const focusable = Array.from(searchBulkElements.searchHelpDialog.querySelectorAll("button, [href], input, select, textarea"))
+        .filter((element) => !element.disabled);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    if (event.key === "Tab" && !searchBulkElements.presetDialog.classList.contains("hidden")) {
+      const focusable = Array.from(searchBulkElements.presetDialog.querySelectorAll("button, input"))
+        .filter((element) => !element.disabled);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
   });
 
   const validThemes = ["default", "sunset", "mint", "galaxy", "rose", "ocean"];
-  const savedTheme = localStorage.getItem("theme") || "default";
+  const savedTheme = safeStorage.getItem("theme") || "default";
   themeSelect.value = validThemes.includes(savedTheme) ? savedTheme : "default";
   languageSelect.value = State.language;
   applyTheme(themeSelect.value);
   setDateConstraints();
   formatHeaderDate();
 
-  const savedTab = localStorage.getItem(TAB_KEY) || "tasks";
-  switchTab(savedTab);
+  const validTabs = new Set(["dashboard", "calendar", "tasks", "projects", "focus", "habits", "stats"]);
+  const storedTab = safeStorage.getItem(TAB_KEY) || "tasks";
+  switchTab(validTabs.has(storedTab) ? storedTab : "tasks");
 
   checkHabitResets();
   setInterval(checkHabitReminders, 60000);
@@ -2847,7 +3718,8 @@ export function startApp() {
     sortTasks,
     toggleTask: (id) => State.toggleTask(id),
     toggleHabit: (id) => State.toggleHabit(id),
-    xpNeededForLevel
+    xpNeededForLevel,
+    openProject: (id) => richProjectsUI?.openProject(id)
   });
 
   calendar = createCalendar({
@@ -2895,10 +3767,60 @@ export function startApp() {
     toggleTask: (id) => State.toggleTask(id),
     onSessionComplete: showFocusCompletion
   });
-  focusTimer.subscribe((snapshot, event) => focusUI.handleTimerEvent(snapshot, event));
+  richProjectsUI = createRichProjectsUI({
+    t,
+    switchTab,
+    sortTasks,
+    openTask: (id) => openEditModal(id),
+    toggleTask: (id) => State.toggleTask(id),
+    prepareFocus: (id) => focusUI.prepareTask(id),
+    prepareTaskForProject: (projectId) => {
+      const project = State.projects.find((item) => item.id === projectId);
+      switchTab("tasks");
+      State.setProjectFilter(projectId === UNASSIGNED_PROJECT_ID ? "unassigned" : projectId);
+      taskProjectInput.value = project && !project.archived ? project.id : "";
+      requestAnimationFrame(() => taskInput.focus());
+    },
+    viewProjectTasks: (projectId) => {
+      switchTab("tasks");
+      State.setProjectFilter(projectId === UNASSIGNED_PROJECT_ID ? "unassigned" : projectId);
+    },
+    viewProjectCalendar: (projectId) => {
+      calendar?.setProjectFilter(projectId === UNASSIGNED_PROJECT_ID ? "unassigned" : projectId);
+      switchTab("calendar");
+    },
+    openCreateProject: () => {
+      setSettingsOpen(true);
+      requestAnimationFrame(() => document.getElementById("projectNameInput")?.focus());
+    },
+    updateProject: (id, updates) => State.updateProject(id, updates),
+    archiveProject: (id, archived) => State.archiveProject(id, archived),
+    deleteProject: (id) => State.deleteProject(id)
+  });
+  appStatus = createAppStatus({ getLanguage: () => State.language });
+  renderPersistenceStatus = () => {
+    if (persistenceStatusEvent) appStatus.setPersistence(persistenceStatusEvent);
+    else appStatus.render();
+  };
+  renderPersistenceStatus();
+  pwaManager = createPwaManager({ status: appStatus });
+  analyticsUI = createAnalyticsUI({ appVersion: APP_VERSION });
+  focusTimer.subscribe((snapshot, event) => {
+    focusUI.handleTimerEvent(snapshot, event);
+    if (event.type === "complete" || event.type === "reset" || event.type === "import" || event.type === "resetAll") {
+      analyticsUI.render({
+        ...State,
+        focusHistory: focusTimer.getExportData().history
+      });
+    }
+    if (event.type === "complete" && State.searchQuery.toLocaleLowerCase().includes("focus:")) {
+      render(State);
+    }
+  });
 
   State.subscribe(render);
   render(State);
   focusTimer.activate();
+  pwaManager.register();
   setInterval(() => updateQuote(false), 15000);
 }

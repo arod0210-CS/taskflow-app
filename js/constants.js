@@ -5,6 +5,8 @@ export const HABITS_KEY = "taskflow-habits-v1";
 export const TAB_KEY = "taskflow-active-tab-v1";
 export const PROJECTS_KEY = "taskflow-projects-v1";
 export const FOCUS_KEY = "taskflow-focus-v1";
+export const FILTER_PRESETS_KEY = "taskflow-filter-presets-v1";
+export const APP_VERSION = "6.0.0";
 
 export const CATEGORIES = ["work", "school", "personal", "health", "other"];
 
