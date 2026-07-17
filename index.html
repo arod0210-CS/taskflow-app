@@ -32,6 +32,7 @@
   <link rel="stylesheet" href="styles/20-rich-projects.css" />
   <link rel="stylesheet" href="styles/21-analytics.css" />
   <link rel="stylesheet" href="styles/22-pwa.css" />
+  <link rel="stylesheet" href="styles/23-mobile-density.css" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png" />
   <link rel="manifest" href="manifest.json" />
@@ -320,7 +321,11 @@
           </div>
         </header>
 
-        <div class="calendar-project-controls" aria-label="Calendar project filter">
+        <button id="mobileCalendarFiltersToggle" class="mobile-density-toggle mobile-only-control" type="button" aria-expanded="false" aria-controls="calendarProjectControls">
+          <span aria-hidden="true">⌁</span>
+          <span id="mobileCalendarFiltersToggleLabel">Calendar filters</span>
+        </button>
+        <div id="calendarProjectControls" class="calendar-project-controls mobile-collapsible-panel" aria-label="Calendar project filter">
           <label>
             <span id="calendarProjectFilterLabel">Project</span>
             <select id="calendarProjectFilter">
@@ -393,6 +398,11 @@
           </div>
         </div>
 
+        <button id="mobileTaskFormToggle" class="mobile-density-toggle mobile-only-control mobile-task-form-toggle" type="button" aria-expanded="false" aria-controls="taskEntryPanel">
+          <span aria-hidden="true">＋</span>
+          <span id="mobileTaskFormToggleLabel">Add task</span>
+        </button>
+        <div id="taskEntryPanel" class="task-entry-panel mobile-collapsible-panel">
         <div class="task-input">
           <input type="text" id="taskInput" placeholder="Add a new task..." aria-label="Task" />
           <input type="date" id="dueDateInput" aria-label="Due Date" />
@@ -468,6 +478,7 @@
             </fieldset>
           </div>
         </div>
+        </div>
 
         <div class="view-bar">
           <div class="view-group">
@@ -497,6 +508,11 @@
           <p id="searchResultCount" class="search-result-count" role="status" aria-live="polite">0 results</p>
         </div>
 
+        <button id="mobileTaskFiltersToggle" class="mobile-density-toggle mobile-only-control mobile-task-filters-toggle" type="button" aria-expanded="false" aria-controls="taskFiltersPanel">
+          <span aria-hidden="true">⌁</span>
+          <span id="mobileTaskFiltersToggleLabel">Filters</span>
+        </button>
+        <div id="taskFiltersPanel" class="task-filters-panel mobile-collapsible-panel">
         <div class="organization-filters" aria-label="Organization filters">
           <label>
             <span id="projectFilterLabel">Project</span>
@@ -524,6 +540,7 @@
           <button id="saveFilterPresetBtn" type="button">Save filter</button>
           <button id="renameFilterPresetBtn" type="button" disabled>Rename</button>
           <button id="deleteFilterPresetBtn" class="preset-delete-btn" type="button" disabled>Delete preset</button>
+        </div>
         </div>
 
         <section id="bulkToolbar" class="bulk-toolbar hidden" aria-labelledby="bulkToolbarTitle">

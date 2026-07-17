@@ -50,6 +50,7 @@ import { createRichProjectsUI, UNASSIGNED_PROJECT_ID } from "./project-dashboard
 import { createAnalyticsUI } from "./analytics.js";
 import { buildBackupEnvelope, downloadBackupJson, parseBackupText } from "./backup.js";
 import { createAppStatus } from "./app-status.js";
+import { createMobileDensity } from "./mobile-density.js";
 import { createPwaManager } from "./pwa.js";
 
 export function startApp() {
@@ -307,6 +308,14 @@ export function startApp() {
       calendarSubtitle: "See deadlines and completed work across the month.",
       calendarPreviousMonth: "Previous month",
       calendarNextMonth: "Next month",
+      mobileAddTask: "Add task",
+      mobileShowTaskForm: "Show task form",
+      mobileCloseTaskForm: "Close task form",
+      mobileFilters: "Filters",
+      mobileHideFilters: "Hide filters",
+      mobileCalendarFilters: "Calendar filters",
+      mobileHideCalendarFilters: "Hide calendar filters",
+      mobileActiveFilter: "Active",
       calendarSelectedDate: "Selected date",
       calendarTaskSummary: "{incomplete} open, {completed} completed",
       calendarOpenShort: "open",
@@ -743,6 +752,14 @@ export function startApp() {
       calendarSubtitle: "Consulta las fechas límite y el trabajo completado del mes.",
       calendarPreviousMonth: "Mes anterior",
       calendarNextMonth: "Mes siguiente",
+      mobileAddTask: "Agregar tarea",
+      mobileShowTaskForm: "Mostrar formulario de tarea",
+      mobileCloseTaskForm: "Cerrar formulario de tarea",
+      mobileFilters: "Filtros",
+      mobileHideFilters: "Ocultar filtros",
+      mobileCalendarFilters: "Filtros del calendario",
+      mobileHideCalendarFilters: "Ocultar filtros del calendario",
+      mobileActiveFilter: "Activo",
       calendarSelectedDate: "Fecha seleccionada",
       calendarTaskSummary: "{incomplete} pendientes, {completed} completadas",
       calendarOpenShort: "pend.",
@@ -1066,6 +1083,7 @@ export function startApp() {
   let focusUI = null;
   let analyticsUI = null;
   let appStatus = null;
+  let mobileDensity = null;
   let pwaManager = null;
   let persistenceStatusEvent = null;
   let renderPersistenceStatus = () => {};
@@ -1920,6 +1938,7 @@ export function startApp() {
     updateEditModeUI();
     formatHeaderDate();
     appStatus?.render();
+    mobileDensity?.render();
   }
 
   function createEmptyState(message) {
@@ -2266,6 +2285,8 @@ export function startApp() {
     reminderBtn.textContent = habit.reminderTime
       ? `⏰ ${t("reminderSetLabel")} · ${habit.reminderTime}`
       : `⏰ ${t("reminderSetAction")}`;
+    reminderBtn.dataset.mobileLabel = habit.reminderTime || "+";
+    reminderBtn.classList.toggle("has-reminder", Boolean(habit.reminderTime));
     reminderBtn.addEventListener("click", () => handleSetReminder(habit.id, habit.reminderTime));
     meta.appendChild(reminderBtn);
 
@@ -3035,6 +3056,7 @@ export function startApp() {
       ...state,
       focusHistory: focusTimer.getExportData().history
     });
+    mobileDensity?.render();
   }
 
   let searchTimeout;
@@ -3108,7 +3130,7 @@ export function startApp() {
     setRecurrenceControls(addRecurrenceControls, null);
     notesArea.classList.add("hidden");
     notesToggle.setAttribute("aria-expanded", "false");
-    taskInput.focus();
+    if (!mobileDensity?.collapseTaskFormAfterSubmit()) taskInput.focus();
   }
 
   notesToggle.addEventListener("click", () => {
@@ -3704,6 +3726,7 @@ export function startApp() {
   applyTheme(themeSelect.value);
   setDateConstraints();
   formatHeaderDate();
+  mobileDensity = createMobileDensity({ t });
 
   const validTabs = new Set(["dashboard", "calendar", "tasks", "projects", "focus", "habits", "stats"]);
   const storedTab = safeStorage.getItem(TAB_KEY) || "tasks";
@@ -3719,7 +3742,8 @@ export function startApp() {
     toggleTask: (id) => State.toggleTask(id),
     toggleHabit: (id) => State.toggleHabit(id),
     xpNeededForLevel,
-    openProject: (id) => richProjectsUI?.openProject(id)
+    openProject: (id) => richProjectsUI?.openProject(id),
+    openTaskEntry: () => mobileDensity?.openTaskForm({ focus: true })
   });
 
   calendar = createCalendar({
@@ -3731,7 +3755,7 @@ export function startApp() {
       switchTab("tasks");
       dueDateInput.value = date;
       updateRecurrenceControls(addRecurrenceControls);
-      requestAnimationFrame(() => taskInput.focus());
+      if (!mobileDensity?.openTaskForm({ focus: true })) requestAnimationFrame(() => taskInput.focus());
     }
   });
 
@@ -3779,7 +3803,7 @@ export function startApp() {
       switchTab("tasks");
       State.setProjectFilter(projectId === UNASSIGNED_PROJECT_ID ? "unassigned" : projectId);
       taskProjectInput.value = project && !project.archived ? project.id : "";
-      requestAnimationFrame(() => taskInput.focus());
+      if (!mobileDensity?.openTaskForm({ focus: true })) requestAnimationFrame(() => taskInput.focus());
     },
     viewProjectTasks: (projectId) => {
       switchTab("tasks");

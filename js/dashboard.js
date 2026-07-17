@@ -54,7 +54,8 @@ export function createDashboard({
   toggleTask,
   toggleHabit,
   xpNeededForLevel,
-  openProject
+  openProject,
+  openTaskEntry
 }) {
   const elements = {
     overview: document.getElementById("dashboardOverview"),
@@ -70,6 +71,7 @@ export function createDashboard({
 
   function navigateAndFocus(tab, elementId) {
     switchTab(tab);
+    if (elementId === "taskInput" && openTaskEntry?.()) return;
     requestAnimationFrame(() => document.getElementById(elementId)?.focus());
   }
 

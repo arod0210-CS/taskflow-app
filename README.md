@@ -2,6 +2,8 @@
 
 TaskFlow is a private, browser-based productivity application for tasks, projects, habits, focus sessions, and personal analytics. It is built with native HTML, CSS, and JavaScript ES modules and stores user data locally in the browser.
 
+Current application version: **6.1.0**.
+
 [Live GitHub Pages demo](https://arod0210-cs.github.io/taskflow-app/)
 
 ## Features
@@ -45,6 +47,7 @@ TaskFlow is a private, browser-based productivity application for tasks, project
 - Default, Sunset, Mint, Galaxy, Rose, and Ocean themes, each compatible with dark mode.
 - Keyboard-accessible tabs, dialogs, controls, status messages, and visible focus states.
 - Screen-reader labels, live status regions, reduced-motion support, and responsive desktop/mobile layouts.
+- Phone-density controls collapse the task form and secondary filters by default, compact habit rows and calendar controls, and preserve the full desktop experience above 600px.
 
 ## PWA installation and offline behavior
 
@@ -68,7 +71,7 @@ The full backup button exports a versioned envelope:
 {
   "format": "taskflow-backup",
   "schemaVersion": 2,
-  "appVersion": "6.0.0",
+  "appVersion": "6.1.0",
   "generatedAt": "2026-07-16T00:00:00.000Z",
   "data": {}
 }
@@ -120,7 +123,7 @@ git diff --check
 - `styles/` contains ordered, feature-focused stylesheets.
 - `js/app.js` owns the single `DOMContentLoaded` entry point.
 - `js/core.js` coordinates application state and feature modules.
-- Focused modules handle calendar, dashboard, projects, focus, reminders, search, bulk actions, Analytics, guarded storage, backups, application status, and PWA registration.
+- Focused modules handle calendar, dashboard, projects, focus, reminders, search, bulk actions, Analytics, guarded storage, backups, application status, mobile-density interactions, and PWA registration.
 - `service-worker.js` precaches a deterministic same-origin application shell and never caches localStorage data or generated exports.
 - `tests/run-tests.js` is the dependency-free validation entry point.
 

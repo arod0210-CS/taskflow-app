@@ -9,6 +9,7 @@ import { buildAnalyticsSummary, getAnalyticsRange } from "../js/analytics.js";
 import { BACKUP_FORMAT, BACKUP_SCHEMA_VERSION, buildBackupEnvelope, parseBackupText, prepareBackupImport } from "../js/backup.js";
 import { createTaskSelection } from "../js/bulk-actions.js";
 import { createFilterPresetStore, MAX_FILTER_PRESETS } from "../js/filter-presets.js";
+import { createMobileDensity } from "../js/mobile-density.js";
 import { createPwaManager } from "../js/pwa.js";
 import { matchesTaskQuery, parseTaskQuery } from "../js/search.js";
 import { createSafeStorage } from "../js/storage.js";
@@ -192,7 +193,7 @@ function testAnalytics() {
   const summary = buildAnalyticsSummary(data, "last7", now);
   equal([summary.taskTrends.total, summary.breakdowns.completionRate.rate, summary.focus.minutes], [2, 50, 25], "analytics aggregation");
   equal(summary.heatmap.days.length, 84, "heatmap length");
-  equal(buildAnalyticsExport(summary, "6.0.0").schemaVersion, 1, "Analytics export remains separate schema");
+  equal(buildAnalyticsExport(summary, "6.1.0").schemaVersion, 1, "Analytics export remains separate schema");
 }
 
 function storageError(name, code) {
@@ -250,8 +251,8 @@ function baseBackupData() {
 function testBackups() {
   const current = baseBackupData();
   const snapshot = structuredClone(current);
-  const envelope = buildBackupEnvelope(current, "6.0.0");
-  equal([envelope.format, envelope.schemaVersion, envelope.appVersion], [BACKUP_FORMAT, BACKUP_SCHEMA_VERSION, "6.0.0"], "versioned backup envelope");
+  const envelope = buildBackupEnvelope(current, "6.1.0");
+  equal([envelope.format, envelope.schemaVersion, envelope.appVersion], [BACKUP_FORMAT, BACKUP_SCHEMA_VERSION, "6.1.0"], "versioned backup envelope");
   check(prepareBackupImport(envelope, current).ok, "current versioned backup import");
   check(prepareBackupImport(current, current).ok, "legacy object backup import");
   check(prepareBackupImport(current.tasks, current).ok, "legacy array backup import");
@@ -261,7 +262,7 @@ function testBackups() {
   equal(prepareBackupImport({ format: BACKUP_FORMAT, schemaVersion: 99, data: { tasks: [] } }, current).reason, "unsupportedVersion", "future schema rejection");
   equal(prepareBackupImport({ ...current, habits: {} }, current).reason, "invalidCollection", "corrupt collection rejection");
   check(prepareBackupImport({ tasks: [] }, current).ok, "legacy optional fields may be missing");
-  const empty = prepareBackupImport(buildBackupEnvelope({ ...current, tasks: [], habits: [], projects: [], filterPresets: [] }, "6.0.0"), current);
+  const empty = prepareBackupImport(buildBackupEnvelope({ ...current, tasks: [], habits: [], projects: [], filterPresets: [] }, "6.1.0"), current);
   check(empty.ok, "empty valid backup");
   equal([empty.data.tasks.length, empty.data.habits.length, empty.data.projects.length], [0, 0, 0], "empty collections preserved");
   equal(current, snapshot, "invalid and valid preparation must not mutate current state");
@@ -269,9 +270,9 @@ function testBackups() {
 
 function testServiceWorker() {
   const source = read("service-worker.js");
-  check(source.includes('const APP_VERSION = "6.0.0"'), "service-worker version");
-  check(read("js/constants.js").includes('APP_VERSION = "6.0.0"'), "application version matches service worker");
-  check(read("README.md").includes('"appVersion": "6.0.0"'), "documentation version matches application");
+  check(source.includes('const APP_VERSION = "6.1.0"'), "service-worker version");
+  check(read("js/constants.js").includes('APP_VERSION = "6.1.0"'), "application version matches service worker");
+  check(read("README.md").includes('"appVersion": "6.1.0"'), "documentation version matches application");
   check(source.includes("SKIP_WAITING"), "user-controlled update message");
   check(!source.includes("self.skipWaiting()\n") && source.includes("event.data?.type"), "skipWaiting must be message controlled");
   const match = source.match(/const PRECACHE_URLS = \[([\s\S]*?)\n\];/);
@@ -284,6 +285,98 @@ function testServiceWorker() {
   });
   check(source.includes('name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME'), "only obsolete TaskFlow caches are removed");
   check(source.includes('url.protocol === "blob:"'), "Blob requests bypass service worker");
+}
+
+function testMobileDensity() {
+  const required = [
+    ["mobileTaskFormToggle", "taskEntryPanel"],
+    ["mobileTaskFiltersToggle", "taskFiltersPanel"],
+    ["mobileCalendarFiltersToggle", "calendarProjectControls"]
+  ];
+  required.forEach(([toggleId, panelId]) => {
+    const toggle = html.match(new RegExp(`<button[^>]*id="${toggleId}"[^>]*>`))?.[0] || "";
+    check(toggle.includes('aria-expanded="false"'), `${toggleId} starts collapsed for phones`);
+    check(toggle.includes(`aria-controls="${panelId}"`), `${toggleId} controls ${panelId}`);
+    check(html.includes(`id="${panelId}"`), `${panelId} exists`);
+  });
+
+  const css = read("styles/23-mobile-density.css");
+  const phoneRules = css.indexOf("@media (max-width: 600px)");
+  check(phoneRules > 0, "phone density rules use the 600px breakpoint");
+  [".task-entry-panel", ".habit-card", ".calendar-toolbar", ".dashboard-overview"]
+    .forEach((selector) => check(css.indexOf(selector) > phoneRules, `${selector} override is phone-scoped`));
+
+  class FakeElement extends EventTarget {
+    constructor() {
+      super();
+      this.attributes = new Map();
+      this.classes = new Set();
+      this.value = "all";
+      this.checked = false;
+      this.focused = 0;
+      this.classList = {
+        add: (...names) => names.forEach((name) => this.classes.add(name)),
+        remove: (...names) => names.forEach((name) => this.classes.delete(name)),
+        contains: (name) => this.classes.has(name),
+        toggle: (name, force) => {
+          const active = force === undefined ? !this.classes.has(name) : Boolean(force);
+          if (active) this.classes.add(name); else this.classes.delete(name);
+          return active;
+        }
+      };
+    }
+    setAttribute(name, value) { this.attributes.set(name, String(value)); }
+    getAttribute(name) { return this.attributes.get(name) ?? null; }
+    focus() { this.focused += 1; }
+  }
+
+  const ids = [
+    "mobileTaskFormToggle", "mobileTaskFormToggleLabel", "taskEntryPanel", "taskInput",
+    "mobileTaskFiltersToggle", "mobileTaskFiltersToggleLabel", "taskFiltersPanel",
+    "projectFilterInput", "categoryFilterInput", "savedFilterSelect",
+    "mobileCalendarFiltersToggle", "mobileCalendarFiltersToggleLabel", "calendarProjectControls",
+    "calendarProjectFilter", "calendarIncludeArchived"
+  ];
+  const elements = new Map(ids.map((id) => [id, new FakeElement()]));
+  const media = new EventTarget();
+  media.matches = true;
+  const originalDocument = Object.getOwnPropertyDescriptor(globalThis, "document");
+  const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
+  const originalAnimationFrame = Object.getOwnPropertyDescriptor(globalThis, "requestAnimationFrame");
+  Object.defineProperty(globalThis, "document", { configurable: true, value: { getElementById: (id) => elements.get(id) || null } });
+  Object.defineProperty(globalThis, "window", { configurable: true, value: { matchMedia: () => media } });
+  Object.defineProperty(globalThis, "requestAnimationFrame", { configurable: true, value: (callback) => callback() });
+
+  try {
+    const controller = createMobileDensity({ t: (key) => key });
+    const taskToggle = elements.get("mobileTaskFormToggle");
+    const taskPanel = elements.get("taskEntryPanel");
+    equal(taskToggle.getAttribute("aria-expanded"), "false", "mobile task form initializes collapsed");
+    check(taskPanel.classList.contains("is-mobile-collapsed"), "mobile task panel initializes hidden");
+    taskToggle.dispatchEvent(new Event("click"));
+    equal(taskToggle.getAttribute("aria-expanded"), "true", "mobile task toggle expands panel");
+    check(!taskPanel.classList.contains("is-mobile-collapsed"), "expanded task panel becomes visible");
+    equal(elements.get("taskInput").focused, 1, "opening task form moves focus to title");
+
+    const filtersToggle = elements.get("mobileTaskFiltersToggle");
+    filtersToggle.dispatchEvent(new Event("click"));
+    equal(filtersToggle.getAttribute("aria-expanded"), "true", "mobile task filters expand");
+    elements.get("projectFilterInput").value = "project-1";
+    elements.get("projectFilterInput").dispatchEvent(new Event("change"));
+    check(filtersToggle.classList.contains("has-active-filter"), "active task filter is exposed without color alone");
+
+    check(controller.collapseTaskFormAfterSubmit(), "successful mobile submit requests form collapse");
+    equal(taskToggle.getAttribute("aria-expanded"), "false", "mobile task form collapses after submit");
+    check(taskPanel.classList.contains("is-mobile-collapsed"), "submitted task panel is hidden");
+
+    media.matches = false;
+    media.dispatchEvent(new Event("change"));
+    check(!taskPanel.classList.contains("is-mobile-collapsed"), "desktop viewport restores full task form");
+  } finally {
+    if (originalDocument) Object.defineProperty(globalThis, "document", originalDocument); else delete globalThis.document;
+    if (originalWindow) Object.defineProperty(globalThis, "window", originalWindow); else delete globalThis.window;
+    if (originalAnimationFrame) Object.defineProperty(globalThis, "requestAnimationFrame", originalAnimationFrame); else delete globalThis.requestAnimationFrame;
+  }
 }
 
 async function testPwaUpdateFlow() {
@@ -352,6 +445,7 @@ testAnalytics();
 testSafeStorage();
 testBackups();
 testServiceWorker();
+testMobileDensity();
 await testPwaUpdateFlow();
 
 console.log(JSON.stringify({ status: "passed", assertions, modules: fs.readdirSync(path.join(root, "js")).filter((name) => name.endsWith(".js")).length }));
