@@ -1,4 +1,5 @@
 import { CATEGORIES } from "./constants.js";
+import { clearFieldValidation, focusInvalidField, runGuardedAction } from "./interaction-guard.js";
 
 export function sanitizeProjects(rawProjects) {
   if (!Array.isArray(rawProjects)) return [];
@@ -74,11 +75,10 @@ export function createProjectsUI({
   function tryAddProject() {
     const name = projectNameInput.value.trim();
     if (!name) {
-      projectNameInput.classList.add("input-error");
-      projectNameInput.focus();
+      focusInvalidField(projectNameInput);
       return;
     }
-    addProject({
+    const result = runGuardedAction(addProjectButton, () => addProject({
       id: crypto.randomUUID(),
       name,
       emoji: projectEmojiInput.value.trim() || "📁",
@@ -86,7 +86,8 @@ export function createProjectsUI({
       archived: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    });
+    }), { savingLabel: t("saving") });
+    if (!result.ok) return;
     projectEmojiInput.value = "";
     projectNameInput.value = "";
     projectNameInput.classList.remove("input-error");
@@ -97,9 +98,12 @@ export function createProjectsUI({
     event.stopPropagation();
     tryAddProject();
   });
-  projectNameInput.addEventListener("input", () => projectNameInput.classList.remove("input-error"));
+  projectNameInput.addEventListener("input", () => clearFieldValidation(projectNameInput));
   projectNameInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") tryAddProject();
+    if (event.key === "Enter") {
+      event.preventDefault();
+      tryAddProject();
+    }
   });
   projectFilterInput.addEventListener("change", () => setProjectFilter(projectFilterInput.value));
   categoryFilterInput.addEventListener("change", () => setCategoryFilter(categoryFilterInput.value));

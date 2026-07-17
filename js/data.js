@@ -1,5 +1,6 @@
 import { CATEGORIES, DEFAULT_HABITS } from "./constants.js";
 import { sanitizeRecurrenceFields } from "./recurrence.js";
+import { isValidDateKey } from "./dates.js";
 
 export function defaultPlayer() {
   return {
@@ -37,10 +38,10 @@ export function sanitizeTasks(rawTasks) {
         id: String(task.id ?? `${Date.now()}-${index}`),
         text: String(task.text ?? "").trim(),
         completed: Boolean(task.completed),
-        completedAt: task.completedAt || null,
-        dueDate: task.dueDate || null,
+        completedAt: typeof task.completedAt === "string" && Number.isFinite(Date.parse(task.completedAt)) ? task.completedAt : null,
+        dueDate: isValidDateKey(task.dueDate) ? task.dueDate : null,
         priority: normalizePriority(task.priority),
-        createdAt: task.createdAt || new Date().toISOString(),
+        createdAt: typeof task.createdAt === "string" && Number.isFinite(Date.parse(task.createdAt)) ? task.createdAt : new Date().toISOString(),
         notes: String(task.notes ?? "").trim(),
         rewardGranted: Boolean(task.rewardGranted),
         projectId: task.projectId === null || task.projectId === undefined || task.projectId === ""
@@ -54,9 +55,19 @@ export function sanitizeTasks(rawTasks) {
 }
 
 export function sanitizePlayer(player) {
+  const raw = player && typeof player === "object" && !Array.isArray(player) ? player : {};
+  const nonNegative = (value, fallback = 0) => Number.isFinite(Number(value)) ? Math.max(0, Number(value)) : fallback;
   return {
     ...defaultPlayer(),
-    ...player
+    ...raw,
+    xp: nonNegative(raw.xp),
+    level: Math.max(1, Math.floor(nonNegative(raw.level, 1))),
+    coins: nonNegative(raw.coins),
+    streak: Math.floor(nonNegative(raw.streak)),
+    completedToday: Math.floor(nonNegative(raw.completedToday)),
+    completedWeek: Math.floor(nonNegative(raw.completedWeek)),
+    totalCompleted: Math.floor(nonNegative(raw.totalCompleted)),
+    completedByDay: raw.completedByDay && typeof raw.completedByDay === "object" && !Array.isArray(raw.completedByDay) ? raw.completedByDay : {}
   };
 }
 
@@ -78,10 +89,10 @@ export function sanitizeHabits(rawHabits) {
       id: String(habit.id ?? `habit-${Date.now()}-${index}`),
       name: String(habit.name ?? "").trim(),
       emoji: String(habit.emoji ?? "🌟").trim() || "🌟",
-      reminderTime: habit.reminderTime || null,
-      completedDates: Array.isArray(habit.completedDates) ? habit.completedDates : [],
-      streak: Number(habit.streak ?? 0),
-      lastCompletedDate: habit.lastCompletedDate || null
+      reminderTime: /^\d{2}:\d{2}$/.test(String(habit.reminderTime || "")) ? habit.reminderTime : null,
+      completedDates: Array.isArray(habit.completedDates) ? habit.completedDates.filter(isValidDateKey) : [],
+      streak: Math.max(0, Number.isFinite(Number(habit.streak)) ? Number(habit.streak) : 0),
+      lastCompletedDate: isValidDateKey(habit.lastCompletedDate) ? habit.lastCompletedDate : null
     }))
     .filter((habit) => habit.name !== "");
 }

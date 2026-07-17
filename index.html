@@ -175,6 +175,10 @@
           <span id="updateStatusText"></span>
           <button id="updateNowBtn" type="button">Update now</button>
         </div>
+        <div id="formStatus" class="app-status-message app-status-warning hidden" role="status" aria-live="polite">
+          <span class="app-status-icon" aria-hidden="true">!</span>
+          <span id="formStatusText"></span>
+        </div>
       </div>
 
       <!-- ===== TAB NAVIGATION ===== -->
@@ -404,7 +408,7 @@
         </button>
         <div id="taskEntryPanel" class="task-entry-panel mobile-collapsible-panel">
         <div class="task-input">
-          <input type="text" id="taskInput" placeholder="Add a new task..." aria-label="Task" />
+          <input type="text" id="taskInput" placeholder="Add a new task..." aria-label="Task" autocomplete="off" enterkeyhint="done" />
           <input type="date" id="dueDateInput" aria-label="Due Date" />
           <select id="priorityInput" aria-label="Priority">
             <option value="high">High Priority</option>
@@ -433,7 +437,7 @@
             <span class="notes-chevron">▾</span>
           </button>
           <div id="notesArea" class="notes-area hidden">
-            <textarea id="notesInput" rows="3" placeholder="Optional notes..." aria-label="Notes"></textarea>
+            <textarea id="notesInput" rows="3" placeholder="Optional notes..." aria-label="Notes" autocomplete="off"></textarea>
             <fieldset class="recurrence-fieldset">
               <legend id="taskRecurrenceLegend">Repeat</legend>
               <div class="recurrence-control-grid">
@@ -871,7 +875,7 @@
         <div class="add-habit-form" id="addHabitForm">
           <div class="add-habit-fields">
             <input type="text" id="habitEmojiInput" class="habit-emoji-picker" maxlength="2" placeholder="🌟" aria-describedby="addHabitHint" />
-            <input type="text" id="habitNameInput" placeholder="New habit name..." aria-describedby="addHabitHint" />
+            <input type="text" id="habitNameInput" placeholder="New habit name..." aria-describedby="addHabitHint" autocomplete="off" enterkeyhint="done" />
             <input type="time" id="habitReminderInput" title="Optional reminder time" aria-describedby="addHabitHint" />
             <button id="addHabitBtn" type="button">Add</button>
           </div>

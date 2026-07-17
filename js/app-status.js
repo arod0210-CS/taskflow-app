@@ -34,7 +34,9 @@ export function createAppStatus({ getLanguage = () => "en" } = {}) {
     connectivityText: document.getElementById("connectivityStatusText"),
     update: document.getElementById("updateStatus"),
     updateText: document.getElementById("updateStatusText"),
-    updateButton: document.getElementById("updateNowBtn")
+    updateButton: document.getElementById("updateNowBtn"),
+    form: document.getElementById("formStatus"),
+    formText: document.getElementById("formStatusText")
   };
   let persistenceState = null;
   let connectivityState = null;
@@ -42,6 +44,7 @@ export function createAppStatus({ getLanguage = () => "en" } = {}) {
   let updateHandler = () => {};
   let connectivityTimer = null;
   let persistenceTimer = null;
+  let formTimer = null;
 
   function text(key) {
     const language = getLanguage() === "es" ? "es" : "en";
@@ -49,7 +52,7 @@ export function createAppStatus({ getLanguage = () => "en" } = {}) {
   }
 
   function updateRegionVisibility() {
-    const visible = [elements.persistence, elements.connectivity, elements.update]
+    const visible = [elements.persistence, elements.connectivity, elements.update, elements.form]
       .some((element) => element && !element.classList.contains("hidden"));
     elements.region?.classList.toggle("hidden", !visible);
   }
@@ -119,12 +122,30 @@ export function createAppStatus({ getLanguage = () => "en" } = {}) {
     render();
   }
 
+  function setFormNotice(message, { urgent = false } = {}) {
+    clearTimeout(formTimer);
+    if (!message) {
+      elements.form?.classList.add("hidden");
+      updateRegionVisibility();
+      return;
+    }
+    elements.formText.textContent = message;
+    elements.form.setAttribute("role", urgent ? "alert" : "status");
+    elements.form.classList.remove("hidden");
+    formTimer = setTimeout(() => {
+      elements.form?.classList.add("hidden");
+      updateRegionVisibility();
+    }, urgent ? 6000 : 4000);
+    updateRegionVisibility();
+  }
+
   elements.updateButton?.addEventListener("click", () => updateHandler());
 
   return {
     render,
     setConnectivity,
     setPersistence,
+    setFormNotice,
     setUpdateAvailable,
     setUpdateHandler(handler) {
       updateHandler = typeof handler === "function" ? handler : () => {};

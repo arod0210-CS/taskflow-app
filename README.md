@@ -2,7 +2,7 @@
 
 TaskFlow is a private, browser-based productivity application for tasks, projects, habits, focus sessions, and personal analytics. It is built with native HTML, CSS, and JavaScript ES modules and stores user data locally in the browser.
 
-Current application version: **6.1.0**.
+Current application version: **6.4.0**.
 
 [Live GitHub Pages demo](https://arod0210-cs.github.io/taskflow-app/)
 
@@ -71,7 +71,7 @@ The full backup button exports a versioned envelope:
 {
   "format": "taskflow-backup",
   "schemaVersion": 2,
-  "appVersion": "6.1.0",
+  "appVersion": "6.4.0",
   "generatedAt": "2026-07-16T00:00:00.000Z",
   "data": {}
 }

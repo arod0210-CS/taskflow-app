@@ -1,4 +1,4 @@
-const APP_VERSION = "6.1.0";
+const APP_VERSION = "6.4.0";
 const CACHE_PREFIX = "taskflow-static-";
 const CACHE_NAME = `${CACHE_PREFIX}v${APP_VERSION}`;
 const PRECACHE_URLS = [
@@ -47,6 +47,7 @@ const PRECACHE_URLS = [
   "./js/data.js",
   "./js/dates.js",
   "./js/filter-presets.js",
+  "./js/interaction-guard.js",
   "./js/focus.js",
   "./js/mobile-density.js",
   "./js/project-dashboard.js",

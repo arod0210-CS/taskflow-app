@@ -1,5 +1,6 @@
 import { getTodayString, parseDateOnly } from "./dates.js";
 import { formatRecurrence } from "./recurrence.js";
+import { clearFieldValidation, focusInvalidField, runGuardedAction } from "./interaction-guard.js";
 
 export const UNASSIGNED_PROJECT_ID = "__unassigned__";
 
@@ -295,7 +296,7 @@ export function createRichProjectsUI({
       copy.append(createElement("strong", "", task.text), createElement("span", task.dueDate < today ? "project-task-overdue" : "", `${dueStatus} · ${taskMetadata(task)}`));
       item.append(copy, createTaskActions(task, true));
       return item;
-    }));
+    }), { savingLabel: t("saving") });
   }
 
   function renderActivity(tasks) {
@@ -419,17 +420,19 @@ export function createRichProjectsUI({
     const project = currentProject();
     const name = elements.editName.value.trim();
     if (!project || !name) {
-      elements.editName.focus();
+      focusInvalidField(elements.editName);
       return;
     }
-    updateProject(project.id, {
+    const result = runGuardedAction(elements.editSave, () => updateProject(project.id, {
       emoji: elements.editEmoji.value.trim() || "📁",
       name,
       description: elements.editDescription.value.trim()
-    });
+    }));
+    if (!result.ok) return;
     closeEditDialog();
     announce("projectUpdated");
   });
+  elements.editName.addEventListener("input", () => clearFieldValidation(elements.editName));
   elements.editDialog.addEventListener("click", (event) => {
     if (event.target === elements.editDialog) closeEditDialog();
   });

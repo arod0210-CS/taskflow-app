@@ -13,6 +13,8 @@ import { createMobileDensity } from "../js/mobile-density.js";
 import { createPwaManager } from "../js/pwa.js";
 import { matchesTaskQuery, parseTaskQuery } from "../js/search.js";
 import { createSafeStorage } from "../js/storage.js";
+import { clearFieldValidation, focusInvalidField, runGuardedAction } from "../js/interaction-guard.js";
+import { sanitizeHabits, sanitizePlayer, sanitizeTasks } from "../js/data.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), "utf8");
@@ -41,6 +43,40 @@ function testSyntax() {
     const result = spawnSync(process.execPath, ["--check", path.join(root, file)], { encoding: "utf8" });
     check(result.status === 0, `${file} syntax: ${result.stderr}`);
   });
+}
+
+function testInteractionGuards() {
+  const attributes = new Map();
+  const button = {
+    disabled: false,
+    textContent: "Save",
+    setAttribute: (name, value) => attributes.set(name, value),
+    removeAttribute: (name) => attributes.delete(name)
+  };
+  let release;
+  let calls = 0;
+  const first = runGuardedAction(button, () => { calls += 1; }, { savingLabel: "Saving…", schedule: (callback) => { release = callback; } });
+  const second = runGuardedAction(button, () => { calls += 1; }, { schedule: () => {} });
+  check(first.ok && !second.ok && second.busy && calls === 1, "submission guard suppresses rapid duplicate actions");
+  check(button.disabled && attributes.get("aria-busy") === "true", "submission guard exposes busy state");
+  release();
+  check(!button.disabled && button.textContent === "Save" && !attributes.has("aria-busy"), "submission guard restores control state");
+
+  const fieldAttributes = new Map();
+  const classNames = new Set();
+  const field = {
+    classList: { add: (name) => classNames.add(name), remove: (name) => classNames.delete(name) },
+    setAttribute: (name, value) => fieldAttributes.set(name, value),
+    getAttribute: (name) => fieldAttributes.get(name) || "",
+    removeAttribute: (name) => fieldAttributes.delete(name),
+    focus: () => {},
+    scrollIntoView: () => {}
+  };
+  const message = { id: "fieldFeedback", textContent: "" };
+  focusInvalidField(field, message, "Required");
+  check(classNames.has("input-error") && fieldAttributes.get("aria-invalid") === "true" && message.textContent === "Required", "invalid field feedback is programmatic");
+  clearFieldValidation(field, message);
+  check(!classNames.has("input-error") && !fieldAttributes.has("aria-invalid") && !message.textContent, "field validation clears after correction");
 }
 
 function testHtmlAndCss() {
@@ -193,7 +229,7 @@ function testAnalytics() {
   const summary = buildAnalyticsSummary(data, "last7", now);
   equal([summary.taskTrends.total, summary.breakdowns.completionRate.rate, summary.focus.minutes], [2, 50, 25], "analytics aggregation");
   equal(summary.heatmap.days.length, 84, "heatmap length");
-  equal(buildAnalyticsExport(summary, "6.1.0").schemaVersion, 1, "Analytics export remains separate schema");
+  equal(buildAnalyticsExport(summary, "6.4.0").schemaVersion, 1, "Analytics export remains separate schema");
 }
 
 function storageError(name, code) {
@@ -251,8 +287,8 @@ function baseBackupData() {
 function testBackups() {
   const current = baseBackupData();
   const snapshot = structuredClone(current);
-  const envelope = buildBackupEnvelope(current, "6.1.0");
-  equal([envelope.format, envelope.schemaVersion, envelope.appVersion], [BACKUP_FORMAT, BACKUP_SCHEMA_VERSION, "6.1.0"], "versioned backup envelope");
+  const envelope = buildBackupEnvelope(current, "6.4.0");
+  equal([envelope.format, envelope.schemaVersion, envelope.appVersion], [BACKUP_FORMAT, BACKUP_SCHEMA_VERSION, "6.4.0"], "versioned backup envelope");
   check(prepareBackupImport(envelope, current).ok, "current versioned backup import");
   check(prepareBackupImport(current, current).ok, "legacy object backup import");
   check(prepareBackupImport(current.tasks, current).ok, "legacy array backup import");
@@ -262,7 +298,7 @@ function testBackups() {
   equal(prepareBackupImport({ format: BACKUP_FORMAT, schemaVersion: 99, data: { tasks: [] } }, current).reason, "unsupportedVersion", "future schema rejection");
   equal(prepareBackupImport({ ...current, habits: {} }, current).reason, "invalidCollection", "corrupt collection rejection");
   check(prepareBackupImport({ tasks: [] }, current).ok, "legacy optional fields may be missing");
-  const empty = prepareBackupImport(buildBackupEnvelope({ ...current, tasks: [], habits: [], projects: [], filterPresets: [] }, "6.1.0"), current);
+  const empty = prepareBackupImport(buildBackupEnvelope({ ...current, tasks: [], habits: [], projects: [], filterPresets: [] }, "6.4.0"), current);
   check(empty.ok, "empty valid backup");
   equal([empty.data.tasks.length, empty.data.habits.length, empty.data.projects.length], [0, 0, 0], "empty collections preserved");
   equal(current, snapshot, "invalid and valid preparation must not mutate current state");
@@ -270,9 +306,9 @@ function testBackups() {
 
 function testServiceWorker() {
   const source = read("service-worker.js");
-  check(source.includes('const APP_VERSION = "6.1.0"'), "service-worker version");
-  check(read("js/constants.js").includes('APP_VERSION = "6.1.0"'), "application version matches service worker");
-  check(read("README.md").includes('"appVersion": "6.1.0"'), "documentation version matches application");
+  check(source.includes('const APP_VERSION = "6.4.0"'), "service-worker version");
+  check(read("js/constants.js").includes('APP_VERSION = "6.4.0"'), "application version matches service worker");
+  check(read("README.md").includes('"appVersion": "6.4.0"'), "documentation version matches application");
   check(source.includes("SKIP_WAITING"), "user-controlled update message");
   check(!source.includes("self.skipWaiting()\n") && source.includes("event.data?.type"), "skipWaiting must be message controlled");
   const match = source.match(/const PRECACHE_URLS = \[([\s\S]*?)\n\];/);
@@ -285,6 +321,18 @@ function testServiceWorker() {
   });
   check(source.includes('name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME'), "only obsolete TaskFlow caches are removed");
   check(source.includes('url.protocol === "blob:"'), "Blob requests bypass service worker");
+  check(assets.includes("./js/interaction-guard.js"), "offline shell includes interaction safeguards");
+}
+
+function testMalformedRenderingData() {
+  const tasks = sanitizeTasks([{ id: "x", text: "Safe", dueDate: "not-a-date", completedAt: "bad", createdAt: "bad" }]);
+  equal([tasks[0].dueDate, tasks[0].completedAt], [null, null], "invalid task dates are isolated");
+  const player = sanitizePlayer({ xp: -4, level: "NaN", completedByDay: [] });
+  equal([player.xp, player.level, player.completedByDay], [0, 1, {}], "invalid player values cannot render as NaN");
+  const habits = sanitizeHabits([{ name: "Habit", reminderTime: "bad", completedDates: ["bad", "2026-07-16"], streak: -2 }]);
+  equal([habits[0].reminderTime, habits[0].completedDates, habits[0].streak], [null, ["2026-07-16"], 0], "malformed habit values are isolated");
+  const css = read("styles/23-mobile-density.css");
+  check(css.includes("prefers-reduced-motion: reduce") && css.includes("scroll-behavior: auto"), "reduced motion disables smooth scrolling");
 }
 
 function testMobileDensity() {
@@ -436,6 +484,7 @@ async function testPwaUpdateFlow() {
 }
 
 testSyntax();
+testInteractionGuards();
 testHtmlAndCss();
 testTranslations();
 testModuleGraph();
@@ -443,6 +492,7 @@ testManifestAndIcons();
 testSearchPresetsAndSelection();
 testAnalytics();
 testSafeStorage();
+testMalformedRenderingData();
 testBackups();
 testServiceWorker();
 testMobileDensity();

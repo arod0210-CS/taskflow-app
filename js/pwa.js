@@ -2,9 +2,17 @@ export function createPwaManager({ status }) {
   let registration = null;
   let updateRequested = false;
   let reloadStarted = false;
+  let waitingWorkerAnnounced = false;
 
   function showWaitingWorker() {
-    status.setUpdateAvailable(Boolean(registration?.waiting));
+    const waiting = Boolean(registration?.waiting);
+    if (waiting && !waitingWorkerAnnounced) {
+      waitingWorkerAnnounced = true;
+      status.setUpdateAvailable(true);
+    } else if (!waiting) {
+      waitingWorkerAnnounced = false;
+      status.setUpdateAvailable(false);
+    }
   }
 
   function watchRegistration(nextRegistration) {
@@ -24,6 +32,7 @@ export function createPwaManager({ status }) {
   function requestUpdate() {
     if (!registration?.waiting) return;
     updateRequested = true;
+    waitingWorkerAnnounced = false;
     registration.waiting.postMessage({ type: "SKIP_WAITING" });
   }
 

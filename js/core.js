@@ -52,6 +52,7 @@ import { buildBackupEnvelope, downloadBackupJson, parseBackupText } from "./back
 import { createAppStatus } from "./app-status.js";
 import { createMobileDensity } from "./mobile-density.js";
 import { createPwaManager } from "./pwa.js";
+import { clearFieldValidation, focusInvalidField, runGuardedAction } from "./interaction-guard.js";
 
 export function startApp() {
 
@@ -87,6 +88,10 @@ export function startApp() {
       todayMissions: "Today’s Missions",
       addTaskPlaceholder: "Add a new task...",
       addTask: "Add Task",
+      saving: "Saving…",
+      taskNameRequired: "Enter a task name before saving.",
+      habitNameRequired: "Enter a habit name before saving.",
+      saveFailed: "TaskFlow could not save this change. Your entered information is still here.",
       reset: "Reset",
       searchPlaceholder: "Search tasks...",
       advancedSearch: "Advanced search",
@@ -152,6 +157,7 @@ export function startApp() {
       markTaskComplete: "Mark as complete",
       markTaskIncomplete: "Mark as incomplete",
       deleteTask: "Delete task",
+      deleteTaskConfirm: "Delete {name}? This cannot be undone.",
       taskDescriptionPlaceholder: "Task description",
       dueDate: "Due Date",
       priority: "Priority",
@@ -468,6 +474,7 @@ export function startApp() {
       habitMarkDone: "Mark habit as done",
       habitMarkNotDone: "Mark habit as not done",
       deleteHabit: "Delete",
+      deleteHabitConfirm: "Delete {name}? This cannot be undone.",
       closeReminder: "Dismiss reminder",
       noHabits: "No habits yet — add one below!",
       reminderSet: "⏰ Reminder set!",
@@ -531,6 +538,10 @@ export function startApp() {
       todayMissions: "Misiones de hoy",
       addTaskPlaceholder: "Agregar una nueva tarea...",
       addTask: "Agregar tarea",
+      saving: "Guardando…",
+      taskNameRequired: "Escribe un nombre de tarea antes de guardar.",
+      habitNameRequired: "Escribe un nombre de hábito antes de guardar.",
+      saveFailed: "TaskFlow no pudo guardar este cambio. La información escrita sigue aquí.",
       reset: "Reiniciar",
       searchPlaceholder: "Buscar tareas...",
       advancedSearch: "Búsqueda avanzada",
@@ -596,6 +607,7 @@ export function startApp() {
       markTaskComplete: "Marcar como completada",
       markTaskIncomplete: "Marcar como pendiente",
       deleteTask: "Eliminar tarea",
+      deleteTaskConfirm: "¿Eliminar {name}? Esta acción no se puede deshacer.",
       taskDescriptionPlaceholder: "Descripción de la tarea",
       dueDate: "Fecha límite",
       priority: "Prioridad",
@@ -912,6 +924,7 @@ export function startApp() {
       habitMarkDone: "Marcar hábito como hecho",
       habitMarkNotDone: "Marcar hábito como no hecho",
       deleteHabit: "Eliminar",
+      deleteHabitConfirm: "¿Eliminar {name}? Esta acción no se puede deshacer.",
       closeReminder: "Cerrar recordatorio",
       noHabits: "¡Sin hábitos aún — agrega uno abajo!",
       reminderSet: "⏰ ¡Recordatorio establecido!",
@@ -1052,6 +1065,7 @@ export function startApp() {
     dueDate: editDateInput
   };
   let modalReturnFocus = null;
+  let settingsReturnFocus = null;
 
   const levelCard = document.getElementById("levelCard");
   const levelToggle = document.getElementById("levelToggle");
@@ -1598,6 +1612,7 @@ export function startApp() {
     document.getElementById("settingsHeaderText").textContent = t("settings");
     settingsBtn.setAttribute("aria-label", t("settingsMenu"));
     document.getElementById("darkModeLabel").textContent = t("darkMode");
+    darkModeToggle.setAttribute("aria-label", t("darkMode"));
     document.getElementById("languageLabel").textContent = t("language");
     document.getElementById("themesHeaderText").textContent = t("themes");
     document.getElementById("themeColorLabel").textContent = t("themeColor");
@@ -2296,7 +2311,9 @@ export function startApp() {
       deleteBtn.className = "habit-delete-btn";
       deleteBtn.textContent = t("deleteHabit");
       deleteBtn.setAttribute("aria-label", `${t("deleteHabit")}: ${habit.name}`);
-      deleteBtn.addEventListener("click", () => State.deleteHabit(habit.id));
+      deleteBtn.addEventListener("click", () => {
+        if (confirm(t("deleteHabitConfirm").replace("{name}", habit.name))) State.deleteHabit(habit.id);
+      });
       meta.appendChild(deleteBtn);
     }
 
@@ -2646,9 +2663,8 @@ export function startApp() {
 
     const newText = editTextInput.value.trim();
     if (!newText) {
-      editTextInput.classList.add("input-error");
-      editTextInput.focus();
-      editTextInput.addEventListener("input", () => editTextInput.classList.remove("input-error"), { once: true });
+      focusInvalidField(editTextInput, editRecurrenceControls.feedback, t("taskNameRequired"));
+      editTextInput.addEventListener("input", () => clearFieldValidation(editTextInput, editRecurrenceControls.feedback), { once: true });
       return;
     }
 
@@ -2658,7 +2674,7 @@ export function startApp() {
     if (!task) return;
     const recurrence = recurrenceResult.recurrence;
 
-    State.updateTask(State.editingTaskId, {
+    const result = runGuardedAction(editSaveBtn, () => State.updateTask(State.editingTaskId, {
       text: newText,
       dueDate: editDateInput.value || null,
       priority: editPriorityInput.value,
@@ -2670,8 +2686,11 @@ export function startApp() {
       recurrenceSourceId: recurrence ? task.recurrenceSourceId : null,
       recurrenceOccurrenceDate: recurrence ? editDateInput.value : null,
       nextOccurrenceGenerated: recurrence ? task.nextOccurrenceGenerated : false
-    });
-
+    }), { savingLabel: t("saving") });
+    if (!result.ok) {
+      if (!result.busy) appStatus?.setFormNotice(t("saveFailed"), { urgent: true });
+      return;
+    }
     closeEditModal();
   }
 
@@ -2840,7 +2859,9 @@ export function startApp() {
       deleteBtn.type = "button";
       deleteBtn.textContent = State.language === "es" ? "Eliminar" : "Delete";
       deleteBtn.setAttribute("aria-label", `${t("deleteTask")}: ${task.text}`);
-      deleteBtn.addEventListener("click", () => State.deleteTask(task.id));
+      deleteBtn.addEventListener("click", () => {
+        if (confirm(t("deleteTaskConfirm").replace("{name}", task.text))) State.deleteTask(task.id);
+      });
 
       actions.appendChild(editBtn);
       actions.appendChild(deleteBtn);
@@ -3086,9 +3107,8 @@ export function startApp() {
   function tryAddTask() {
     const text = taskInput.value.trim();
     if (!text) {
-      taskInput.classList.add("input-error");
-      taskInput.focus();
-      taskInput.addEventListener("input", () => taskInput.classList.remove("input-error"), { once: true });
+      focusInvalidField(taskInput, addRecurrenceControls.feedback, t("taskNameRequired"));
+      taskInput.addEventListener("input", () => clearFieldValidation(taskInput, addRecurrenceControls.feedback), { once: true });
       return;
     }
 
@@ -3102,7 +3122,7 @@ export function startApp() {
     const id = crypto.randomUUID();
     const recurrence = recurrenceResult.recurrence;
 
-    State.addTask({
+    const result = runGuardedAction(addTaskBtn, () => State.addTask({
       id,
       text,
       completed: false,
@@ -3119,7 +3139,11 @@ export function startApp() {
       recurrenceSourceId: null,
       recurrenceOccurrenceDate: recurrence ? dueDateInput.value : null,
       nextOccurrenceGenerated: false
-    });
+    }), { savingLabel: t("saving") });
+    if (!result.ok) {
+      if (!result.busy) appStatus?.setFormNotice(t("saveFailed"), { urgent: true });
+      return;
+    }
 
     taskInput.value = "";
     dueDateInput.value = "";
@@ -3145,9 +3169,15 @@ export function startApp() {
   setRecurrenceControls(addRecurrenceControls, null);
 
   function setSettingsOpen(isOpen) {
-    if (isOpen) reminderCenter?.close(false);
+    if (isOpen) {
+      settingsReturnFocus = document.activeElement;
+      reminderCenter?.close(false);
+    }
     settingsPanel.classList.toggle("hidden", !isOpen);
     settingsBtn.setAttribute("aria-expanded", String(isOpen));
+    if (isOpen) requestAnimationFrame(() => darkModeToggle.focus());
+    else if (settingsReturnFocus?.isConnected) settingsReturnFocus.focus();
+    if (!isOpen) settingsReturnFocus = null;
   }
 
   settingsBtn.addEventListener("click", (event) => {
@@ -3256,15 +3286,15 @@ export function startApp() {
     const name = habitNameInputEl ? habitNameInputEl.value.trim() : "";
     if (!name) {
       if (habitNameInputEl) {
-        habitNameInputEl.classList.add("input-error");
-        habitNameInputEl.focus();
-        habitNameInputEl.addEventListener("input", () => habitNameInputEl.classList.remove("input-error"), { once: true });
+        focusInvalidField(habitNameInputEl, null, t("habitNameRequired"));
+        appStatus?.setFormNotice(t("habitNameRequired"), { urgent: true });
+        habitNameInputEl.addEventListener("input", () => clearFieldValidation(habitNameInputEl), { once: true });
       }
       return;
     }
     const emoji = (habitEmojiInputEl ? habitEmojiInputEl.value.trim() : "") || "🌟";
     const reminderTime = (habitReminderInputEl ? habitReminderInputEl.value.trim() : "") || null;
-    State.addHabit({
+    const result = runGuardedAction(addHabitBtnEl, () => State.addHabit({
       id: String(Date.now()),
       name,
       emoji,
@@ -3272,7 +3302,11 @@ export function startApp() {
       completedDates: [],
       streak: 0,
       lastCompletedDate: null
-    });
+    }), { savingLabel: t("saving") });
+    if (!result.ok) {
+      if (!result.busy) appStatus?.setFormNotice(t("saveFailed"), { urgent: true });
+      return;
+    }
     if (habitNameInputEl) habitNameInputEl.value = "";
     if (habitEmojiInputEl) habitEmojiInputEl.value = "";
     if (habitReminderInputEl) habitReminderInputEl.value = "";
@@ -3639,6 +3673,12 @@ export function startApp() {
   });
 
   document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !editModal.classList.contains("hidden")) {
+      event.preventDefault();
+      closeEditModal();
+      return;
+    }
+
     if (event.key === "Escape" && !searchBulkElements.presetDialog.classList.contains("hidden")) {
       closePresetDialog();
       return;
